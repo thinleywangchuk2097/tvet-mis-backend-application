@@ -90,7 +90,8 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 			userRoleRepository.saveAll(userRoles);
 			user.setUserRoles(userRoles);
 			var savedUser = userRepository.save(user);
-			// Generate JWT Tokens
+			
+			//Generate JWT Tokens
 			var jwtToken = jwtUtilService.generateToken(savedUser);
 			var refreshToken = jwtUtilService.generateRefreshToken(savedUser);
 			saveUserToken(savedUser, jwtToken);
