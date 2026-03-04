@@ -28,7 +28,8 @@ public class Role {
 
 	@Column(nullable = false, unique = true)
 	private String roleName;
-
+	
+	@Column(columnDefinition = "TEXT")
 	private String description;
 
 	private Integer unitId;

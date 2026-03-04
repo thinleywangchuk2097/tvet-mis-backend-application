@@ -25,6 +25,11 @@ public class ServiceMaster {
 	@Column(name = "service_name")
 	private String serviceName;
 	
+	@Column(name = "department_id")
+	private String departmentId;
+	
+	private String validityDate;
+	
 	@Column(name = "route",columnDefinition = "TEXT")
 	private String route;
 	

@@ -30,11 +30,13 @@ private String applicantName;
 	
 	private Integer currentRoleId;
 	
+	private String assignedUserId;
+	
 	private Integer locationId;
 	
 	private Integer statusId;
 	
-	private Integer userId;
+	private String userId;
 	
 	private String remarks;
 

@@ -1,5 +1,7 @@
 package com.moesd.tvet.mis.backend.application.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,15 +22,22 @@ public class RoleService {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
-	@Column(name="current_role_id",columnDefinition = "TEXT")
+	@Column(name="current_role_id")
 	private String roleId;
 	
 	@Column(name="service_id")
 	private Integer serviceId;
 	
-	@Column(name="next_role_id",columnDefinition = "TEXT")
+	@Column(name="next_role_id")
 	private String nextRoleId;
+	
+	@Column(name="next_user_id")
+	private String assignedUserId;
 	
 	@Column(name="next_status_id")
 	private Integer nextStatusId;
+	
+	private Integer createdBy;
+	
+	private LocalDateTime createdAt;
 }

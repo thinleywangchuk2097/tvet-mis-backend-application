@@ -23,7 +23,7 @@ public class DocumentFileUploadService {
 	 @Autowired
 	 private DocumentRepository documentRepository;
 	 
-	 public void saveDocument(Documentdto[] documentdto, String applicationNo, String directoryName, Integer serviceId,Integer userId, @Nullable String attachmentType) {
+	 public void saveDocument(Documentdto[] documentdto, String applicationNo, String directoryName, Integer serviceId,String userId, @Nullable String attachmentType) {
 	        for (Documentdto file : documentdto) {
 	            String name = file.getName();
 	            byte[] content = file.getContent();
