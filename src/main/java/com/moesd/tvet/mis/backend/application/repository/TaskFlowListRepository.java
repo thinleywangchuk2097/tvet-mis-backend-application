@@ -48,7 +48,7 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "    ON d.id = a.status_id "
 			+ "WHERE b.assigned_user_id = ? "
 			+ "  AND b.assigned_role_id = ?", nativeQuery = true)
-	List<Tuple>getMyTaskListDtl(String userId, String current_roleId);
+	List<Tuple>getMyTaskListDtl(String userId, String current_roleId);// current_roleId used for switch role
 	
 	/* @Query(value =    "SELECT "
 			+ "  a.* "

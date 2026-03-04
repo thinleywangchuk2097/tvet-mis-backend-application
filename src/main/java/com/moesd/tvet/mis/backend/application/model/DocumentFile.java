@@ -45,5 +45,5 @@ public class DocumentFile {
 	private Date createdAt;
 	
 	@Column(name = "created_by")
-	private Integer createdBy;
+	private String createdBy;
 }

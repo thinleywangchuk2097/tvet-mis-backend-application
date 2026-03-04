@@ -30,7 +30,7 @@ public class WorkTaskFlowServiceImpl implements WorkTaskFlowService{
 
 	@Override
 	public WorkFlowList createWorkflow(String applicationNo, String appName, Integer serviceId, Integer statusId,
-			Integer roleId, Integer actorId, String remarks) {
+			Integer roleId, String actorId, String remarks) {
 		WorkFlowList workflow = WorkFlowList.builder()
                 .applicationNo(applicationNo)
                 .applicationName(appName)
@@ -46,12 +46,13 @@ public class WorkTaskFlowServiceImpl implements WorkTaskFlowService{
 	}
 
 	@Override
-	public TaskFlowList createTaskFlow(String applicationNo, Integer taskStatusId, String assignedRoleId,
+	public TaskFlowList createTaskFlow(String applicationNo, Integer taskStatusId, String assignedRoleId, String assignedUserId,
 			WorkFlowList workflow, String remarks, Integer locationId) {
 		TaskFlowList taskFlow = TaskFlowList.builder()
                 .applicationNo(applicationNo)
                 .taskStatusId(taskStatusId)
                 .assignedRoleId(assignedRoleId)
+                .assignedUserId(assignedUserId)
                 .workFlow(workflow)
                 .saveRemarks(remarks)
                 .locationId(locationId)
@@ -62,7 +63,7 @@ public class WorkTaskFlowServiceImpl implements WorkTaskFlowService{
 	}
 
 	@Override
-	public WorkFlowList updateWorkflow(String applicationNo, Integer statusId, Integer roleId, Integer actorId,
+	public WorkFlowList updateWorkflow(String applicationNo, Integer statusId, Integer roleId, String actorId,
 			String remarks, Integer serviceId, Integer updatedBy) {
 		
 			WorkFlowList workflow = workFlowListRepository.findByApplicationNo(applicationNo);

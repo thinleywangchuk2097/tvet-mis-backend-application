@@ -73,7 +73,7 @@ public class ComplaintServiceImpl implements ComplaintService{
 
 			// Create task flow
 			workTaskFlowService.createTaskFlow(complaint.getApplicationNo(), initiatedStatusId,
-					roleService.getNextRoleId(), workflow, request.getRemarks(), request.getLocationId());
+					roleService.getNextRoleId(),request.getAssignedUserId(), workflow, request.getRemarks(), request.getLocationId());
 
 			// Save documents if provided
 			if (request.getDocuments() != null && request.getDocuments().length > 0) {
