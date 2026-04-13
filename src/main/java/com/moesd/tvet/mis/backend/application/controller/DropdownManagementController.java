@@ -38,4 +38,10 @@ public class DropdownManagementController {
 	    ResponseEntity<?> privileges = dropdownManagementService.getAllDropdownLists();
 	    return ResponseEntity.ok(privileges);
 	}
+	
+	//@GetMapping("/get-child-dropdown/{parentId}")
+	//public ResponseEntity<?> getByParentId(@PathVariable String parentId) {
+	//    List<DropdownChild> children = dropdownManagementService.getByParentId(parentId);
+	//    return ResponseEntity.ok(children);
+	//}
 }

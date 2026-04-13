@@ -47,9 +47,9 @@ public class WorkFlowList {
     @Column(name="role_id")
     private Integer roleId;
     
-    @Column(name = "update_by")
-    private Integer updateBy;
+    @Column(name = "updated_by")
+    private Integer updatedBy;
     
-    @Column(name = "update_on")
-    private Date updateOn;
+    @Column(name = "updated_at")
+    private Date updatedAt;
 }

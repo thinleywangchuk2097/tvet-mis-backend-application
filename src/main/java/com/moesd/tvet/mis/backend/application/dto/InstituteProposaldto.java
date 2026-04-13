@@ -10,28 +10,33 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InstituteProposaldto {
-
-	private String ownershipType;
-	private String otherOwnershipType;
+	// Ownership Information 
+	private String ownershipTypeId; 
+	private String otherOwnershipTypeId; 
 	private String registrationNo;
 	private String companyName;
 	private String otherName;
 	private String otherAddress;
 	private PartnerDto[] partners;
+	private String applicationNo;
+	private String promoterCitizenId;
+	private String promoterName;
+	// Training Provider Profile
 	private String proposedInstituteName;
-	private Integer dzongkhagId;
+	private Integer dzongkhagId; 
 	private String exactLocation;
 	private String telephoneNo;
 	private String mobileNo;
 	private String email;
-	private String promoterCitizenId;
-	private String promoterName;
-	private String fieldOfTraining;
-	private String activityLevel;
+	private String sectorId; 
+	private String activityLevelId;
+	// System fields
+	private Integer serviceId; 
+	private Integer assignedRoleId;
+	private String assignedUserId; 
+	private String userId; 
+	private Integer statusId; 
 	private String remarks;
-	private Integer serviceId;
-	private Integer currentRoleId;
-	private String userId;
-	private Integer statusId;
+	// Documents
 	private Documentdto[] documents;
 }

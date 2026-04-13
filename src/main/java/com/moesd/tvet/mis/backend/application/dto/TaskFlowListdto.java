@@ -15,7 +15,7 @@ public class TaskFlowListdto {
 	private String assignedUserId;
 	private Integer taskStatusId;
 	private Date actionDate;
-	private String assignedRoleId;
+	private Integer assignedRoleId;
 	private Integer locationId;
 	private Integer statusId;
 	private Integer serviceId;

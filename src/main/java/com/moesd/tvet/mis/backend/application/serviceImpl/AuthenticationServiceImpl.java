@@ -134,7 +134,7 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 			revokeAllUserTokens(user);
 			saveUserToken(user, jwtToken);
 
-			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken,"current_role", user.getCurrentRole(),"userId", user.getUserId(),"locationId", user.getLocationId()));
+			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken,"current_role", user.getCurrentRole(),"userId", user.getUserId(),"id", user.getId(),"locationId", user.getLocationId()));
 
 		} catch (BadCredentialsException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

@@ -16,5 +16,5 @@ public class PartnerDto {
 	private String citizenId;
 	private String registrationNo;
 	private String companyName;
-	
+
 }

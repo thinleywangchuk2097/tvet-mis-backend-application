@@ -20,4 +20,6 @@ public interface UserProfileService {
 	ResponseEntity<?> switchRole(SwitchRoleRequest request);
 	 
 	ResponseEntity<?> getUserNameCurrentRoleName(String userId);
+	
+	ResponseEntity<?> deleteProfileImage(String userId);
 }

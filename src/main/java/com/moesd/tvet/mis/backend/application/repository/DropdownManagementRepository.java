@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import com.moesd.tvet.mis.backend.application.model.DropdownParent;
 
 
-public interface DropdownManagementRepository extends JpaRepository<DropdownParent, Integer>{
+public interface DropdownManagementRepository extends JpaRepository<DropdownParent, Integer> {
 	@Modifying
 	@Query("DELETE FROM DropdownChild c WHERE c.parent.id = :parentId")
 	int deleteChildrenByParentId(@Param("parentId") Integer parentId);
@@ -22,7 +22,9 @@ public interface DropdownManagementRepository extends JpaRepository<DropdownPare
 	@EntityGraph(attributePaths = { "dropdownChild" })
 	@Query("SELECT d FROM DropdownParent d")
 	List<DropdownParent> findAllWithChildren();
-	
+
 	@Query("SELECT c.id FROM DropdownChild c WHERE c.id = :id")
 	Optional<Integer> findChildById(@Param("id") Integer id);
+
+	
 }

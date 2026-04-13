@@ -31,7 +31,7 @@ public class InstituteProposal {
 	@Column(nullable = false, unique = true)
 	private String applicationNo;
 	
-	private String ownershipType;
+	private String ownershipTypeId;
 
 	private String registrationNo;
 
@@ -39,8 +39,9 @@ public class InstituteProposal {
 
 	private String proposedInstituteName;
 
-	private String dzongkhagId;
-
+	private Integer dzongkhagId;
+	
+	@Column(columnDefinition = "TEXT")
 	private String exactLocation;
 
 	private String telephoneNo;
@@ -49,22 +50,24 @@ public class InstituteProposal {
 
 	private String emailId;
 
-	private String fieldOfTrainingId;
+	private String sectorId;
 
 	private String activityLevelId;
 
-	private String otherOwnershipType;
+	private String otherOwnershipTypeId;
 
 	private String otherName;
 
 	private String otherAddress;
 	
-	private String promoterCidNo;
+	private String promoterCitizenId;
 	
 	private String promoterName;
 
-	private String statusId;
-
+	private Integer statusId;
+	
+	private Integer serviceId;
+	
 	private Integer createdBy;
 
 	private LocalDateTime createdAt;

@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DropdownChilddto {
-	private Long id; 
+	private Integer id; 
 	private String designation;
 }
