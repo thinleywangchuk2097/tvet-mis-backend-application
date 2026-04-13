@@ -22,7 +22,7 @@ public class InstituteProposalPartnership {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	private String typeOfOwner;
+	private String typeOfOwnerId;
 
 	private String partnerCidNo;
 

@@ -3,6 +3,7 @@ package com.moesd.tvet.mis.backend.application;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 
@@ -18,5 +19,10 @@ public class TvetMisBackendApplication {
 	public ObjectToJson objectToJson() {
 		return new ObjectToJson();
 	} 
+	
+	@Bean
+	public RestTemplate getRestTemplate() {
+		return new RestTemplate();
+	}
 
 }

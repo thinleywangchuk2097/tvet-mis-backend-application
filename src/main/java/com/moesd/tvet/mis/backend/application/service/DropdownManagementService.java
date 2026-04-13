@@ -1,5 +1,6 @@
 package com.moesd.tvet.mis.backend.application.service;
 
+
 import org.springframework.http.ResponseEntity;
 import com.moesd.tvet.mis.backend.application.dto.DropdownManagementdto;
 
@@ -12,4 +13,6 @@ public interface DropdownManagementService {
 	ResponseEntity<?> deleteDropdown(Integer parentId);
 	
 	ResponseEntity<?> getAllDropdownLists();
+	
+	//List<DropdownChild> getByParentId(String parentId);
 }

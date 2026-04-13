@@ -50,5 +50,10 @@ public class UserProfileController {
     public ResponseEntity<?> getUserNameCurrentRoleName(@PathVariable String userId) {
         return userProfileService.getUserNameCurrentRoleName(userId);
     }
+    
+    @PostMapping("/delete-profile-image/{userId}")
+	public ResponseEntity<?> deleteProfileImage(@PathVariable String userId) {
+		return (userProfileService.deleteProfileImage(userId));
+	}
 
 }

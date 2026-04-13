@@ -30,14 +30,13 @@ public class WorkTaskFlowServiceImpl implements WorkTaskFlowService{
 
 	@Override
 	public WorkFlowList createWorkflow(String applicationNo, String appName, Integer serviceId, Integer statusId,
-			Integer roleId, String actorId, String remarks) {
+			Integer roleId, String remarks) {
 		WorkFlowList workflow = WorkFlowList.builder()
                 .applicationNo(applicationNo)
                 .applicationName(appName)
                 .serviceId(serviceId)
                 .statusId(statusId)
                 .roleId(roleId)
-                .actorId(actorId)
                 .wfRemarks(remarks)
                 .actionDate(new Date())
                 .build();
@@ -46,7 +45,7 @@ public class WorkTaskFlowServiceImpl implements WorkTaskFlowService{
 	}
 
 	@Override
-	public TaskFlowList createTaskFlow(String applicationNo, Integer taskStatusId, String assignedRoleId, String assignedUserId,
+	public TaskFlowList createTaskFlow(String applicationNo, Integer taskStatusId, Integer assignedRoleId, String assignedUserId,
 			WorkFlowList workflow, String remarks, Integer locationId) {
 		TaskFlowList taskFlow = TaskFlowList.builder()
                 .applicationNo(applicationNo)
@@ -74,14 +73,14 @@ public class WorkTaskFlowServiceImpl implements WorkTaskFlowService{
 	        workflow.setActorId(actorId);
 	        workflow.setWfRemarks(remarks);
 	        workflow.setServiceId(serviceId);
-	        workflow.setUpdateBy(updatedBy);
+	        workflow.setUpdatedBy(updatedBy);
 	        workflow.setActionDate(new Date());
 
 	        return workFlowListRepository.save(workflow);
 	}
 
 	@Override
-	public TaskFlowList updateTaskFlow(String applicationNo, Integer taskStatusId, String assignedRoleId, String assignedUserId,String remarks) {
+	public TaskFlowList updateTaskFlow(String applicationNo, Integer taskStatusId, Integer assignedRoleId, String assignedUserId, String remarks) {
 		//audit save
 		TaskFlowList taskFlow = taskFlowListRepository.findByApplicationNo(applicationNo);
 		saveTaskflowAudit(taskFlow);
@@ -132,5 +131,7 @@ public class WorkTaskFlowServiceImpl implements WorkTaskFlowService{
 
 		taskFlowListAuditRepository.save(taskFlowAudit);
     }
+
+
 
 }

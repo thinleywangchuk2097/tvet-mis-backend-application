@@ -44,7 +44,7 @@ public class TaskFlowListAudit {
 	private Long workflowId;
 
 	@Column(name = "assigned_role_id", columnDefinition = "TEXT", length = 255)
-	private String assignedRoleId;
+	private Integer assignedRoleId;
 
 	@Column(name = "save_remarks", columnDefinition = "TEXT")
 	private String saveRemarks;
