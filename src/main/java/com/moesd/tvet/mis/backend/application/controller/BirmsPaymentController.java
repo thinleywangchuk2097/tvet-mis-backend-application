@@ -13,7 +13,7 @@ import java.util.*;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/birms/payment")
+@RequestMapping("/api/v1/public/auth/birms/payment")
 public class BirmsPaymentController {
 
 	private final BirmsPaymentService birmsPaymentService;

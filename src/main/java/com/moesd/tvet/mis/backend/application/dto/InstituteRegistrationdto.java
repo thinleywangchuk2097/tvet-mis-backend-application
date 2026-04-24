@@ -1,7 +1,6 @@
 package com.moesd.tvet.mis.backend.application.dto;
 
 import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +18,6 @@ public class InstituteRegistrationdto {
 	private String telephoneNo;
 	private String mobileNo;
 	private String emailId;
-	private String sectorId;
 	private String website;
 	private Long ownershipTypeId;
 	private Integer bhutaneseEmployees;
@@ -30,8 +28,8 @@ public class InstituteRegistrationdto {
 	private String keyContactMobileNo;
 	private List<Trainerdto> trainers;
 	private List<Coursedto> courses;
-	private Map<String, Map<String, Long>> qualityStandards;
-	
+	private List<QualityStandardsdto> qualityStandards;
+	private List<TuitionDetailsdto>tuitionDetails;
 	// System fields
 	private Integer serviceId; 
 	private Integer assignedRoleId;
@@ -39,6 +37,8 @@ public class InstituteRegistrationdto {
 	private String userId; 
 	private Integer statusId; 
 	private String remarks;
+	private String createdBy;
+	private String updatedBy;
 	// Documents
 	private Documentdto[] documents;
 }

@@ -29,6 +29,7 @@ public class InstituteProposaldto {
 	private String mobileNo;
 	private String email;
 	private String sectorId; 
+	private String courseId;
 	private String activityLevelId;
 	// System fields
 	private Integer serviceId; 

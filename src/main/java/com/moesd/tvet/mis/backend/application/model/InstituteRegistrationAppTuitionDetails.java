@@ -17,19 +17,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_institute_registration_course_app")
-public class InstituteRegistrationAppCourse {
+@Table(name = "tbl_institute_registration_tuition_details")
+public class InstituteRegistrationAppTuitionDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String sectorId;
-	private String courseId;
-	private String theoryHours;
-	private String practicalHours;
-	private String ojtHours;
-	private String feesPerTrainee;
-	private String enrollmentCapacity;
-	private String courseLevelId;
+	private String classLevel;
+	private String duration;
+	private String fees;
+	private String subject;
+	private String tutorCid;
+	private String tutorName;
+	private String tutorQualification;
 	// Many-to-One relationship with InstituteRegistration
 	@ManyToOne
 	@JoinColumn(name = "application_no", // FK column in trainer table

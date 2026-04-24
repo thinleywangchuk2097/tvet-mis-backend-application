@@ -19,6 +19,7 @@ import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationApp;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppCourse;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppQualityStandardResponse;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppTrainer;
+import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppTuitionDetails;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
 import com.moesd.tvet.mis.backend.application.model.Role;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
@@ -94,15 +95,16 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			// Build InstituteRegistration entity
 			InstituteRegistrationApp registration = InstituteRegistrationApp.builder().applicationNo(applicationNo)
 					.proposedInstituteName(request.getInstituteName()).dzongkhagId(request.getDzongkhagId())
-					.sectorId(request.getSectorId()).emailId(request.getEmailId())
-					.proposalApplicationNo(request.getApplicationNo()).exactLocation(request.getExactLocation())
-					.mobileNo(request.getMobileNo()).telephoneNo(request.getTelephoneNo()).website(request.getWebsite())
+					.emailId(request.getEmailId()).proposalApplicationNo(request.getApplicationNo())
+					.exactLocation(request.getExactLocation()).mobileNo(request.getMobileNo())
+					.telephoneNo(request.getTelephoneNo()).website(request.getWebsite())
 					.ownershipTypeId(request.getOwnershipTypeId()).bhutaneseEmployees(request.getBhutaneseEmployees())
 					.nonBhutaneseEmployees(request.getNonBhutaneseEmployees())
 					.businessLicenseNo(request.getBusinessLicenseNo()).keyContactName(request.getKeyContactName())
-					.keyContactDesignation(request.getKeyContactDesignation()).keyContactMobileNo(request.getKeyContactMobileNo())
-					.statusId(request.getStatusId()).createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now())
-					.serviceId(serviceId).createdBy(userId).updatedBy(userId).build();
+					.keyContactDesignation(request.getKeyContactDesignation())
+					.keyContactMobileNo(request.getKeyContactMobileNo()).statusId(request.getStatusId())
+					.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).serviceId(serviceId)
+					.createdBy(request.getCreatedBy()).updatedBy(userId).build();
 
 			// Build trainers that were added while institute registration
 			if (request.getTrainers() != null && !request.getTrainers().isEmpty()) {
@@ -118,49 +120,47 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 
 				registration.setTrainers(trainers);
 			}
-			
+
 			// Build courses that were added while institute registration
 			if (request.getCourses() != null && !request.getCourses().isEmpty()) {
 				List<InstituteRegistrationAppCourse> courses = request.getCourses().stream()
-						.map(courseDto -> InstituteRegistrationAppCourse.builder()
-								.courseTitle(courseDto.getCourseTitle()).theoryHours(courseDto.getTheoryHours())
+						.map(courseDto -> InstituteRegistrationAppCourse.builder().sectorId(courseDto.getSectorId())
+								.courseId(courseDto.getCourseId()).theoryHours(courseDto.getTheoryHours())
 								.practicalHours(courseDto.getPracticalHours()).ojtHours(courseDto.getOjtHours())
-								.feesPerTrainee(courseDto.getFeesPerTrainee()).enrollmentCapacity(courseDto.getEnrollmentCapacity())
-								.courseLevelId(courseDto.getCourseLevel())
-								.instituteRegistration(registration) // Set the parent
+								.feesPerTrainee(courseDto.getFeesPerTrainee())
+								.enrollmentCapacity(courseDto.getEnrollmentCapacity())
+								.courseLevelId(courseDto.getCourseLevel()).instituteRegistration(registration) 																	
 								.build())
 						.collect(Collectors.toList());
 
 				registration.setCourses(courses);
 			}
 
-			// Build quality standard responses and add to registration
 			if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
-				List<InstituteRegistrationAppQualityStandardResponse> qualityResponses = new ArrayList<>();
+				List<InstituteRegistrationAppQualityStandardResponse> qualitystandards = request.getQualityStandards()
+						.stream()
+						.map(qualitystandardsDto -> InstituteRegistrationAppQualityStandardResponse.builder()
+								.standardId(qualitystandardsDto.getStandardId())
+								.responseId(qualitystandardsDto.getResponseId()).instituteRegistration(registration)																																				
+								.build())
+						.collect(Collectors.toList());
+				registration.setQualityStandardResponses(qualitystandards);
+			}
 
-				// Iterate through each standard group
-				for (Map.Entry<String, Map<String, Long>> standardGroupEntry : request.getQualityStandards()
-						.entrySet()) {
-					Map<String, Long> standardsMap = standardGroupEntry.getValue();
-
-					// Iterate through each standard under this group
-					for (Map.Entry<String, Long> standardEntry : standardsMap.entrySet()) {
-						Long standardId = Long.parseLong(standardEntry.getKey());
-						Long responseId = standardEntry.getValue();
-
-						InstituteRegistrationAppQualityStandardResponse response = InstituteRegistrationAppQualityStandardResponse
-								.builder().standardId(standardId).responseId(responseId)
+			if (request.getTuitionDetails() != null && !request.getTuitionDetails().isEmpty()) {
+				List<InstituteRegistrationAppTuitionDetails> tuitiondetails = request.getTuitionDetails().stream()
+						.map(tuitiondetailsDto -> InstituteRegistrationAppTuitionDetails.builder()
+								.classLevel(tuitiondetailsDto.getClassLevel()).duration(tuitiondetailsDto.getDuration())
+								.fees(tuitiondetailsDto.getFees()).subject(tuitiondetailsDto.getSubjects())
+								.tutorCid(tuitiondetailsDto.getTutorCid()).tutorName(tuitiondetailsDto.getTutorName())
+								.tutorQualification(tuitiondetailsDto.getTutorQualification())
 								.instituteRegistration(registration) // Set the parent
-								.build();
-						qualityResponses.add(response);
-					}
-				}
-
-				registration.setQualityStandardResponses(qualityResponses);
+								.build())
+						.collect(Collectors.toList());
+				registration.setTuitionDetails(tuitiondetails);
 			}
 
 			// Save everything - cascade will automatically save trainers and quality
-			// responses
 			InstituteRegistrationApp savedRegistration = instituteRegistrationRepository.save(registration);
 
 			// Get unclaimed statusId
@@ -198,9 +198,9 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	}
 
 	@Override
-	public List<Tuple> applicationExistOrNot(String application_no) {
-		List<Tuple> resultList = instituteRegistrationRepository
-				.findByProposalApplicationNo(application_no);
+	public List<Tuple> applicationExistOrNot(String application_no, String service_id) {
+		List<Tuple> resultList = instituteRegistrationRepository.findByProposalApplicationNo(application_no,
+				service_id);
 		return resultList;
 	}
 
@@ -241,17 +241,50 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			// Fetch next role
 			RoleService roleService = roleServiceRepository.getNextAssignedRole(assignedRoleId, serviceId, statusId)
 					.orElseThrow(() -> new RecordNotFoundException("Next assigned role not found"));
-
-			// Find existing registration by applicationNo
+            //System.out.println("roleService" + roleService);
+            // Find existing registration by applicationNo
 			InstituteRegistrationApp existingRegistration = instituteRegistrationRepository
-					.findInstituteRegistrationByApplicationNo(request.getApplicationNo()) // Returns Optional
+					.findByApplicationNo(request.getApplicationNo()) // Returns Optional
 					.orElseThrow(() -> new RecordNotFoundException(
 							"Institute registration not found with applicationNo: " + request.getApplicationNo()));
 			// Update InstituteRegistration entity
+			existingRegistration.setUpdatedBy(request.getUpdatedBy());
 			existingRegistration.setStatusId(request.getStatusId());
 			existingRegistration.setUpdatedAt(LocalDateTime.now());
-			existingRegistration.setUpdatedBy(userId);
-
+			
+			  //Update ONLY existing records
+	        if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
+	            
+	            // Get existing quality standards for this registration
+	            List<InstituteRegistrationAppQualityStandardResponse> existingStandards = 
+	                existingRegistration.getQualityStandardResponses();
+	           
+	            if (existingStandards != null && !existingStandards.isEmpty()) {
+	                Map<Long, InstituteRegistrationAppQualityStandardResponse> existingMap = 
+	                    existingStandards.stream()
+	                        .collect(Collectors.toMap(
+	                            InstituteRegistrationAppQualityStandardResponse::getStandardId,
+	                            standard -> standard
+	                        ));
+	                
+	                // Update only existing quality standards
+	                for (var qualityDto : request.getQualityStandards()) {
+	                    Long standardId = qualityDto.getStandardId();
+	                    InstituteRegistrationAppQualityStandardResponse existingStandard = existingMap.get(standardId);
+	                    
+	                    if (existingStandard != null) {
+	                        // Update only responseId and remarks
+	                        existingStandard.setResponseId(qualityDto.getResponseId());
+	                        existingStandard.setRemarks(qualityDto.getRemarks());
+	                       
+	                    } else {
+	                        System.out.println("Quality standard with standardId " + standardId + " not found, skipping");
+	                    }
+	                }
+	               
+	            }
+	        }
+	        
 			// Save the updated registration
 			InstituteRegistrationApp savedRegistration = instituteRegistrationRepository.save(existingRegistration);
 
@@ -266,7 +299,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 				InstituteRegistrationDetails registrationDetails = InstituteRegistrationDetails.builder()
 						.applicationNo(request.getApplicationNo()).RegistrationNo(licenseNo)
 						.proposedInstituteName(request.getInstituteName()).dzongkhagId(request.getDzongkhagId())
-						.sectorId(request.getSectorId()).emailId(request.getEmailId())
+						.emailId(request.getEmailId())
 						.exactLocation(request.getExactLocation()).mobileNo(request.getMobileNo())
 						.telephoneNo(request.getTelephoneNo()).website(request.getWebsite())
 						.ownershipTypeId(request.getOwnershipTypeId())

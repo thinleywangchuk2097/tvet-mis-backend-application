@@ -11,7 +11,7 @@ public interface InstituteRegistrationService {
 	
 	ResponseEntity<?> registerInstitute(InstituteRegistrationdto request);
 	
-	List<Tuple> applicationExistOrNot(String application_no);
+	List<Tuple> applicationExistOrNot(String application_no,String service_id);
 	
 	List<ObjectNode> getInstituteRegistrationDetails(String application_no);
 	

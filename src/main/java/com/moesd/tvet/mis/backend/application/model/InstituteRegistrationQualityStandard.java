@@ -34,6 +34,8 @@ public class InstituteRegistrationQualityStandard {
 	private Integer isActive;
 
 	private Integer parentId;
+	
+	private Integer serviceId;
 
 	private LocalDateTime createdAt;
 

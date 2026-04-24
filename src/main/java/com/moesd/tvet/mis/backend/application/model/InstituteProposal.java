@@ -51,6 +51,8 @@ public class InstituteProposal {
 	private String emailId;
 
 	private String sectorId;
+	
+	private String courseId;
 
 	private String activityLevelId;
 

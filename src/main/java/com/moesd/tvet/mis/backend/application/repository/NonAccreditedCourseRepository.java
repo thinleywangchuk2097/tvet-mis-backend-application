@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import com.moesd.tvet.mis.backend.application.model.InstituteNonAccreditedCourse;
+import com.moesd.tvet.mis.backend.application.model.NonAccreditedCourse;
 import jakarta.persistence.Tuple;
 
-public interface InstituteNonAccreditedCourseRepository extends JpaRepository<InstituteNonAccreditedCourse,Long>{
+public interface NonAccreditedCourseRepository extends JpaRepository<NonAccreditedCourse,Long>{
 	
 	@Query(value = 
 		    "SELECT "
@@ -56,18 +56,21 @@ public interface InstituteNonAccreditedCourseRepository extends JpaRepository<In
 		        + "WHERE n.application_no = ?1", nativeQuery = true)
 		List<Tuple> getNonAccreditedCourseByApplicationNo(String application_no);
 	
-		Optional<InstituteNonAccreditedCourse> findByApplicationNo(String applicationNo);
+		Optional<NonAccreditedCourse> findByApplicationNo(String applicationNo);
 		
 		@Query(value =  
 				"SELECT "
-						+ "  a.* "
+						+ "  a.*, "
+						+ "  d.name AS status_name "
 						+ "FROM "
 						+ "  tbl_non_accredited_course_dtls a "
 						+ "  LEFT JOIN tbl_institute_registration_dtls b "
 						+ "    ON a.institute_id = b.institute_id "
 						+ "  LEFT JOIN tbl_user c "
 						+ "    ON c.user_id = b.registration_no "
-						+ "WHERE c.user_id=?", nativeQuery = true)
+						+ "  LEFT JOIN tbl_dropdown_child_master d "
+						+ "    ON d.id = a.status_id "
+						+ "WHERE c.user_id = ?", nativeQuery = true)
 		List<Tuple> getNonAccreditedCourseDetailsByUserId(String user_id);
 	
 	

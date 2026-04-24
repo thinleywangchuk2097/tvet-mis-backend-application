@@ -10,7 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Coursedto {
-	private String courseTitle;
+	
+	private String sectorId;
+	private String courseId;
 	private String theoryHours;
 	private String practicalHours;
 	private String ojtHours;

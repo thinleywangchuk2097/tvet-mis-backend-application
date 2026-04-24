@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.moesd.tvet.mis.backend.application.dto.InstituteNonAccreditedCoursedto;
-import com.moesd.tvet.mis.backend.application.service.InstituteNonAccreditedCourseService;
+import com.moesd.tvet.mis.backend.application.dto.NonAccreditedCoursedto;
+import com.moesd.tvet.mis.backend.application.service.NonAccreditedCourseService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/management/non-accredited-course")
-public class InstituteNonAccreditedCourseController {
+public class NonAccreditedCourseController {
 	
-	private final InstituteNonAccreditedCourseService instituteNonAccreditedCourseService;
+	private final NonAccreditedCourseService instituteNonAccreditedCourseService;
 	
 	@PostMapping("/submit")
-	public ResponseEntity<?> submitNonAccreditedCourse(@RequestBody InstituteNonAccreditedCoursedto request) {
+	public ResponseEntity<?> submitNonAccreditedCourse(@RequestBody NonAccreditedCoursedto request) {
 		return(instituteNonAccreditedCourseService.submitNonAccreditedCourse(request));
 	}
 	
@@ -32,7 +32,7 @@ public class InstituteNonAccreditedCourseController {
 	}
 	
 	@PostMapping("/verify-non-accredited-course")
-	public ResponseEntity<?> verifyNonAccreditedCourse(@RequestBody InstituteNonAccreditedCoursedto request) {
+	public ResponseEntity<?> verifyNonAccreditedCourse(@RequestBody NonAccreditedCoursedto request) {
 		return(instituteNonAccreditedCourseService.verifyNonAccreditedCourse(request));
 	}
 	

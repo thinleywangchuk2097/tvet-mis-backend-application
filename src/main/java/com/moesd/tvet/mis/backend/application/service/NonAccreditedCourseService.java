@@ -5,15 +5,15 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.moesd.tvet.mis.backend.application.dto.InstituteNonAccreditedCoursedto;
+import com.moesd.tvet.mis.backend.application.dto.NonAccreditedCoursedto;
 
-public interface InstituteNonAccreditedCourseService {
+public interface NonAccreditedCourseService {
 	
-	ResponseEntity<?> submitNonAccreditedCourse(InstituteNonAccreditedCoursedto request);
+	ResponseEntity<?> submitNonAccreditedCourse(NonAccreditedCoursedto request);
 	
 	List<ObjectNode> getNonAccreditedCourseByApplicationNo(String application_no);
 	
-	ResponseEntity<?> verifyNonAccreditedCourse(InstituteNonAccreditedCoursedto request);
+	ResponseEntity<?> verifyNonAccreditedCourse(NonAccreditedCoursedto request);
 	
 	List<ObjectNode> getNonAccreditedCourseDetailsByUserId(String user_id);
 }

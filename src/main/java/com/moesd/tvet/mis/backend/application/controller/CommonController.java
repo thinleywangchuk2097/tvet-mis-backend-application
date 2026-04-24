@@ -61,9 +61,9 @@ public class CommonController {
 	    return ResponseEntity.ok(data);
 	}
 	
-	@GetMapping("/get-quality-standards")
-	public ResponseEntity<List<InstituteRegistrationQualityStandard>> getAllQualitystandards() {
-		List<InstituteRegistrationQualityStandard> qualitystandards = commonService.getAllQualitystandards();
+	@GetMapping("/get-quality-standards/{serviceId}")
+	public ResponseEntity<List<InstituteRegistrationQualityStandard>> getAllQualitystandards(@PathVariable Integer serviceId) {
+		List<InstituteRegistrationQualityStandard> qualitystandards = commonService.getAllQualitystandards(serviceId);
 		return ResponseEntity.ok(qualitystandards);
 	}
 	

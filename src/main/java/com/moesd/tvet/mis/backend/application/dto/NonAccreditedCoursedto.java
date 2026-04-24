@@ -1,6 +1,8 @@
 package com.moesd.tvet.mis.backend.application.dto;
 
 import java.util.Date;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class InstituteNonAccreditedCoursedto {
+public class NonAccreditedCoursedto {
 	
 	private String instituteId;
 	private String courseTitle;
@@ -26,6 +28,8 @@ public class InstituteNonAccreditedCoursedto {
 	private String createdBy;
 	private Integer updatedBy;
 	private String ApplicationNo;
+	private String applicantName;
+	private List<QualityStandardsdto> qualityStandards;
 	// System fields
 	private Integer serviceId; 
 	private Integer assignedRoleId;

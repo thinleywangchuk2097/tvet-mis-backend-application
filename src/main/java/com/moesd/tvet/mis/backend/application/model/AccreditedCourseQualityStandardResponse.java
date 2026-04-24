@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_institute_registration_quality_response_app")
-public class InstituteRegistrationAppQualityStandardResponse {
+@Table(name = "tbl_accredited_course_quality_standard_Response")
+public class AccreditedCourseQualityStandardResponse {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -33,10 +33,10 @@ public class InstituteRegistrationAppQualityStandardResponse {
 	@Column(name = "remarks", columnDefinition = "TEXT")
 	private String remarks;
 	
-	// Many-to-One relationship with InstituteRegistration
+	// Many-to-One relationship with AccreditedCourse
 	@ManyToOne
 	@JoinColumn(name = "application_no", // FK column in response table
-			referencedColumnName = "application_no" // column in InstituteRegistration application_no
+			referencedColumnName = "application_no" // column in AccreditedCourse application_no
 	)
-	private InstituteRegistrationApp instituteRegistration;
+	private AccreditedCourse accreditedCourse;
 }
