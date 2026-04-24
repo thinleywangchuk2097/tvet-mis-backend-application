@@ -80,6 +80,7 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 					.telephoneNo(dto.getTelephoneNo()).mobileNo(dto.getMobileNo()).emailId(dto.getEmail())
 					.promoterCitizenId(dto.getPromoterCitizenId()).promoterName(dto.getPromoterName())
 					.sectorId(dto.getSectorId()).activityLevelId(dto.getActivityLevelId()).serviceId(serviceId)
+					.courseId(dto.getCourseId())
 					.statusId(dto.getStatusId()).createdAt(LocalDateTime.now()).build();
 
 			// 6. Handle partners safely
@@ -208,5 +209,7 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
 		}
 	}
+
+	
 
 }

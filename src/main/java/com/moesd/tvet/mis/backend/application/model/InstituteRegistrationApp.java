@@ -46,8 +46,6 @@ public class InstituteRegistrationApp {
 
 	private String emailId;
 
-	private String sectorId;
-
 	private Integer serviceId;
 	
 	private String website;
@@ -92,4 +90,8 @@ public class InstituteRegistrationApp {
 	@Builder.Default
 	@OneToMany(mappedBy = "instituteRegistration", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<InstituteRegistrationAppQualityStandardResponse> qualityStandardResponses = new ArrayList<>();
+	
+	@Builder.Default
+	@OneToMany(mappedBy = "instituteRegistration", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<InstituteRegistrationAppTuitionDetails> tuitionDetails = new ArrayList<>();
 }

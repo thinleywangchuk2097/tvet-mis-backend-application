@@ -19,30 +19,29 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/auth/license")
-public class IBLSAPIController {
-	@Value("${datahub.ibls-token-api}")
-	String tokenUrl;
+@RequestMapping("/api/v1/public/auth/gyalsung")
+public class GyalsungApiController {
+	
+	@Value("${gyalsung-token-api}")
+	String gyalsungTokenUrl;
 
-	@Value("${datahub.ibls-consumer-key}")
+	@Value("${gyalsung-consumer-key}")
 	String consumerKey;
 
-	@Value("${datahub.ibls-consumer-secret}")
+	@Value("${gyalsung-consumer-secret}")
 	String consumerSecret;
 
-	@Value("${datahub.ibls-license-api}")
-	String LicenseUrl;
+	@Value("${gyalsung-data-api}")
+	String gyalsungDataUrl;
 
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@GetMapping("/licenseDetails/{licenseNo}")
-	public ResponseEntity<Object> getCitizenDetails(@PathVariable String licenseNo) throws ParseException {
+	@GetMapping("/gyalsungDetails/{citizenshipNo}")
+	public ResponseEntity<Object> getGyalsungDetails(@PathVariable String citizenshipNo) throws ParseException {
 
 		// Step 1: Generate token (no model, no DB)
 		String accessToken = generateNewToken();
@@ -54,7 +53,7 @@ public class IBLSAPIController {
 		HttpEntity<String> request = new HttpEntity<>(headers);
 
 		// Step 3: Call citizen API
-		ResponseEntity<Object> response = restTemplate.exchange(LicenseUrl + licenseNo, HttpMethod.GET, request,
+		ResponseEntity<Object> response = restTemplate.exchange(gyalsungDataUrl + citizenshipNo, HttpMethod.GET, request,
 				Object.class);
 
 		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
@@ -70,7 +69,7 @@ public class IBLSAPIController {
 		HttpEntity<String> request = new HttpEntity<>(headers);
 
 		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-				tokenUrl + "?grant_type=client_credentials", HttpMethod.POST, request,
+				gyalsungTokenUrl + "?grant_type=client_credentials", HttpMethod.POST, request,
 				new ParameterizedTypeReference<Map<String, Object>>() {
 				});
 

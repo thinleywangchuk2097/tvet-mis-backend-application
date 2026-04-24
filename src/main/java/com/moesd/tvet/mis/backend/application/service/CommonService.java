@@ -16,7 +16,7 @@ public interface CommonService {
 
 	List<Occupation> getAllOccupations();
 	
-	List<InstituteRegistrationQualityStandard> getAllQualitystandards();
+	List<InstituteRegistrationQualityStandard> getAllQualitystandards(Integer serviceId);
 
 	List<Sector> getAllSectors();
 	

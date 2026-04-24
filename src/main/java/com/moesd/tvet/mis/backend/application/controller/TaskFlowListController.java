@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.TaskFlowListdto;
@@ -18,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth/tasklist")
 public class TaskFlowListController {
-	
+
 	private final TaskFlowListService taskFlowListService;
 
 	@GetMapping("/get-group-tasklist-dtl/{taskStatusId}/{currentRoleId}/{locationId}")
@@ -29,21 +30,31 @@ public class TaskFlowListController {
 	}
 
 	@GetMapping("/get-my-tasklist-dtl/{userId}/{current_roleId}")
-	public ResponseEntity<List<ObjectNode>> getMyTaskListDtl(@PathVariable String userId, @PathVariable String current_roleId) {
-		return new ResponseEntity<List<ObjectNode>>(taskFlowListService.getMyTaskListDtl(userId, current_roleId), HttpStatus.OK);
+	public ResponseEntity<List<ObjectNode>> getMyTaskListDtl(@PathVariable String userId,
+			@PathVariable String current_roleId) {
+		return new ResponseEntity<List<ObjectNode>>(taskFlowListService.getMyTaskListDtl(userId, current_roleId),
+				HttpStatus.OK);
+	}
+    //It is in process not completed yet
+	@GetMapping("/get-application-dtl-status")
+	public ResponseEntity<List<ObjectNode>> getApplicationStatusDtl(
+			@RequestParam(required = false) String application_no,
+			@RequestParam(required = false) String applicant_name,
+			@RequestParam(required = false) String application_date) {
+		return new ResponseEntity<List<ObjectNode>>(
+				taskFlowListService.getApplicationStatusDtl(application_no, applicant_name, application_date),
+				HttpStatus.OK);
 	}
 
-	
 	@PostMapping("/claim-task")
 	public ResponseEntity<ObjectNode> claimTask(@RequestBody TaskFlowListdto request) {
-	    ObjectNode result = taskFlowListService.claimTask(request);
-	    return ResponseEntity.status(result.get("status").asInt()).body(result);
+		ObjectNode result = taskFlowListService.claimTask(request);
+		return ResponseEntity.status(result.get("status").asInt()).body(result);
 	}
-	
-	
+
 	@PostMapping("/unclaim-task")
 	public ResponseEntity<ObjectNode> unclaimTask(@RequestBody TaskFlowListdto request) {
-	    ObjectNode result = taskFlowListService.unclaimTask(request);
-	    return ResponseEntity.status(result.get("status").asInt()).body(result);
+		ObjectNode result = taskFlowListService.unclaimTask(request);
+		return ResponseEntity.status(result.get("status").asInt()).body(result);
 	}
 }

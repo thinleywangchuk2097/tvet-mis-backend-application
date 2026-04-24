@@ -27,6 +27,7 @@ public interface InstituteProposalRepository extends JpaRepository<InstituteProp
 					+ "  p.mobile_no, "
 					+ "  p.email_id, "
 					+ "  p.sector_id, "
+					+ "  p.course_id, "
 					+ "  p.activity_level_id, "
 					+ "  p.other_ownership_type_id, "
 					+ "  p.other_name, "
@@ -79,6 +80,6 @@ public interface InstituteProposalRepository extends JpaRepository<InstituteProp
 					+ "WHERE p.application_no = ?", nativeQuery = true)
 		List<Tuple> getInstituteDetails(String application_no);
 	
-	  Optional<InstituteProposal> findByApplicationNo(String applicationNo);
+	  	Optional<InstituteProposal> findByApplicationNo(String applicationNo);
 
 }

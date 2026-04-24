@@ -51,8 +51,8 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public List<InstituteRegistrationQualityStandard> getAllQualitystandards() {
-		return qualityStandardRepository.findAll();
+	public List<InstituteRegistrationQualityStandard> getAllQualitystandards(Integer serviceId) {
+		return qualityStandardRepository.findByServiceId(serviceId);
 	}
 
 	@Override

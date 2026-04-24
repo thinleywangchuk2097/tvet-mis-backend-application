@@ -66,6 +66,8 @@ public class User implements UserDetails {
 	
 	private Integer currentRole;
 	
+	private String doB;
+	
 	private Integer createdBy;
 	
 	private Date createdAt;

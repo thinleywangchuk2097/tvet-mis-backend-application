@@ -31,9 +31,9 @@ public class InstituteRegistrationController {
 	}
 	
 	
-	@GetMapping("/get-application-status/{application_no}")
-	public ResponseEntity<?> applicationExistOrNot(@PathVariable String application_no){
-	    List<Tuple> instituteDetails = instituteRegistrationService.applicationExistOrNot(application_no);
+	@GetMapping("/get-application-status/{application_no}/{service_id}")
+	public ResponseEntity<?> applicationExistOrNot(@PathVariable String application_no, @PathVariable String service_id){
+	    List<Tuple> instituteDetails = instituteRegistrationService.applicationExistOrNot(application_no, service_id);
 	    
 	    if (!instituteDetails.isEmpty()) {
 	        Tuple tuple = instituteDetails.get(0);

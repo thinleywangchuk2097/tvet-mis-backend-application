@@ -2,24 +2,31 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.*;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.moesd.tvet.mis.backend.application.dto.AuthenticationRequest;
+import com.moesd.tvet.mis.backend.application.dto.AuthenticationResponse;
+import com.moesd.tvet.mis.backend.application.dto.UserRegisterRequest;
 import com.moesd.tvet.mis.backend.application.model.BhutanNDIToken;
 import com.moesd.tvet.mis.backend.application.repository.BhutanNDIRepository;
+import com.moesd.tvet.mis.backend.application.repository.UserRepository;
+import com.moesd.tvet.mis.backend.application.service.AuthenticationService;
 import com.moesd.tvet.mis.backend.application.service.BhutanNDIService;
-
+import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+
 
 @Service
 @RequiredArgsConstructor
 public class BhutanNDIServiceImpl implements BhutanNDIService {
 
 	private final BhutanNDIRepository bhutanNDIRepository;
+	private final AuthenticationService authenticationService;
+	private final UserRepository userRepository;
 
 	@Value("${ndi.token-api-url}")
 	private String tokenApiUrl;
@@ -88,7 +95,9 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 	public Map<String, Object> createProofRequest(BhutanNDIToken token) {
 
 		Map<String, Object> payload = new HashMap<>();
-		payload.put("proofName", "Tvet-Mis System Foundational ID");
+		
+		payload.put("purpose", "login");
+		payload.put("proofName", "Tvet Mis System Foundational ID");
 
 		List<Map<String, Object>> proofAttributes = new ArrayList<>();
 
@@ -102,7 +111,7 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 				.add(Map.of("name", "Date of Birth", "restrictions", List.of(Map.of("schema_name", schemaNameUrl))));
 
 		proofAttributes
-				.add(Map.of("name", "Contact Number", "restrictions", new ArrayList<>(), "selfAttestedAllowed", true));
+				.add(Map.of("name", "Mobile Number", "restrictions", new ArrayList<>(), "selfAttestedAllowed", true));
 
 		proofAttributes.add(Map.of("name", "Email", "restrictions", new ArrayList<>(), "selfAttestedAllowed", true));
 
@@ -119,5 +128,136 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 				});
 
 		return response.getBody();
+	}
+
+	@Override
+	public ResponseEntity<?> processNatsResponse(JsonNode payload) {
+		  try {
+		        JsonNode dataNode = payload.path("data");
+
+		        String type = dataNode.path("type").asText();
+
+		        if ("present-proof/rejected".equals(type)) {
+		            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+		                    .body(Map.of("message", "User rejected proof request"));
+		        }
+
+		        JsonNode requestedPresentation = dataNode.path("requested_presentation");
+		        JsonNode revealedAttrs = requestedPresentation.path("revealed_attrs");
+
+		        String idNumber = revealedAttrs.path("ID Number").get(0).path("value").asText();
+		        String fullName = revealedAttrs.path("Full Name").get(0).path("value").asText();
+		        String gender = revealedAttrs.path("Gender").get(0).path("value").asText();
+		        String dateOfBirth = revealedAttrs.path("Date of Birth").get(0).path("value").asText();
+
+		        // Optional: split name
+		        String[] nameParts = fullName.split("\\s+");
+		        String firstName = nameParts.length > 0 ? nameParts[0] : "";
+		        String middleName = nameParts.length > 2
+		                ? String.join(" ", Arrays.copyOfRange(nameParts, 1, nameParts.length - 1))
+		                : "";
+		        String lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+
+		        // Build clean response
+		        Map<String, Object> response = new HashMap<>();
+		        response.put("idNumber", idNumber);
+		        response.put("fullName", fullName);
+		        response.put("firstName", firstName);
+		        response.put("middleName", middleName);
+		        response.put("lastName", lastName);
+		        response.put("gender", gender);
+		        response.put("dateOfBirth", dateOfBirth);
+
+		        return ResponseEntity.ok(response);
+
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		                .body(Map.of("message", "Failed to process NATS response"));
+		    }
+	}
+
+	@Override
+	public ResponseEntity<?> processAuthNatsResponse(JsonNode payload) {
+		try {
+			// Log the received payload
+			System.out.println("Received payload: " + payload.toString());
+
+			// Extract the "data" node
+			JsonNode dataNode = payload.path("data");
+			String type = dataNode.path("type").asText();
+			if ("present-proof/rejected".equals(type)) {
+				 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                         .body("The user has declined the request to share proof.");
+			}
+
+			// Extract fields from "data"
+			//String type = dataNode.path("type").asText();
+			String verificationResult = dataNode.path("verification_result").asText();
+			JsonNode requestedPresentation = dataNode.path("requested_presentation");
+
+			// Extract revealed attributes
+			JsonNode revealedAttrs = requestedPresentation.path("revealed_attrs");
+			String idNumber = revealedAttrs.path("ID Number").get(0).path("value").asText();
+			String fullName = revealedAttrs.path("Full Name").get(0).path("value").asText();
+			String gender = revealedAttrs.path("Gender").get(0).path("value").asText();
+			String dateOfBirth = revealedAttrs.path("Date of Birth").get(0).path("value").asText();
+
+			// Split fullName into first, middle, and last name
+			String[] nameParts = fullName.split("\\s+");
+			String firstName = nameParts.length > 0 ? nameParts[0] : "";
+			String middleName = nameParts.length > 2
+					? String.join(" ", Arrays.copyOfRange(nameParts, 1, nameParts.length - 1))
+					: "";
+			String lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : middleName;
+
+			// Create a Set for roles
+			Set<Integer> roles = new HashSet<>();
+			roles.add(11);// training provider roleId
+			roles.add(3);
+
+			try {
+				List<Tuple> user = userRepository.findNDIByUserId(idNumber, 1);
+				ResponseEntity<?> authResponse;
+				// Check if user exists
+				if (user != null && !user.isEmpty()) {
+					String userId = "";
+					for (Tuple tuple : user) {
+						userId = tuple.get(0, String.class);
+					}
+					AuthenticationRequest data = new AuthenticationRequest();
+					data.setUsername(userId);
+					data.setPassword("");
+					authResponse = authenticationService.authenticate(data);
+				} else {
+					// Register a new user if not found
+					UserRegisterRequest registerRequest = UserRegisterRequest.builder().userId(idNumber).firstName(firstName)
+							.middleName(middleName).lastName(lastName).role(roles).emailId("dummy123@moitgmail.com")
+							.doB(dateOfBirth)
+							.build();
+					authResponse = authenticationService.register(registerRequest);
+				}
+
+				AuthenticationResponse responseBody = (AuthenticationResponse) authResponse.getBody();
+
+				if (responseBody != null 
+				        && responseBody.getAccessToken() != null
+				        && responseBody.getRefreshToken() != null) {
+
+				    return ResponseEntity.ok(responseBody);
+				} else {
+					System.err.println("Authentication failed: No tokens received");
+					return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+							.body("Authentication failed: No tokens received");
+				}
+			} catch (RuntimeException e) {
+				System.err.println("Error: " + e.getMessage());
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User has denied");
+		}
 	}
 }

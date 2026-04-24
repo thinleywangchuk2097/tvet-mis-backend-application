@@ -41,8 +41,8 @@ public class DatahubAPIController {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@GetMapping("/citizendetails/{cidnumber}")
-	public ResponseEntity<Object> getCitizenDetails(@PathVariable String cidnumber) throws ParseException {
+	@GetMapping("/citizendetails/{citizenshipNo}")
+	public ResponseEntity<Object> getCitizenDetails(@PathVariable String citizenshipNo) throws ParseException {
 
 		// Step 1: Generate token (no model, no DB)
 		String accessToken = generateNewToken();
@@ -54,7 +54,7 @@ public class DatahubAPIController {
 		HttpEntity<String> request = new HttpEntity<>(headers);
 
 		// Step 3: Call citizen API
-		ResponseEntity<Object> response = restTemplate.exchange(CitizenshipUrl + cidnumber, HttpMethod.GET, request,
+		ResponseEntity<Object> response = restTemplate.exchange(CitizenshipUrl + citizenshipNo, HttpMethod.GET, request,
 				Object.class);
 
 		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
