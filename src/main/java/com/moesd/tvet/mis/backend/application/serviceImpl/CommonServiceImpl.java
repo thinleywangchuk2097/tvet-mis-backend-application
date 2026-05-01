@@ -12,12 +12,14 @@ import com.moesd.tvet.mis.backend.application.model.Sector;
 import com.moesd.tvet.mis.backend.application.model.ServiceMaster;
 import com.moesd.tvet.mis.backend.application.repository.DropdownChildRepository;
 import com.moesd.tvet.mis.backend.application.repository.DzongkhagRepository;
+import com.moesd.tvet.mis.backend.application.repository.InstituteRegistrationDetailsRepository;
 import com.moesd.tvet.mis.backend.application.repository.OccupationRepository;
 import com.moesd.tvet.mis.backend.application.repository.QualityStandardRepository;
 import com.moesd.tvet.mis.backend.application.repository.SectorRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.service.CommonService;
 import lombok.RequiredArgsConstructor;
+import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class CommonServiceImpl implements CommonService {
 	private final DropdownChildRepository dropdownChildRepository;
 	private final QualityStandardRepository qualityStandardRepository;
     private final ServiceMasterRepository serviceMasterRepository;
+    private final InstituteRegistrationDetailsRepository assessmentInstituteRepository;
 	@Override
 	public List<Dzongkhag> getAllDzongkhags() {
 		return dzongkhagRepository.findAllOrderByName();
@@ -66,7 +69,4 @@ public class CommonServiceImpl implements CommonService {
 		// TODO Auto-generated method stub
 		return occupationRepository.findBySectorId(sectorId);
 	}
-
-	
-
 }
