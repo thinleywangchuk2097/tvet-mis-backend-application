@@ -3,9 +3,7 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.model.Dzongkhag;
 import com.moesd.tvet.mis.backend.application.model.Gewog;
@@ -23,9 +21,9 @@ import com.moesd.tvet.mis.backend.application.repository.SectorRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.service.CommonService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +40,7 @@ public class CommonServiceImpl implements CommonService {
 	private final ObjectToJson objectTojson;
 	
 	
+
 	@Override
 	public List<Dzongkhag> getAllDzongkhags() {
 		return dzongkhagRepository.findAllOrderByName();
@@ -83,6 +82,7 @@ public class CommonServiceImpl implements CommonService {
 		return occupationRepository.findBySectorId(sectorId);
 	}
 
+
 	@Override
 	public List<ObjectNode> getAllCourseAnnouncement() {
 		List<Tuple> resultList = courseEnrollmentAppRepository.getAllCourseAnnouncement();
@@ -105,5 +105,6 @@ public class CommonServiceImpl implements CommonService {
 	
 
 	
+
 
 }

@@ -24,6 +24,7 @@ import com.moesd.tvet.mis.backend.application.model.ServiceMaster;
 import com.moesd.tvet.mis.backend.application.service.CommonService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
 
 
 @RestController
@@ -134,4 +135,5 @@ public class CommonController {
 		Files.copy(file.toPath(), response.getOutputStream());
 		response.flushBuffer();
 	}
+	
 }

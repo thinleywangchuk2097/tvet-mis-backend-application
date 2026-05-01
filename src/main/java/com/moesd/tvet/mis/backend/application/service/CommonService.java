@@ -11,6 +11,7 @@ import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationQuality
 import com.moesd.tvet.mis.backend.application.model.Occupation;
 import com.moesd.tvet.mis.backend.application.model.Sector;
 import com.moesd.tvet.mis.backend.application.model.ServiceMaster;
+import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
 
 public interface CommonService {
 
