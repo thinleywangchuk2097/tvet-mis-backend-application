@@ -8,14 +8,15 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.model.Dzongkhag;
+import com.moesd.tvet.mis.backend.application.model.Gewog;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationQualityStandard;
 import com.moesd.tvet.mis.backend.application.model.Occupation;
 import com.moesd.tvet.mis.backend.application.model.Sector;
@@ -24,17 +25,24 @@ import com.moesd.tvet.mis.backend.application.service.CommonService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/common")
 public class CommonController {
 
 	private final CommonService commonService;
-
+    
 	@GetMapping("/get-dzongkhags")
 	public ResponseEntity<List<Dzongkhag>> getAllDzongkhags() {
 		List<Dzongkhag> dzongkhagLists = commonService.getAllDzongkhags();
 		return ResponseEntity.ok(dzongkhagLists);
+	}
+	
+	@GetMapping("/get-gewog/{dzongkhagId}")
+	public ResponseEntity<List<Gewog>> getGewogByDzongkhagId(@PathVariable Integer dzongkhagId) {
+		List<Gewog> gewogLists = commonService.getGewogByDzongkhagId(dzongkhagId);
+		return ResponseEntity.ok(gewogLists);
 	}
 
 	@GetMapping("/get-sectors")
@@ -47,6 +55,12 @@ public class CommonController {
 	public ResponseEntity<List<Occupation>> getAllOccupations() {
 		List<Occupation> occupationLists = commonService.getAllOccupations();
 		return ResponseEntity.ok(occupationLists);
+	}
+	
+	@GetMapping("/get-service-announcement")
+	public ResponseEntity<List<ServiceMaster>> getServiceNameCourseAnnouncement() {
+		List<ServiceMaster> data = commonService.getServiceNameCourseAnnouncement();
+		return ResponseEntity.ok(data);
 	}
 
 	@GetMapping("/get-child-dropdown/{parentId}")
@@ -72,6 +86,25 @@ public class CommonController {
 		List<Occupation> occupations = commonService.getOccupationsBySectorId(sectorId);
 		return ResponseEntity.ok(occupations);
 	}
+	
+	@GetMapping("/get-announcement-application-details")
+	public ResponseEntity<List<ObjectNode>> getAllCourseAnnouncement() {
+		List<ObjectNode> Details = commonService.getAllCourseAnnouncement();
+		return ResponseEntity.ok(Details);
+	}
+	
+	@GetMapping("/get-announcement-course/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getCourseAnnouncementByApplicationNo(@PathVariable String application_no) {
+		List<ObjectNode> Details = commonService.getCourseAnnouncementByApplicationNo(application_no);
+		return ResponseEntity.ok(Details);
+	}
+	
+	
+	
+	
+	
+	
+	
 
 	@GetMapping("/download-document")
 	public void downloadFile(@RequestParam String upload_url, @RequestParam String fileName,

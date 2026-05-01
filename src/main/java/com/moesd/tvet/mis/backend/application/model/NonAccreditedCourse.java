@@ -50,7 +50,7 @@ public class NonAccreditedCourse {
 
 	private String certificateLevelId;
 
-	private String curriculumTypeId;
+	private String curriculumId;
 
 	private Integer statusId;
 

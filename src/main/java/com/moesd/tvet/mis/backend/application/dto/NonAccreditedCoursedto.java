@@ -22,7 +22,7 @@ public class NonAccreditedCoursedto {
 	private String feesPerTrainee;
 	private String enrolmentCapacity;
 	private String certificateLevelId;
-	private String curriculumTypeId;
+	private String curriculumId;
 	private Date registrationDate;
 	private Date validityDate;
 	private String createdBy;

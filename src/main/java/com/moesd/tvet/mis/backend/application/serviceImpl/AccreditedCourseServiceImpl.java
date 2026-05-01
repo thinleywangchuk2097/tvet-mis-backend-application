@@ -67,6 +67,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			// Build main entity
 			AccreditedCourse course = AccreditedCourse.builder().applicationNo(applicationNo)
 					.instituteId(request.getInstituteId()).courseId(request.getCourseId())
+					.curriculumId(request.getCurriculumId())
 					.courseFee(request.getCourseFee()).sectorId(request.getSectorId()).is_active(request.getIs_active())
 					.registration_date(request.getRegistration_date()).validity_date(request.getValidity_date())
 					.statusId(request.getStatusId()).createdBy(request.getCreatedBy()).updatedBy(request.getUpdatedBy())
@@ -179,7 +180,38 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			existingAccreditedCourse.setStatusId(request.getStatusId());
 			existingAccreditedCourse.setUpdatedAt(new java.util.Date());
 			existingAccreditedCourse.setUpdatedBy(request.getUpdatedBy());
-
+			//Update ONLY existing records
+	        if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
+	            
+	            // Get existing quality standards for this registration
+	            List<AccreditedCourseQualityStandardResponse> existingStandards = 
+	            		existingAccreditedCourse.getQualityStandardResponses();
+	           
+	            if (existingStandards != null && !existingStandards.isEmpty()) {
+	                Map<Long, AccreditedCourseQualityStandardResponse> existingMap = 
+	                    existingStandards.stream()
+	                        .collect(Collectors.toMap(
+	                        		AccreditedCourseQualityStandardResponse::getStandardId,
+	                            standard -> standard
+	                        ));
+	                
+	                // Update only existing quality standards
+	                for (var qualityDto : request.getQualityStandards()) {
+	                    Long standardId = qualityDto.getStandardId();
+	                    AccreditedCourseQualityStandardResponse existingStandard = existingMap.get(standardId);
+	                    
+	                    if (existingStandard != null) {
+	                        // Update only responseId and remarks
+	                        existingStandard.setResponseId(qualityDto.getResponseId());
+	                        existingStandard.setRemarks(qualityDto.getRemarks());
+	                       
+	                    } else {
+	                        System.out.println("Quality standard with standardId " + standardId + " not found, skipping");
+	                    }
+	                }
+	               
+	            }
+	        }
 			// Save the updated registration
 			AccreditedCourse savedRegistration = accreditedCourseRepository.save(existingAccreditedCourse);
 
@@ -209,6 +241,13 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
 					"Failed to update  Accredited Course", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
 		}
+	}
+
+	@Override
+	public List<ObjectNode> getAccreditedApprovedCourseByUserId(String user_id) {
+		List<Tuple> resultList = accreditedCourseRepository.getAccreditedApprovedCourseByUserId(user_id);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
 	}
 
 }

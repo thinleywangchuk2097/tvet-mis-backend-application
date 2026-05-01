@@ -27,8 +27,10 @@ public class Gewog {
 	private Integer id;
 	@Column(name = "gewog_name")
 	private String gewogName;
-	@Column(name = "gewog_code")
-	private String gewogCode;
+	
+	@Column(name = "gewog_dzo")
+	private String gewogDzo;
+	
 	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "dzongkhag_id")
 	private Dzongkhag dzongkhag;

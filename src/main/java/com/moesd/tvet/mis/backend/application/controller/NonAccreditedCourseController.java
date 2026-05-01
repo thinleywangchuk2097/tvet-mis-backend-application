@@ -41,4 +41,10 @@ public class NonAccreditedCourseController {
 	    List<ObjectNode> Details = instituteNonAccreditedCourseService.getNonAccreditedCourseDetailsByUserId(user_id);
 	    return ResponseEntity.ok(Details);
 	}
+	
+	@GetMapping("/get-non-accredited-approved-course-details/{user_id}")
+	public ResponseEntity<List<ObjectNode>> getNonAccreditedApprovedCourseByUserId(@PathVariable String user_id){
+	    List<ObjectNode> Details = instituteNonAccreditedCourseService.getNonAccreditedApprovedCourseByUserId(user_id);
+	    return ResponseEntity.ok(Details);
+	}
 }
