@@ -78,7 +78,7 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 					.theoryHour(request.getTheoryHour()).practicalHour(request.getPracticalHour())
 					.ojtHour(request.getOjtHour()).feesPerTrainee(request.getFeesPerTrainee())
 					.enrolmentCapacity(request.getEnrolmentCapacity())
-					.certificateLevelId(request.getCertificateLevelId()).curriculumTypeId(request.getCurriculumTypeId())
+					.certificateLevelId(request.getCertificateLevelId()).curriculumId(request.getCurriculumId())
 					.statusId(request.getStatusId()).registrationDate(new Date()).createdBy(request.getCreatedBy())
 					.createdAt(LocalDateTime.now()).build();
 			// Build NonAccreditedCourseQualityStandardResponse that were added while course apply
@@ -184,7 +184,40 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 			existingNonAccreditedCourse.setStatusId(request.getStatusId());
 			existingNonAccreditedCourse.setUpdatedAt(LocalDateTime.now());
 			existingNonAccreditedCourse.setUpdatedBy(request.getUpdatedBy());
-
+			
+			//Update ONLY existing records
+	        if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
+	            
+	            // Get existing quality standards for this registration
+	            List<NonAccreditedCourseQualityStandardResponse> existingStandards = 
+	            		existingNonAccreditedCourse.getQualityStandardResponses();
+	           
+	            if (existingStandards != null && !existingStandards.isEmpty()) {
+	                Map<Long, NonAccreditedCourseQualityStandardResponse> existingMap = 
+	                    existingStandards.stream()
+	                        .collect(Collectors.toMap(
+	                        		NonAccreditedCourseQualityStandardResponse::getStandardId,
+	                            standard -> standard
+	                        ));
+	                
+	                // Update only existing quality standards
+	                for (var qualityDto : request.getQualityStandards()) {
+	                    Long standardId = qualityDto.getStandardId();
+	                    NonAccreditedCourseQualityStandardResponse existingStandard = existingMap.get(standardId);
+	                    
+	                    if (existingStandard != null) {
+	                        // Update only responseId and remarks
+	                        existingStandard.setResponseId(qualityDto.getResponseId());
+	                        existingStandard.setRemarks(qualityDto.getRemarks());
+	                       
+	                    } else {
+	                        System.out.println("Quality standard with standardId " + standardId + " not found, skipping");
+	                    }
+	                }
+	               
+	            }
+	        }
+	        
 			// Save the updated registration
 			NonAccreditedCourse savedRegistration = nonAccreditedCourseRepository
 					.save(existingNonAccreditedCourse);
@@ -221,6 +254,13 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 	@Override
 	public List<ObjectNode> getNonAccreditedCourseDetailsByUserId(String user_id) {
 		List<Tuple> resultList = nonAccreditedCourseRepository.getNonAccreditedCourseDetailsByUserId(user_id);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> getNonAccreditedApprovedCourseByUserId(String user_id) {
+		List<Tuple> resultList = nonAccreditedCourseRepository.getNonAccreditedApprovedCourseByUserId(user_id);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

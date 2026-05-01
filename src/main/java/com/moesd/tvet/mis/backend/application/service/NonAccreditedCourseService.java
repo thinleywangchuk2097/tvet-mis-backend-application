@@ -16,4 +16,7 @@ public interface NonAccreditedCourseService {
 	ResponseEntity<?> verifyNonAccreditedCourse(NonAccreditedCoursedto request);
 	
 	List<ObjectNode> getNonAccreditedCourseDetailsByUserId(String user_id);
+	
+	List<ObjectNode> getNonAccreditedApprovedCourseByUserId(String user_id);
+	
 }

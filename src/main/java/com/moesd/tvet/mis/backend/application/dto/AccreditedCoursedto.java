@@ -21,6 +21,7 @@ public class AccreditedCoursedto {
 	private String is_active;
 	private String sectorId;
 	private Date registration_date;
+	private String curriculumId;
 	private String validity_date;
 	private Integer createdBy;
 	private Date createdAt;

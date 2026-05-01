@@ -25,6 +25,6 @@ public class Dzongkhag {
 	@Column(name = "dzongkhag_name")
 	private String dzonkhagName;
 	
-	@Column(name = "dzongkhag_code")
-	private String dzongkhagCode;
+	@Column(name = "dzongkhag_dzo")
+	private String dzongkhagDzo;
 }
