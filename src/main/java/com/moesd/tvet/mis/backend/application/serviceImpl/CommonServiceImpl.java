@@ -102,6 +102,13 @@ public class CommonServiceImpl implements CommonService {
 		return serviceMasterRepository.getServiceNameCourseAnnouncement();
 	}
 
+	@Override
+	public List<ObjectNode> getReAssessmentAnnouncementByApplicationNo(String application_no) {
+		List<Tuple> resultList = courseEnrollmentAppRepository.getReAssessmentAnnouncementByApplicationNo(application_no);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
 	
 
 	

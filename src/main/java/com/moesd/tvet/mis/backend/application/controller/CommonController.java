@@ -24,7 +24,6 @@ import com.moesd.tvet.mis.backend.application.model.ServiceMaster;
 import com.moesd.tvet.mis.backend.application.service.CommonService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
 
 
 @RestController
@@ -101,8 +100,11 @@ public class CommonController {
 	}
 	
 	
-	
-	
+	@GetMapping("/get-reassessment-announcement-course/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getReAssessmentAnnouncementByApplicationNo(@PathVariable String application_no) {
+		List<ObjectNode> Details = commonService.getReAssessmentAnnouncementByApplicationNo(application_no);
+		return ResponseEntity.ok(Details);
+	}
 	
 	
 	

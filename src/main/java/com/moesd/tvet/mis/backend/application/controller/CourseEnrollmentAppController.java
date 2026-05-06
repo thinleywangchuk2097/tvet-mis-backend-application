@@ -33,5 +33,11 @@ public class CourseEnrollmentAppController {
 		List<ObjectNode> Details = courseEnrollmentAppService.getCourseDetailsAnnouncementByUserId(user_id, service_id);
 		return ResponseEntity.ok(Details);
 	}
-	
+
+	@GetMapping("/get-reassessment-service-name")
+	public ResponseEntity<List<ObjectNode>> getReAssessmentServiceName() {
+		List<ObjectNode> Details = courseEnrollmentAppService.getReAssessmentServiceName();
+		return ResponseEntity.ok(Details);
+	}
+
 }

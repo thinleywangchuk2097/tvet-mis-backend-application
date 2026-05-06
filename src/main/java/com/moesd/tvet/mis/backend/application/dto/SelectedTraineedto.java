@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class SelectedTraineedto {
 	private String applicationNo;
 	private Integer statusId;
+	private String courseId;
 	private Integer certificationlevelId;
 	private String courseName;
 	private Date caStartDate;

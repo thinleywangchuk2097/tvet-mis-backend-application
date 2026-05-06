@@ -91,6 +91,13 @@ public class CourseEnrollmentAppServiceImpl implements CourseEnrollmentAppServic
 		return DtlsJson;
 	}
 
+	@Override
+	public List<ObjectNode> getReAssessmentServiceName() {
+		List<Tuple> resultList = courseEnrollmentAppRepository.getReAssessmentServiceName();
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
 	
 
 }
