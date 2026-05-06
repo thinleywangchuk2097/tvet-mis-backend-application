@@ -9,8 +9,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public interface AuthenticationService {
 	
 	ResponseEntity<?> register(UserRegisterRequest request);
-
+	
 	ResponseEntity<?> authenticate(AuthenticationRequest request);
+	
+	ResponseEntity<?> authByBhutanNDI(AuthenticationRequest request);
+	
 
 	void refreshToken(HttpServletRequest request, HttpServletResponse response);
 }

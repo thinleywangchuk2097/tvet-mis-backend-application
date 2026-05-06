@@ -24,5 +24,7 @@ public class TvetMisBackendApplication {
 	public RestTemplate getRestTemplate() {
 		return new RestTemplate();
 	}
+	
+	
 
 }

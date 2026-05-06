@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
-import com.moesd.tvet.mis.backend.application.model.Occupation;
 import com.moesd.tvet.mis.backend.application.repository.CertificateRepository;
 import com.moesd.tvet.mis.backend.application.service.CertificateService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
