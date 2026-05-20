@@ -67,7 +67,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			// Build main entity
 			AccreditedCourse course = AccreditedCourse.builder().applicationNo(applicationNo)
 					.instituteId(request.getInstituteId()).courseId(request.getCourseId())
-					.curriculumId(request.getCurriculumId())
+					.curriculumId(request.getCurriculumId()).serviceId(serviceId)
 					.courseFee(request.getCourseFee()).sectorId(request.getSectorId()).is_active(request.getIs_active())
 					.registration_date(request.getRegistration_date()).validity_date(request.getValidity_date())
 					.statusId(request.getStatusId()).createdBy(request.getCreatedBy()).updatedBy(request.getUpdatedBy())

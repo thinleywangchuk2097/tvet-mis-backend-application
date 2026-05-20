@@ -1,4 +1,3 @@
-
 # Stage 1: Build the project
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 
@@ -23,6 +22,12 @@ FROM eclipse-temurin:21-jdk
 
 # Set working directory
 WORKDIR /app
+
+# Create upload directories (will be overridden by PVC)
+RUN mkdir -p /app/uploads/profile-images /app/uploads/documents
+
+# Create logs directory
+RUN mkdir -p /app/logs
 
 # Copy jar from build stage
 COPY --from=build /app/target/*.jar app.jar
