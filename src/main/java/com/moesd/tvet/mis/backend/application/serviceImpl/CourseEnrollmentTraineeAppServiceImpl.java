@@ -212,6 +212,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			// Get task statusId
 			Integer taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 					.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
+			
 			Integer resultId;
 			// Validate required fields
 			if (request.getCaStartDate() != null && request.getCaEndDate() != null) {

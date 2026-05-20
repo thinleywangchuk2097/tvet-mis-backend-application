@@ -46,7 +46,9 @@ public class AccreditedCourse {
 	private String validity_date;
 
 	private Integer statusId;
-
+	
+	private Integer serviceId;
+	
 	private Integer createdBy;
 
 	private Date createdAt;
