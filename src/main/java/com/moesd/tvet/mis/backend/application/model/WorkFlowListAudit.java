@@ -38,7 +38,7 @@ public class WorkFlowListAudit {
 	private Integer serviceId;
 	
 	@Column(name="actor_id")
-	private Integer actorId;
+	private String actorId;
 	
 	@Column(name="role_id")
 	private long roleId;

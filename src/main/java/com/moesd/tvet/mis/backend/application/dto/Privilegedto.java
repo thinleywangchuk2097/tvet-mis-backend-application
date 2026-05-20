@@ -16,5 +16,7 @@ public class Privilegedto {
 	private Long parentId;
 	private String privilegeName;
 	private String routeName;
-    private String icon;
+    private String menuIcon;
+	private String description;
+
 }

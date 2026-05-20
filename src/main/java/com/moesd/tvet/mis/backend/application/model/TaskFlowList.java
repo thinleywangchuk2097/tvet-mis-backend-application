@@ -41,7 +41,7 @@ public class TaskFlowList {
 	private String saveRemarks;
 	
 	@Column(name="assigned_role_id",columnDefinition = "TEXT")
-	private String assignedRoleId;
+	private Integer assignedRoleId;
 	
 	@Column(name = "location_id")
 	private Integer locationId;

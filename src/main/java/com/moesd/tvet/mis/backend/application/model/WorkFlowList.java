@@ -36,7 +36,7 @@ public class WorkFlowList {
 	private Integer serviceId;
 	
 	@Column(name="actor_id")
-	private Integer actorId;
+	private String actorId;
 	
 	@Column(name="action_date")
     private Date actionDate;
@@ -47,9 +47,9 @@ public class WorkFlowList {
     @Column(name="role_id")
     private Integer roleId;
     
-    @Column(name = "update_by")
-    private Integer updateBy;
+    @Column(name = "updated_by")
+    private Integer updatedBy;
     
-    @Column(name = "update_on")
-    private Date updateOn;
+    @Column(name = "updated_at")
+    private Date updatedAt;
 }

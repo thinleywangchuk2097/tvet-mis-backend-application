@@ -66,6 +66,8 @@ public class User implements UserDetails {
 	
 	private Integer currentRole;
 	
+	private String doB;
+	
 	private Integer createdBy;
 	
 	private Date createdAt;
@@ -77,7 +79,7 @@ public class User implements UserDetails {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 	private List<Token> tokens;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	private List<UserRole> userRoles;
 
 	@Override

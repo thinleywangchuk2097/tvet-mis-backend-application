@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,188 +22,158 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class DropdownManagementServiceImpl implements DropdownManagementService{
-	
+public class DropdownManagementServiceImpl implements DropdownManagementService {
+
 	private final DropdownManagementRepository dropdownManagementRepository;
 
-    @Override
-    public ResponseEntity<?> createDropdown(DropdownManagementdto request) {
-        try {
-            // 1. Create parent drop down
-            DropdownParent parent = DropdownParent.builder()
-                .dropdownName(request.getDropdownName())
-                .description(request.getDescription())
-                .createdAt(LocalDateTime.now())
-                .createdBy(request.getCreatedBy()) // Assuming this comes from DTO or security context
-                .statusId("1") // Default status
-                .build();
+	@Override
+	public ResponseEntity<?> createDropdown(DropdownManagementdto request) {
+		try {
+			// 1. Create parent drop down
+			DropdownParent parent = DropdownParent.builder().dropdownName(request.getDropdownName())
+					.description(request.getDescription()).createdAt(LocalDateTime.now())
+					.createdBy(request.getCreatedBy()).statusId("1") // Default status
+					.build();
 
-            // 2. Process children if they exist
-            if (request.getDropdownChild() != null && !request.getDropdownChild().isEmpty()) {
-                List<DropdownChild> children = request.getDropdownChild().stream()
-                    .map(childDto -> DropdownChild.builder()
-                        .name(childDto.getDesignation())
-                        .parent(parent) // Set the parent reference
-                        .build())
-                    .collect(Collectors.toList());
-                
-                parent.setDropdownChild(children);
-            }
+			// 2. Process children if they exist
+			if (request.getDropdownChild() != null && !request.getDropdownChild().isEmpty()) {
+				List<DropdownChild> children = request.getDropdownChild().stream()
+						.map(childDto -> DropdownChild.builder().name(childDto.getDesignation()).parent(parent) // Set
+																												// the
+																												// parent
+																												// reference
+								.build())
+						.collect(Collectors.toList());
 
-            // 3. Save the parent (cascade will save children automatically)
-            DropdownParent savedParent = dropdownManagementRepository.save(parent);
+				parent.setDropdownChild(children);
+			}
 
-            // 4. Return response
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedParent);
+			// 3. Save the parent (cascade will save children automatically)
+			DropdownParent savedParent = dropdownManagementRepository.save(parent);
 
-        } catch (Exception e) {
-      
-        	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        		    .body(Map.of(
-        		        "message", "Failed to create dropdown",
-        		        "error", e.getMessage(),
-        		        "timestamp", LocalDateTime.now()
-        		    ));
-        }
-    }
-    
-    @Transactional
-    @Override
-    public ResponseEntity<?> updateDropdown(DropdownManagementdto request) {
-        try {
-            // 1. Find existing parent or return 404
-            DropdownParent existingParent = dropdownManagementRepository.findById(request.getId())
-                .orElseThrow(() -> new RuntimeException("Dropdown not found"));
+			// 4. Return response
+			return ResponseEntity.status(HttpStatus.CREATED).body(savedParent);
 
-            // 2. Update parent fields
-            if (request.getDropdownName() != null) {
-                existingParent.setDropdownName(request.getDropdownName());
-            }
-            if (request.getDescription() != null) {
-                existingParent.setDescription(request.getDescription());
-            }
-            
-            existingParent.setUpdatedAt(LocalDateTime.now());
-           // existingParent.setUpdatedBy(request.getUpdatedBy());
+		} catch (Exception e) {
 
-            // 3. Process child updates if provided
-            if (request.getDropdownChild() != null) {
-                // Clear existing children (will be replaced)
-                existingParent.getDropdownChild().clear();
-                
-                // Add all new children from DTO
-                for (DropdownChilddto childDto : request.getDropdownChild()) {
-                    DropdownChild child = new DropdownChild();
-                    child.setName(childDto.getDesignation());
-                    child.setParent(existingParent);
-                    existingParent.getDropdownChild().add(child);
-                }
-            }
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
+					"Failed to create dropdown", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+		}
+	}
 
-            // 4. Save the updated parent (cascade will handle children)
-            DropdownParent updatedParent = dropdownManagementRepository.save(existingParent);
+	@Transactional
+	@Override
+	public ResponseEntity<?> updateDropdown(DropdownManagementdto request) {
+	    DropdownParent parent = dropdownManagementRepository.findById(request.getId())
+	            .orElseThrow(() -> new RuntimeException("Dropdown not found"));
 
-            // 5. Return success response
-            return ResponseEntity.ok(updatedParent);
+	    // Update parent fields
+	    parent.setDropdownName(request.getDropdownName());
+	    parent.setDescription(request.getDescription());
+	    parent.setUpdatedAt(LocalDateTime.now());
 
-        } catch (RuntimeException e) {
-            // Handle not found and other runtime exceptions
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of(
-                    "error", e.getMessage(),
-                    "timestamp", LocalDateTime.now()
-                ));
-        } catch (Exception e) {
-            // Handle other exceptions
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                    "error", "Failed to update dropdown",
-                    "details", e.getMessage(),
-                    "timestamp", LocalDateTime.now()
-                ));
-        }
-    }
-    
-    @Transactional
-    @Override
-    public ResponseEntity<?> deleteDropdown(Integer parentId) {
-        try {
-            // 1. Delete children first using direct JPQL (bypasses persistence context issues)
-            int childrenDeleted = dropdownManagementRepository.deleteChildrenByParentId(parentId);
-            
-            // 2. Delete parent using direct JPQL
-            int parentDeleted = dropdownManagementRepository.deleteParentById(parentId);
-            
-            if (parentDeleted == 0) {
-                throw new RuntimeException("Parent dropdown not found with ID: " + parentId);
-            }
-            
-            // 3. Return response
-            return ResponseEntity.ok(Map.of(
-                "status", "success",
-                "parentDeleted", parentId,
-                "childrenDeletedCount", childrenDeleted,
-                "timestamp", LocalDateTime.now()
-            ));
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                    "status", "error",
-                    "message", "Deletion failed",
-                    "details", e.getMessage()
-                ));
-        }
-    }
+	    List<DropdownChild> existingChildren = parent.getDropdownChild();
+	    Map<Integer, DropdownChild> existingMap = existingChildren.stream()
+	            .collect(Collectors.toMap(DropdownChild::getId, c -> c));
 
-    @Override
-    public ResponseEntity<?> getAllDropdownLists() {
-        try {
-            // 1. Fetch all parent drop downs with children
-            List<DropdownParent> parents = dropdownManagementRepository.findAllWithChildren();
-            
-            // 2. Convert to DTOs
-            List<DropdownResponse> response = parents.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-            
-            // 3. Return successful response
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                    "status", "error",
-                    "message", "Failed to fetch dropdown lists",
-                    "error", e.getMessage(),
-                    "timestamp", LocalDateTime.now()
-                ));
-        }
-    }
+	    List<DropdownChild> updatedChildren = new ArrayList<>();
 
-    private DropdownResponse convertToDto(DropdownParent parent) {
-        return DropdownResponse.builder()
-            .id(parent.getId())
-            .dropdownName(parent.getDropdownName())
-            .description(parent.getDescription())
-            .statusId(parent.getStatusId())
-            .createdAt(parent.getCreatedAt())
-            .updatedAt(parent.getUpdatedAt())
-            .dropdownChild(convertChildrenToDto(parent.getDropdownChild()))
-            .build();
-    }
+	    for (DropdownChilddto dto : request.getDropdownChild()) {
+	        if (dto.getId() != null && existingMap.containsKey(dto.getId())) {
+	            // 1️Update existing child
+	            DropdownChild child = existingMap.get(dto.getId());
+	            child.setName(dto.getDesignation());
+	            updatedChildren.add(child);
+	        } else {
+	            // 2️ New child
+	            DropdownChild newChild = new DropdownChild();
+	            newChild.setName(dto.getDesignation());
+	            newChild.setParent(parent);
+	            updatedChildren.add(newChild);
+	        }
+	    }
 
-    private List<DropdownChildResponse> convertChildrenToDto(List<DropdownChild> children) {
-        if (children == null || children.isEmpty()) {
-            return Collections.emptyList();
-        }
-        
-        return children.stream()
-            .map(child -> DropdownChildResponse.builder()
-                .id(child.getId())
-                .designation(child.getName())
-                .build())
-            .collect(Collectors.toList());
-    }
+	    // 3️ If a child exists in DB but is not sent in the update request → delete it
+	    existingChildren.removeIf(c -> updatedChildren.stream()
+	            .noneMatch(u -> c.getId() != null && c.getId().equals(u.getId())));
+
+	    // Add new children (with null IDs)
+	    existingChildren.addAll(updatedChildren.stream()
+	            .filter(c -> c.getId() == null)
+	            .toList());
+
+	    // Save parent with updated children
+	    DropdownParent saved = dropdownManagementRepository.save(parent);
+
+	    return ResponseEntity.ok(saved);
+	}
+
+	@Transactional
+	@Override
+	public ResponseEntity<?> deleteDropdown(Integer parentId) {
+		try {
+			// 1. Delete children first using direct JPQL (bypasses persistence context
+			// issues)
+			int childrenDeleted = dropdownManagementRepository.deleteChildrenByParentId(parentId);
+
+			// 2. Delete parent using direct JPQL
+			int parentDeleted = dropdownManagementRepository.deleteParentById(parentId);
+
+			if (parentDeleted == 0) {
+				throw new RuntimeException("Parent dropdown not found with ID: " + parentId);
+			}
+
+			// 3. Return response
+			return ResponseEntity.ok(Map.of("status", "success", "parentDeleted", parentId, "childrenDeletedCount",
+					childrenDeleted, "timestamp", LocalDateTime.now()));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("status", "error", "message", "Deletion failed", "details", e.getMessage()));
+		}
+	}
+
+	@Override
+	public ResponseEntity<?> getAllDropdownLists() {
+		try {
+			// 1. Fetch all parent drop downs with children
+			List<DropdownParent> parents = dropdownManagementRepository.findAllWithChildren();
+
+			// 2. Convert to DTOs
+			List<DropdownResponse> response = parents.stream().map(this::convertToDto).collect(Collectors.toList());
+
+			// 3. Return successful response
+			return ResponseEntity.ok(response);
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("status", "error", "message",
+					"Failed to fetch dropdown lists", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+		}
+	}
+
+	private DropdownResponse convertToDto(DropdownParent parent) {
+		return DropdownResponse.builder().id(parent.getId()).dropdownName(parent.getDropdownName())
+				.description(parent.getDescription()).statusId(parent.getStatusId()).createdAt(parent.getCreatedAt())
+				.updatedAt(parent.getUpdatedAt()).dropdownChild(convertChildrenToDto(parent.getDropdownChild()))
+				.build();
+	}
+
+	private List<DropdownChildResponse> convertChildrenToDto(List<DropdownChild> children) {
+		if (children == null || children.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		return children.stream()
+				.map(child -> DropdownChildResponse.builder().id(child.getId()).designation(child.getName()).build())
+				.collect(Collectors.toList());
+	}
+
+	// @Override
+	// public List<DropdownChild> getByParentId(String parentId) {
+
+	// List<DropdownChild> children =
+	// dropdownManagementRepository.findChildByParentId(parentId);
+	// return children;
+	// }
 
 }

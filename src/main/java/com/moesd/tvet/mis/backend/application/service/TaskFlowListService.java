@@ -6,9 +6,11 @@ import com.moesd.tvet.mis.backend.application.dto.TaskFlowListdto;
 
 public interface TaskFlowListService {
 	
-	List<ObjectNode> getGroupTaskListDtl(Integer taskStatusId, Integer currentRoleId,String locationId);
+	List<ObjectNode> getGroupTaskListDtl(Integer taskStatusId, Integer currentRoleId, String locationId);
 	
 	List<ObjectNode> getMyTaskListDtl(String userId, String current_roleId);
+	
+	List<ObjectNode> getApplicationStatusDtl(String application_no, String applicant_name, String application_date);
 	
 	ObjectNode claimTask(TaskFlowListdto request);
 	

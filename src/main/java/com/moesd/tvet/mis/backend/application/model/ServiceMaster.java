@@ -25,12 +25,23 @@ public class ServiceMaster {
 	@Column(name = "service_name")
 	private String serviceName;
 	
+	@Column(name = "department_id")
+	private String departmentId;
+	
+	private String validityDate;
+	
 	@Column(name = "route",columnDefinition = "TEXT")
 	private String route;
 	
 	@Column(name = "last_application_no",columnDefinition = "INT(7) UNSIGNED ZEROFILL")
 	private Integer  lastApplicationNo; 
-
+	
+	@Column(name = "license_last_sequence",columnDefinition = "INT(4) UNSIGNED ZEROFILL")
+	private Integer  licenseLastSequence; 
+	
+	@Column(name = "has_certificate",columnDefinition = "CHAR(1) DEFAULT 'N'")
+    private char hasCertificate='Y'; 
+	
     @Column(name = "is_active",columnDefinition = "CHAR(1) DEFAULT 'Y'")
     private char isActive='Y'; 
 }

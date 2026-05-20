@@ -38,8 +38,11 @@ public class Privilege {
     private boolean  isDisplay;
     
     @Column(nullable = false)
-    private String icon;
-
+    private String menuIcon;
+    
+    @Column(columnDefinition = "TEXT")
+	private String description;
+    
     private Long parentId;
 
     @OneToMany(mappedBy = "privilege", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -20,9 +20,9 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtUtilService {
 	private static final String secretKey = "6D5A7134743777217A25432A462D4A614E645267556B586E3272357538702F31";
-	//private static final long jwtExpiration = 3600000; // 1 hour (3600000 milliseconds)
+	private static final long jwtExpiration = 3600000; // 1 hour (3600000 milliseconds)
 	//private static final long jwtExpiration = 30000; // 30 seconds (30000 milliseconds)
-	private static final long jwtExpiration = 1800000; // 30 minutes (1,800,000 milliseconds(30 * 60 * 1000))
+	//private static final long jwtExpiration = 1800000; // 30 minutes (1,800,000 milliseconds(30 * 60 * 1000))
 	private static final long refreshExpiration = 7200000; // 2 hours
 
 	public String extractUsername(String token) {

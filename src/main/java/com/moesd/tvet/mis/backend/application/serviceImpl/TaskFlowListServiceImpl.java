@@ -94,4 +94,12 @@ public class TaskFlowListServiceImpl implements TaskFlowListService{
 	    return response;
 	}
 
+	@Override
+	public List<ObjectNode> getApplicationStatusDtl(String application_no, String applicant_name,
+			String application_date) {
+		List<Tuple> resultList = taskFlowListRepository.getApplicationStatusDtl(application_no, applicant_name,application_date);
+		List<ObjectNode> TaskDtlsJson = objectTojson._toJson(resultList);
+		return TaskDtlsJson;
+	}
+
 }

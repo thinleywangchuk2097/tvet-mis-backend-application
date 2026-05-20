@@ -7,6 +7,7 @@ import com.moesd.tvet.mis.backend.application.model.RoleService;
 
 
 public interface RoleServiceRepository extends JpaRepository<RoleService, Integer>{
-	@Query(value = "SELECT a.* FROM tbl_role_service a WHERE FIND_IN_SET(?1,a.current_role_id) AND a.service_id = ?2 AND a.next_status_id = ?3", nativeQuery = true)
+	
+	@Query(value = "SELECT a.* FROM tbl_role_service a WHERE a.assigned_role_id=? AND a.service_id =? AND a.status_id=?", nativeQuery = true)
 	Optional<RoleService> getNextAssignedRole(Integer roleId, Integer serviceId, Integer nextStatusId);
 }

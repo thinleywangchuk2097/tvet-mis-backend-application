@@ -6,14 +6,14 @@ import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
 public interface WorkTaskFlowService {
 	
 	WorkFlowList createWorkflow(String applicationNo, String appName, Integer serviceId, Integer statusId,
-			Integer roleId, Integer actorId, String remarks);
+			Integer roleId, String remarks);
 
-	TaskFlowList createTaskFlow(String applicationNo, Integer taskStatusId, String assignedRoleId,
+	TaskFlowList createTaskFlow(String applicationNo, Integer taskStatusId, Integer assignedRoleId, String assignedUserId,
 			WorkFlowList workflow, String remarks, Integer locationId);
 
-	WorkFlowList updateWorkflow(String applicationNo, Integer statusId, Integer roleId, Integer actorId,
+	WorkFlowList updateWorkflow(String applicationNo, Integer statusId, Integer roleId, String actorId,
 			String remarks, Integer serviceId, Integer updatedBy);
 
-	TaskFlowList updateTaskFlow(String applicationNo, Integer taskStatusId, String assignedRoleId,String assignedUserId, String remarks);
+	TaskFlowList updateTaskFlow(String applicationNo, Integer taskStatusId, Integer assignedRoleId, String assignedUserId, String remarks);
 
 }
