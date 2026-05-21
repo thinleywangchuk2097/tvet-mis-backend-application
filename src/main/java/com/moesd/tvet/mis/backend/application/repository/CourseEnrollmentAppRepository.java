@@ -40,7 +40,8 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    ON a.course_id = nc.id "
 			+ "  LEFT JOIN tbl_occupation_master d "
 			+ "    ON d.id = a.course_id "
-			+ "WHERE a.service_id IN(37, 38, 39)", nativeQuery = true)
+			+ "WHERE a.service_id IN (37, 38, 39) "
+			+ "AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
 	List<Tuple> getAllCourseAnnouncement();
 	
 	@Query(value =  "SELECT "
