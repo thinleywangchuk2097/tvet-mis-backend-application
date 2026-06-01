@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
-@RequestMapping("/api/v1/public/auth/gyalsung")
+@RequestMapping("/api/v1/public/gyalsung")
 public class GyalsungApiController {
 
     @Value("${gyalsung-token-api}")

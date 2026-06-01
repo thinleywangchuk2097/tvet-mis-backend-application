@@ -22,8 +22,7 @@ public class UserServiceImpl implements UserDetailsService{
 		 return userRepository.findByUsername(username, 1)
 	                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 	}
-	
-	
+    
 	public ChangePasswordResponse changeUserPassword(String username, String currentPassword, String newPassword) {
         User user = userRepository.findByUsername(username, 1)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

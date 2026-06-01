@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.dao.DataIntegrityViolationException;
+//import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,7 +34,10 @@ import com.moesd.tvet.mis.backend.application.repository.UserRepository;
 import com.moesd.tvet.mis.backend.application.repository.UserRoleRepository;
 import com.moesd.tvet.mis.backend.application.service.UserRoleManagementService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
+
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +55,9 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
     private final UserRoleRepository userRoleRepository;
     private final JwtUtilService jwtUtilService;
     private final TokenRepository tokenRepository;
+    
+    @PersistenceContext
+	private EntityManager entityManager;
     
     @Override
     @Transactional
@@ -231,6 +237,7 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<?> createUser(UserRegisterRequest request) {
 		try {
 			// Check if user ID already exists
@@ -376,56 +383,84 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
 	                "message", "An unexpected error occurred. Please try again later."));
 	    }
 	}
-
-	@Override
+	
 	@Transactional
+	@Override
+	
 	public ResponseEntity<?> deleteUser(UserRegisterRequest request) {
-	    try {
-	        // 1. Find the user to delete
-	        User userToDelete = userRepository.findByUserId(request.getUserId())
-	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
-	                "User not found with ID: " + request.getUserId()));
+		
+		
+	    User userToDelete = userRepository.findByUserId(request.getUserId())
+	        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-	        // 2. First delete all dependent records (tokens and user roles)
-	        
-	        // Delete all tokens associated with the user (using user's primary ID)
-	        tokenRepository.deleteByUser_Id(userToDelete.getId());
-	        
-	        // Delete all roles associated with the user
-	        List<UserRole> userRoles = userRoleRepository.findByUserId(userToDelete.getId());
-	        if (!userRoles.isEmpty()) {
-	            userRoleRepository.deleteAll(userRoles);
-	        }
+	    Long userId = userToDelete.getId();
 
-	        // 3. Now delete the user
-	        userRepository.delete(userToDelete);
+	    // 1. delete children FIRST (direct query, no entity loading)
+	    tokenRepository.deleteByUser_Id(userId);
+	    userRoleRepository.deleteByUserId(userId);
 
-	        // 4. Return success response
-	        return ResponseEntity.ok(Map.of(
-	            "status", HttpStatus.OK.value(),
-	            "message", "User deleted successfully",
-	            "deleted_user_id", request.getUserId()));
+	    // 2. clear persistence context (prevents stale tracking issues)
+	    entityManager.flush();
+	    entityManager.clear();
 
-	    } catch (ResponseStatusException e) {
-	        return ResponseEntity.status(e.getStatusCode()).body(
-	            Map.of(
-	                "status", e.getStatusCode().value(),
-	                "error", e.getReason(),
-	                "message", e.getReason()));
-	    } catch (DataIntegrityViolationException e) {
-	        return ResponseEntity.status(HttpStatus.CONFLICT).body(
-	            Map.of(
-	                "status", HttpStatus.CONFLICT.value(),
-	                "error", "Data Integrity Violation",
-	                "message", "Cannot delete user due to existing references"));
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body(Map.of(
-	                "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-	                "error", "Internal Server Error",
-	                "message", "Failed to delete user. Please try again later."));
-	    }
+	    // 3. delete parent
+	    userRepository.deleteById(userId);
+
+	    return ResponseEntity.ok(Map.of(
+	        "status", HttpStatus.OK.value(),
+	        "message", "User deleted successfully"
+	    ));
 	}
+//	@Override
+//	@Transactional
+//	public ResponseEntity<?> deleteUser(UserRegisterRequest request) {
+//	    try {
+//	        // 1. Find the user to delete
+//	        User userToDelete = userRepository.findByUserId(request.getUserId())
+//	            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
+//	                "User not found with ID: " + request.getUserId()));
+//
+//	        // 2. First delete all dependent records (tokens and user roles)
+//	        
+//	        // Delete all tokens associated with the user (using user's primary ID)
+//	        tokenRepository.deleteByUser_Id(userToDelete.getId());
+//	        
+//	        // Delete all roles associated with the user
+//	        List<UserRole> userRoles = userRoleRepository.findByUserId(userToDelete.getId());
+//	        if (!userRoles.isEmpty()) {
+//	            userRoleRepository.deleteAll(userRoles);
+//	        	
+//	        }
+//
+//	        // 3. Now delete the user
+//	        userRepository.delete(userToDelete);
+//
+//	        // 4. Return success response
+//	        return ResponseEntity.ok(Map.of(
+//	            "status", HttpStatus.OK.value(),
+//	            "message", "User deleted successfully",
+//	            "deleted_user_id", request.getUserId()));
+//
+//	    } catch (ResponseStatusException e) {
+//	        return ResponseEntity.status(e.getStatusCode()).body(
+//	            Map.of(
+//	                "status", e.getStatusCode().value(),
+//	                "error", e.getReason(),
+//	                "message", e.getReason()));
+//	    } catch (DataIntegrityViolationException e) {
+//	        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+//	            Map.of(
+//	                "status", HttpStatus.CONFLICT.value(),
+//	                "error", "Data Integrity Violation",
+//	                "message", "Cannot delete user due to existing references"));
+//	    } catch (Exception e) {
+//	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//	            .body(Map.of(
+//	                "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
+//	                "error", "Internal Server Error",
+//	                "message", "Failed to delete user. Please try again later."));
+//	    }
+//	}
 
 	@Override
 	public List<ObjectNode> getAllUsers() {
