@@ -219,9 +219,15 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 					// Create a Set for roles
 					Set<Integer> roles = new HashSet<>();
 					roles.add(11);// training provider roleId
+					roles.add(22);
+					roles.add(22);
+					roles.add(23);
+					roles.add(9);
+					roles.add(7);
 					// Register a new user if not found
 					UserRegisterRequest registerRequest = UserRegisterRequest.builder().userId(idNumber)
 							.firstName(firstName).middleName(middleName).lastName(lastName)
+							.password("password").locationId("14")
 							.statusId("1").role(roles).doB(dateOfBirth).CurrentRole(11)
 							.build();
 					return (authenticationService.register(registerRequest));

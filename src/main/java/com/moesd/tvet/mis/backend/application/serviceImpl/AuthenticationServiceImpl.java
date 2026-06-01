@@ -94,7 +94,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			var jwtToken = jwtUtilService.generateToken(savedUser);
 			var refreshToken = jwtUtilService.generateRefreshToken(savedUser);
 			saveUserToken(savedUser, jwtToken);
-
 //			return ResponseEntity.status(HttpStatus.CREATED)
 //					.body(Map.of("status", HttpStatus.CREATED.value(), "message", "User registration successful",
 //							"user_id", savedUser.getUserId(), "access_token", jwtToken, "refresh_token", refreshToken));
@@ -102,6 +101,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken, "current_role",
 					user.getCurrentRole(), "userId", user.getUserId(), "id", user.getId(), "locationId",
 					user.getLocationId()));
+			
+			
 			
 		} catch (ResponseStatusException e) {
 			return ResponseEntity.status(e.getStatusCode()).body(
