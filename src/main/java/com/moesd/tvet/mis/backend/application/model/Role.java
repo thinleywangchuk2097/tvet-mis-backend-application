@@ -45,10 +45,10 @@ public class Role {
 
 	private LocalDateTime  updatedAt;
 
-	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private List<UserRole> userRoles;
 
-	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<RolePrivilege> privileges;
 	
 	 // Add this method to properly handle privilege assignment
