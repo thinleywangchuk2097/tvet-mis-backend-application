@@ -20,8 +20,9 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  AND a.service_id = ?", nativeQuery = true)
 	List<Tuple> getCourseDetailsAnnouncementByUserId(String user_id, String service_id);
 	
-	@Query(value =  "SELECT "
+	@Query(value = "SELECT "
 			+ "  a.*, "
+			+ "  e.proposed_institute_name AS institute_name, "
 			+ "  CASE "
 			+ "    WHEN a.service_id = 37 "
 			+ "    THEN c.occupation_name "
@@ -40,8 +41,10 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    ON a.course_id = nc.id "
 			+ "  LEFT JOIN tbl_occupation_master d "
 			+ "    ON d.id = a.course_id "
+			+ "  LEFT JOIN tbl_institute_registration_dtls e "
+			+ "    ON e.institute_id = a.institute_id "
 			+ "WHERE a.service_id IN (37, 38, 39) "
-			+ "AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
+			+ "  AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
 	List<Tuple> getAllCourseAnnouncement();
 	
 	@Query(value =  "SELECT "
