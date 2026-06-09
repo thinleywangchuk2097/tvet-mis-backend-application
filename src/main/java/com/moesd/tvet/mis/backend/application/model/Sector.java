@@ -1,9 +1,8 @@
 package com.moesd.tvet.mis.backend.application.model;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,15 +12,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+
+@Data
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Builder
 @Table(name = "tbl_sector_master")
 public class Sector {
 	@Id
@@ -31,10 +31,11 @@ public class Sector {
 	@Column(name = "sector_name")
 	private String sectorName;
 
-	@Column(name = "is_active", columnDefinition = "CHAR(1) DEFAULT 'Y'")
-	private char isActive = 'Y';
+	@Column(name = "is_active")
+	private char isActive;
 
 	@JsonManagedReference
-	@OneToMany(mappedBy = "sector", cascade = CascadeType.ALL)
-	private List<Occupation> child;
+	@OneToMany(mappedBy = "sector", cascade = CascadeType.ALL, orphanRemoval = true)  // Add orphanRemoval = true
+	@Builder.Default 
+	private List<Occupation> child = new ArrayList<>();  // Initialize to avoid null
 }
