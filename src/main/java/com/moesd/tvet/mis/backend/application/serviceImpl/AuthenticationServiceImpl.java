@@ -37,7 +37,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl implements AuthenticationService{
+public class AuthenticationServiceImpl implements AuthenticationService {
 
 	private final RoleRepository roleRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -53,25 +53,24 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 		try {
 			// Check if user ID already exists
 			if (userRepository.findByUserId(request.getUserId()).isPresent()) {
-				return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
-						"status", HttpStatus.CONFLICT.value(),
-						"error", "Conflict", 
-						"message", "User ID " + request.getUserId() + " already exists"));
+				return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
+						"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
 			}
 			// Create new User
 			User user = new User();
-			
+
 			// Assign Roles
 			List<UserRole> userRoles = new ArrayList<>();
 			for (Integer roleId : request.getRole()) {
 				Role role = roleRepository.findById(roleId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-					"Role with ID " + roleId + " does not exist"));
-				    UserRole userRole = new UserRole();
-					userRole.setUser(user);
-					userRole.setRole(role);
-					userRoles.add(userRole);
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+								"Role with ID " + roleId + " does not exist"));
+				UserRole userRole = new UserRole();
+				userRole.setUser(user);
+				userRole.setRole(role);
+				userRoles.add(userRole);
 			}
+			
 			user.setUserId(request.getUserId());
 			user.setPassword(passwordEncoder.encode(request.getPassword()));
 			user.setFirstName(request.getFirstName());
@@ -86,35 +85,31 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 			user.setCreatedAt(new Date());
 			user.setCreatedBy(request.getCreatedBy());
 			user = userRepository.save(user);
-			
+
 			userRoleRepository.saveAll(userRoles);
 			user.setUserRoles(userRoles);
 			var savedUser = userRepository.save(user);
-			
-			//Generate JWT Tokens
+
+			// Generate JWT Tokens
 			var jwtToken = jwtUtilService.generateToken(savedUser);
 			var refreshToken = jwtUtilService.generateRefreshToken(savedUser);
 			saveUserToken(savedUser, jwtToken);
+//			return ResponseEntity.status(HttpStatus.CREATED)
+//					.body(Map.of("status", HttpStatus.CREATED.value(), "message", "User registration successful",
+//							"user_id", savedUser.getUserId(), "access_token", jwtToken, "refresh_token", refreshToken));
 			
-			return ResponseEntity.status(HttpStatus.CREATED)
-					.body(Map.of(
-							"status", HttpStatus.CREATED.value(), 
-							"message", "User registration successful",
-							"user_id", savedUser.getUserId(),
-							"access_token", jwtToken,
-							"refresh_token", refreshToken));
-
+			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken, "current_role",
+					user.getCurrentRole(), "userId", user.getUserId(), "id", user.getId(), "locationId",
+					user.getLocationId()));
+			
+			
+			
 		} catch (ResponseStatusException e) {
 			return ResponseEntity.status(e.getStatusCode()).body(
-					Map.of(
-							"status", e.getStatusCode().value(),
-							"error", e.getReason(),
-							"message", e.getReason()));
+					Map.of("status", e.getStatusCode().value(), "error", e.getReason(), "message", e.getReason()));
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of(
-							"status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-							"error", "Internal Server Error",
+					.body(Map.of("status", HttpStatus.INTERNAL_SERVER_ERROR.value(), "error", "Internal Server Error",
 							"message", "An unexpected error occurred. Please try again later."));
 		}
 	}
@@ -134,20 +129,17 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 			revokeAllUserTokens(user);
 			saveUserToken(user, jwtToken);
 
-			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken,"current_role", user.getCurrentRole(),"userId", user.getUserId(),"id", user.getId(),"locationId", user.getLocationId()));
+			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken, "current_role",
+					user.getCurrentRole(), "userId", user.getUserId(), "id", user.getId(), "locationId",
+					user.getLocationId()));
 
 		} catch (BadCredentialsException e) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-					.body(Map.of(
-							"status", HttpStatus.UNAUTHORIZED.value(), 
-							"error", "Unauthorized",
-							"message","Invalid credentials. Please check your userId and password."));
-							
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("status", HttpStatus.UNAUTHORIZED.value(),
+					"error", "Unauthorized", "message", "Invalid credentials. Please check your userId and password."));
+
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of(
-							"status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-							"error", "Internal Server Error",
+					.body(Map.of("status", HttpStatus.INTERNAL_SERVER_ERROR.value(), "error", "Internal Server Error",
 							"message", "An unexpected error occurred during authentication. Please try again later."));
 		}
 	}
@@ -202,4 +194,27 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 		}
 	}
 
+	@Override
+	public ResponseEntity<?> authByBhutanNDI(AuthenticationRequest request) {
+		try {
+			var user = userRepository.findByUsername(request.getUsername(), 1)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+			var jwtToken = jwtUtilService.generateToken(user);
+			var refreshToken = jwtUtilService.generateRefreshToken(user);
+
+			revokeAllUserTokens(user);
+			saveUserToken(user, jwtToken);
+
+			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken, "current_role",
+					user.getCurrentRole(), "userId", user.getUserId(), "id", user.getId(), "locationId",
+					user.getLocationId()));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("status", HttpStatus.INTERNAL_SERVER_ERROR.value(), "error", "Internal Server Error",
+							"message", "An unexpected error occurred. Please try again later."));
+		}
+	}
+
+	
 }

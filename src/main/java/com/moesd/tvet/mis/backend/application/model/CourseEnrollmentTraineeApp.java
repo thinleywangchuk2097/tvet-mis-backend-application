@@ -34,8 +34,6 @@ public class CourseEnrollmentTraineeApp {
 	
 	private String certificateNo;
 	
-	private Integer courseTypeId;
-	
 	private Integer resultStatusId;
 	
 	private String applicantName;
@@ -65,6 +63,8 @@ public class CourseEnrollmentTraineeApp {
 	private String vivaAssessment;
 	
 	private Integer statusId;
+
+	private Integer reAssessmentNo;
 	
 	private Integer employmentStatusId;
 	

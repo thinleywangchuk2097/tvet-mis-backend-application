@@ -13,7 +13,7 @@ public interface CourseEnrollmentAppService {
 	
 	List<ObjectNode> getCourseDetailsAnnouncementByUserId(String user_id, String service_id);
 	
-	
+	List<ObjectNode> getReAssessmentServiceName();
 	
 	
 	

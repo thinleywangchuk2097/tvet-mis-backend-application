@@ -77,7 +77,7 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 					.instituteId(request.getInstituteId()).courseTitle(request.getCourseTitle())
 					.theoryHour(request.getTheoryHour()).practicalHour(request.getPracticalHour())
 					.ojtHour(request.getOjtHour()).feesPerTrainee(request.getFeesPerTrainee())
-					.enrolmentCapacity(request.getEnrolmentCapacity())
+					.enrolmentCapacity(request.getEnrolmentCapacity()).serviceId(serviceId)
 					.certificateLevelId(request.getCertificateLevelId()).curriculumId(request.getCurriculumId())
 					.statusId(request.getStatusId()).registrationDate(new Date()).createdBy(request.getCreatedBy())
 					.createdAt(LocalDateTime.now()).build();

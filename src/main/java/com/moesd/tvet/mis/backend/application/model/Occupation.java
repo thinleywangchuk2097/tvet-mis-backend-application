@@ -1,7 +1,6 @@
 package com.moesd.tvet.mis.backend.application.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,15 +10,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+
+@Data
+@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Builder
 @Table(name = "tbl_occupation_master")
 public class Occupation {
 	@Id
@@ -32,8 +32,8 @@ public class Occupation {
 	@Column(name = "isco_code")
 	private String iscoCode;
 
-	@Column(name = "is_active", columnDefinition = "CHAR(1) DEFAULT 'Y'")
-	private char isActive = 'Y';
+	@Column(name = "is_active")
+	private char isActive;
 
 	@JsonBackReference
 	@ManyToOne

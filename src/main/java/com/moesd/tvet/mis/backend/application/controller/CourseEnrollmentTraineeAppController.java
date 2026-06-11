@@ -29,33 +29,46 @@ public class CourseEnrollmentTraineeAppController {
 	}
 
 	@GetMapping("/get-applicant-details/{application_no}")
-	public ResponseEntity<List<ObjectNode>> getCourseAppliedTraineesByApplicationNo(@PathVariable String application_no) {
-		List<ObjectNode> Details = courseEnrollmentTraineeAppService.getCourseAppliedTraineesByApplicationNo(application_no);
+	public ResponseEntity<List<ObjectNode>> getCourseAppliedTraineesByApplicationNo(
+			@PathVariable String application_no) {
+		List<ObjectNode> Details = courseEnrollmentTraineeAppService
+				.getCourseAppliedTraineesByApplicationNo(application_no);
 		return ResponseEntity.ok(Details);
 	}
 	
+	@GetMapping("/get-reassessment-applicant-details/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getCourseAppliedTraineesReAssessmentByApplicationNo(
+			@PathVariable String application_no) {
+		List<ObjectNode> Details = courseEnrollmentTraineeAppService
+				.getCourseAppliedTraineesReAssessmentByApplicationNo(application_no);
+		return ResponseEntity.ok(Details);
+	}
+
 	@PostMapping("/selected-trainees")
 	public ResponseEntity<?> selectedTrainee(@RequestBody SelectedTraineedto request) {
 		return (courseEnrollmentTraineeAppService.selectedTrainee(request));
 	}
 	
-	
+	@PostMapping("/selected-reassessment-trainees")
+	public ResponseEntity<?> submitReassessmentTrainees(@RequestBody SelectedTraineedto request) {
+		return (courseEnrollmentTraineeAppService.submitReassessmentTrainees(request));
+	}
+
 	@PostMapping("/update-trainees-application")
 	public ResponseEntity<?> updateTraineeApplication(@RequestBody SelectedTraineedto request) {
 		return (courseEnrollmentTraineeAppService.updateTraineeApplication(request));
 	}
-	
-	@GetMapping("/get-trainee-details/{user_id}")
-	public ResponseEntity<List<ObjectNode>> getFailedTraineeDetails(@PathVariable String user_id) {
-		List<ObjectNode> Details = courseEnrollmentTraineeAppService.getFailedTraineeDetails(user_id);
+
+	@GetMapping("/get-trainee-details/{user_id}/{course_id}")
+	public ResponseEntity<List<ObjectNode>> getFailedTraineeDetails(@PathVariable String user_id,
+			@PathVariable String course_id) {
+		List<ObjectNode> Details = courseEnrollmentTraineeAppService.getFailedTraineeDetails(user_id, course_id);
 		return ResponseEntity.ok(Details);
 	}
-	
+
 	@PostMapping("/select-unselect-trainees")
 	public ResponseEntity<?> selectUnselectTrainee(@RequestBody SelectedTraineedto request) {
 		return (courseEnrollmentTraineeAppService.selectUnselectTrainee(request));
 	}
-	
-	
-	
+
 }

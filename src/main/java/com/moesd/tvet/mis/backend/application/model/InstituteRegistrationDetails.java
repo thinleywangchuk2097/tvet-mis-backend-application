@@ -71,6 +71,8 @@ public class InstituteRegistrationDetails {
 	private String keyContactMobileNo;
 
 	private Integer statusId;
+	
+	private Integer instituteTypeId;
 
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;

@@ -14,11 +14,15 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	List<ObjectNode> getCourseAppliedTraineesByApplicationNo(String application_no);
 	
+	List<ObjectNode> getCourseAppliedTraineesReAssessmentByApplicationNo(String application_no);
+	
 	ResponseEntity<?> selectedTrainee(SelectedTraineedto request);
+	
+	ResponseEntity<?> submitReassessmentTrainees(SelectedTraineedto request);
 	
 	ResponseEntity<?> updateTraineeApplication(SelectedTraineedto request);
 
-	List<ObjectNode> getFailedTraineeDetails(String user_id);
+	List<ObjectNode> getFailedTraineeDetails(String user_id, String course_id);
 	
 	ResponseEntity<?> selectUnselectTrainee(SelectedTraineedto request);
 	

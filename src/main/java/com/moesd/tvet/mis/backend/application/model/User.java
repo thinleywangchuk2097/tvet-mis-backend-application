@@ -14,6 +14,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -79,24 +80,38 @@ public class User implements UserDetails {
 	@OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 	private List<Token> tokens;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<UserRole> userRoles;
-
+	
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private Collection<Role> role;
+	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();
-	    if (userRoles != null) {
-	    	for (UserRole r : userRoles) {
-	    		//authorities.add(new SimpleGrantedAuthority(r.getRole().getRoleName()));
-	    		
-	    		// Use role ID instead of role name
-	    		authorities.add(new SimpleGrantedAuthority(r.getRole().getId().toString()));// Convert Long ID to String
-	    		
+	    if (role != null) {
+	    	for (Role r : role) {
+	    		authorities.add(new SimpleGrantedAuthority(r.getId().toString()));
             }
 	    }
-
 	    return authorities;
 	}
+	
+//	@Override
+//	public Collection<? extends GrantedAuthority> getAuthorities() {
+//		List<GrantedAuthority> authorities = new ArrayList<>();
+//	    if (userRoles != null) {
+//	    	for (UserRole r : userRoles) {
+//	    		//authorities.add(new SimpleGrantedAuthority(r.getRole().getRoleName()));
+//	    		
+//	    		// Use role ID instead of role name
+//	    		authorities.add(new SimpleGrantedAuthority(r.getRole().getId().toString()));// Convert Long ID to String
+//	    		
+//            }
+//	    }
+//
+//	    return authorities;
+//	}
 
 	@Override
 	public String getUsername() {
