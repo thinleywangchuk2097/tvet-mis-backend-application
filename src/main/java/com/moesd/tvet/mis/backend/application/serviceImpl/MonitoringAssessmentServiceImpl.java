@@ -215,7 +215,7 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	        }
 			// Save the updated registration
 	        MonitoringAssessment savedMonitoringAssessment = monitoringAssessmentRepository.save(monitoringAssessment);
-            if(statusId == 57 || statusId == 104 ) {
+            if(statusId == 57) {
             	workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
     					request.getUserId(), request.getRemarks(), serviceId, actorId);
 
