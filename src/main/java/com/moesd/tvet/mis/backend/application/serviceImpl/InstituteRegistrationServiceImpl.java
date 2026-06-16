@@ -2,7 +2,6 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -317,42 +316,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 					return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
 							"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
 				}
-				// Create new User
-//				User user = new User();
-//
-//				// Create a request object with role IDs
-//				List<Integer> RoleIds = Arrays.asList(11); // role IDs
-//
-//				// Assign Roles
-//				List<UserRole> userRoles = new ArrayList<>();
-//				for (Integer roleId : RoleIds) {
-//					Role role = roleRepository.findById(roleId)
-//							.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-//									"Role with ID " + roleId + " does not exist"));
-//					UserRole userRole = new UserRole();
-//					userRole.setUser(user);
-//					userRole.setRole(role);
-//					userRoles.add(userRole);
-//				}
-//				user.setUserId(licenseNo);
-//				user.setPassword(passwordEncoder.encode("password"));
-//				user.setFirstName(request.getInstituteName());
-//				user.setMiddleName("");
-//				user.setLastName("");
-//				user.setGenderId("");
-//				user.setMobileNo(request.getMobileNo());
-//				user.setEmailId(request.getEmailId());
-//				user.setCurrentRole(11);
-//				user.setStatusId("1");
-//				user.setLocationId(request.getDzongkhagId());
-//				user.setCreatedAt(new Date());
-//				user.setCreatedBy(null);
-//				user = userRepository.save(user);
-//
-//				userRoleRepository.saveAll(userRoles);
-//				user.setUserRoles(userRoles);
-//				userRepository.save(user);
-				
+
 				// Create new User
 				User user = new User();
 				// Get roleId from method
@@ -434,6 +398,13 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	@Override
 	public List<ObjectNode> getInstituteDetails(String registration_no) {
 		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteDetails(registration_no);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> getInstituteRenewalDetails(String registration_no) {
+		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteRenewalDetails(registration_no);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

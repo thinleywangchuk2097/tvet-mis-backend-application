@@ -24,7 +24,7 @@ public class UserRegisterRequest {
 	private String profilePath;
 	private String statusId;
 	private String locationId;
-	private Integer CurrentRole;
+	private Integer currentRole;
 	private String doB;
 	private Integer createdBy;
 	private Date createdAt;

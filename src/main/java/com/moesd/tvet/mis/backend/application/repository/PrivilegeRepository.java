@@ -20,10 +20,23 @@ public interface PrivilegeRepository extends JpaRepository<Privilege, Long>{
 			+ "ORDER BY b.dis_play_order ASC", nativeQuery = true)
 	List<Privilegedto> getPrivileges(String roleId);
 	
-	@Query(value = "SELECT a.* FROM tbl_privilege a WHERE a.parent_id='0'", nativeQuery = true)
+	@Query(value = "SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_privilege a "
+			+ "WHERE a.parent_id = 0", nativeQuery = true)
 	List<Privilegedto> getParentPrivileges();
 	
-	@Query(value =  "SELECT a.* FROM tbl_privilege a WHERE a.parent_id=?", nativeQuery = true)
+//	@Query(value =  "SELECT a.* FROM tbl_privilege a WHERE a.parent_id=?", nativeQuery = true)
+//	List<Privilegedto> getChildPrivileges(String roleId);
+	
+	//newly added
+	@Query(value =  "SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_privilege a "
+			+ "WHERE a.parent_id = ? "
+			+ "  AND a.is_display = 1", nativeQuery = true)
 	List<Privilegedto> getChildPrivileges(String roleId);
 	
 	Optional<Privilege> findById(Long id);

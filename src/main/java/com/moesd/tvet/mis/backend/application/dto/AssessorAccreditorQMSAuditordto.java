@@ -15,6 +15,8 @@ public class AssessorAccreditorQMSAuditordto {
 	private Long id;
 	private String applicationNo;
 	private String referenceNo;
+	private String citizenId;
+	private String dateOfBirth;
 	private String fullName;
 	private String genderId;
 	private String genderName;
