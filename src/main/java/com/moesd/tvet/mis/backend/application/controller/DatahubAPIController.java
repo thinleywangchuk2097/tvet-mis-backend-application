@@ -36,7 +36,7 @@ public class DatahubAPIController {
 	String consumerSecret;
 
 	@Value("${datahub.citizen-api}")
-	String CitizenshipUrl;
+	String citizenshipUrl;
 
 	@Autowired
 	private RestTemplate restTemplate;
@@ -54,7 +54,7 @@ public class DatahubAPIController {
 		HttpEntity<String> request = new HttpEntity<>(headers);
 
 		// Step 3: Call citizen API
-		ResponseEntity<Object> response = restTemplate.exchange(CitizenshipUrl + citizenshipNo, HttpMethod.GET, request,
+		ResponseEntity<Object> response = restTemplate.exchange(citizenshipUrl + citizenshipNo, HttpMethod.GET, request,
 				Object.class);
 
 		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);

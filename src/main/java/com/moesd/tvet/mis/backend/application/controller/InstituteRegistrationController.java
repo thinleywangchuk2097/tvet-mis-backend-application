@@ -115,4 +115,10 @@ public class InstituteRegistrationController {
 	public ResponseEntity<?> verifyInstituteRegistration(@RequestBody InstituteRegistrationdto request) {
 		return(instituteRegistrationService.verifyInstituteRegistration(request));
 	}
+	
+	@GetMapping("/get-renewal-details/{registration_no}")
+	public ResponseEntity<List<ObjectNode>> getInstituteRenewalDetails(@PathVariable String registration_no){
+	    List<ObjectNode> instituteDetails = instituteRegistrationService.getInstituteRenewalDetails(registration_no);
+	    return ResponseEntity.ok(instituteDetails);
+	}
 }

@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Privilegedto {
 	private Long id;
-	private String disPlayOrder;
-	private boolean  isDisplay;
+	private Integer disPlayOrder;
+	private Integer  isDisplay;
 	private Long parentId;
 	private String privilegeName;
 	private String routeName;

@@ -23,7 +23,7 @@ public class BirmsPaymentController {
 		return birmsPaymentService.createPaymentAdvice(paymentRequest);
 	}
 
-	@PostMapping("/update-payment-status")
+	@PostMapping("/update-payment")
 	public ResponseEntity<?> updatePaymentStatus(@RequestBody BirmsPaymentRequestdto request) {
 
 		BirmsPayment payment = birmsPaymentService.updatePaymentStatus(request);

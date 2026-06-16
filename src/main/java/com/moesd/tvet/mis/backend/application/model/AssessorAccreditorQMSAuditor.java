@@ -36,6 +36,10 @@ public class AssessorAccreditorQMSAuditor {
     
     @Column(name = "reference_no")
     private String referenceNo;
+    
+    private String citizenId;
+    
+	private String dateOfBirth;
 
     @Column(name = "full_name")
     private String fullName;
