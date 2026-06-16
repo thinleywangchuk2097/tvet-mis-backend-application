@@ -160,11 +160,9 @@ public class UserProfileServiceImpl implements UserProfileService {
 		try {
 			User user = userRepository.findByUserId(userId)
 					.orElseThrow(() -> new EntityNotFoundException("User not found"));
-
 			if (user.getProfilePath() == null) {
 				return ResponseEntity.notFound().build();
 			}
-
 			Path path = Paths.get(user.getProfilePath());
 			byte[] imageBytes = Files.readAllBytes(path);
 

@@ -45,8 +45,8 @@ public class BhutanNDIController {
 		}
 	}
 
-	@PostMapping("/nats-response-submit")
-	public ResponseEntity<?> bhutanNDINatsResponse(@RequestBody JsonNode payload) {
+	@PostMapping("/return-nats-response")
+	public ResponseEntity<?> returnNDINatsResponse(@RequestBody JsonNode payload) {
 		return bhutanNDIService.processNatsResponse(payload);
 	}
 	

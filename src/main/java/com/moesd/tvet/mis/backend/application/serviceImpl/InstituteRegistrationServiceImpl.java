@@ -2,7 +2,6 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -317,23 +316,26 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 					return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
 							"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
 				}
+
 				// Create new User
 				User user = new User();
-
-				// Create a request object with role IDs
-				List<Integer> RoleIds = Arrays.asList(11); // role IDs
-
-				// Assign Roles
-				List<UserRole> userRoles = new ArrayList<>();
-				for (Integer roleId : RoleIds) {
-					Role role = roleRepository.findById(roleId)
-							.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-									"Role with ID " + roleId + " does not exist"));
-					UserRole userRole = new UserRole();
-					userRole.setUser(user);
-					userRole.setRole(role);
-					userRoles.add(userRole);
+				// Get roleId from method
+				final Integer roleId = getRoleIdByServiceId(serviceId);
+				// Validate role mapping
+				if (roleId == null) {
+				    throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
 				}
+				// Fetch the role
+				Role role = roleRepository.findById(roleId)
+				        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+				                "Role with ID " + roleId + " does not exist"));
+				// Assign the single role
+				List<UserRole> userRoles = new ArrayList<>();
+				UserRole userRole = new UserRole();
+				userRole.setUser(user);
+				userRole.setRole(role);
+				userRoles.add(userRole);
+				// Set user properties
 				user.setUserId(licenseNo);
 				user.setPassword(passwordEncoder.encode("password"));
 				user.setFirstName(request.getInstituteName());
@@ -342,13 +344,13 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 				user.setGenderId("");
 				user.setMobileNo(request.getMobileNo());
 				user.setEmailId(request.getEmailId());
-				user.setCurrentRole(11);
+				user.setCurrentRole(roleId);
 				user.setStatusId("1");
 				user.setLocationId(request.getDzongkhagId());
 				user.setCreatedAt(new Date());
 				user.setCreatedBy(null);
 				user = userRepository.save(user);
-
+				// Save user role
 				userRoleRepository.saveAll(userRoles);
 				user.setUserRoles(userRoles);
 				userRepository.save(user);
@@ -385,10 +387,24 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 							"timestamp", LocalDateTime.now()));
 		}
 	}
+	
+	private Integer getRoleIdByServiceId(Integer serviceId) {
+	    if (serviceId == 7) return 11;
+	    if (serviceId == 36) return 28;
+	    if (serviceId == 4) return 12;
+	    return null;
+	}
 
 	@Override
 	public List<ObjectNode> getInstituteDetails(String registration_no) {
 		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteDetails(registration_no);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> getInstituteRenewalDetails(String registration_no) {
+		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteRenewalDetails(registration_no);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

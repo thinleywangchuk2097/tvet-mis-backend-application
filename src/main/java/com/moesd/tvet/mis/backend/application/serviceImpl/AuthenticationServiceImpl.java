@@ -28,7 +28,7 @@ import com.moesd.tvet.mis.backend.application.model.UserRole;
 import com.moesd.tvet.mis.backend.application.repository.RoleRepository;
 import com.moesd.tvet.mis.backend.application.repository.TokenRepository;
 import com.moesd.tvet.mis.backend.application.repository.UserRepository;
-import com.moesd.tvet.mis.backend.application.repository.UserRoleRepository;
+//import com.moesd.tvet.mis.backend.application.repository.UserRoleRepository;
 import com.moesd.tvet.mis.backend.application.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,7 +45,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	private final JwtUtilService jwtUtilService;
 	private final TokenRepository tokenRepository;
 	private final AuthenticationManager authenticationManager;
-	private final UserRoleRepository userRoleRepository;
+	//private final UserRoleRepository userRoleRepository;
 
 	@Override
 	@Transactional
@@ -84,16 +84,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			user.setLocationId(request.getLocationId());
 			user.setCreatedAt(new Date());
 			user.setCreatedBy(request.getCreatedBy());
+			//user = userRepository.save(user);
+
+			//userRoleRepository.saveAll(userRoles);
+			//user.setUserRoles(userRoles);
+			//var savedUser = userRepository.save(user);
+			user.setUserRoles(userRoles);
 			user = userRepository.save(user);
 
-			userRoleRepository.saveAll(userRoles);
-			user.setUserRoles(userRoles);
-			var savedUser = userRepository.save(user);
-
 			// Generate JWT Tokens
-			var jwtToken = jwtUtilService.generateToken(savedUser);
-			var refreshToken = jwtUtilService.generateRefreshToken(savedUser);
-			saveUserToken(savedUser, jwtToken);
+			var jwtToken = jwtUtilService.generateToken(user);
+			var refreshToken = jwtUtilService.generateRefreshToken(user);
+			saveUserToken(user, jwtToken);
 //			return ResponseEntity.status(HttpStatus.CREATED)
 //					.body(Map.of("status", HttpStatus.CREATED.value(), "message", "User registration successful",
 //							"user_id", savedUser.getUserId(), "access_token", jwtToken, "refresh_token", refreshToken));

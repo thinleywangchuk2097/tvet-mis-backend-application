@@ -20,8 +20,36 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  AND a.service_id = ?", nativeQuery = true)
 	List<Tuple> getCourseDetailsAnnouncementByUserId(String user_id, String service_id);
 	
+//	@Query(value = "SELECT "
+//			+ "  a.*, "
+//			+ "  e.proposed_institute_name AS institute_name, "
+//			+ "  CASE "
+//			+ "    WHEN a.service_id = 37 "
+//			+ "    THEN c.occupation_name "
+//			+ "    WHEN a.service_id = 38 "
+//			+ "    THEN nc.course_title "
+//			+ "    WHEN a.service_id = 39 "
+//			+ "    THEN d.occupation_name "
+//			+ "  END AS course_name "
+//			+ "FROM "
+//			+ "  tbl_course_enrollment_app a "
+//			+ "  LEFT JOIN tbl_accredited_course_dtls b "
+//			+ "    ON a.course_id = b.id "
+//			+ "  LEFT JOIN tbl_occupation_master c "
+//			+ "    ON c.id = b.course_id "
+//			+ "  LEFT JOIN tbl_non_accredited_course_dtls nc "
+//			+ "    ON a.course_id = nc.id "
+//			+ "  LEFT JOIN tbl_occupation_master d "
+//			+ "    ON d.id = a.course_id "
+//			+ "  LEFT JOIN tbl_institute_registration_dtls e "
+//			+ "    ON e.institute_id = a.institute_id "
+//			+ "WHERE a.service_id IN (37, 38, 39) "
+//			+ "  AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
+//	List<Tuple> getAllCourseAnnouncement();
+	
 	@Query(value =  "SELECT "
 			+ "  a.*, "
+			+ "  e.proposed_institute_name AS institute_name, "
 			+ "  CASE "
 			+ "    WHEN a.service_id = 37 "
 			+ "    THEN c.occupation_name "
@@ -29,7 +57,8 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    THEN nc.course_title "
 			+ "    WHEN a.service_id = 39 "
 			+ "    THEN d.occupation_name "
-			+ "  END AS course_name "
+			+ "  END AS course_name, "
+			+ "  COALESCE (t.total_applied, 0) AS total_applied "
 			+ "FROM "
 			+ "  tbl_course_enrollment_app a "
 			+ "  LEFT JOIN tbl_accredited_course_dtls b "
@@ -40,8 +69,18 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    ON a.course_id = nc.id "
 			+ "  LEFT JOIN tbl_occupation_master d "
 			+ "    ON d.id = a.course_id "
+			+ "  LEFT JOIN tbl_institute_registration_dtls e "
+			+ "    ON e.institute_id = a.institute_id "
+			+ "  LEFT JOIN "
+			+ "    (SELECT "
+			+ "      course_enrol_app_no, "
+			+ "      COUNT(*) AS total_applied "
+			+ "    FROM "
+			+ "      tbl_course_enrollment_trainee_app "
+			+ "    GROUP BY course_enrol_app_no) t "
+			+ "    ON t.course_enrol_app_no = a.application_no "
 			+ "WHERE a.service_id IN (37, 38, 39) "
-			+ "AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
+			+ "  AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
 	List<Tuple> getAllCourseAnnouncement();
 	
 	@Query(value =  "SELECT "

@@ -21,18 +21,18 @@ public class PrivilegeController {
 	@GetMapping("/menu-lists/{roleId}")
 	public ResponseEntity<List<Privilegedto>> getPrivileges(@PathVariable String roleId){
 		List<Privilegedto> privileges = privilegeService.getPrivileges(roleId);
-		return ResponseEntity.ok(privileges); // Automatically converted to JSON
+		return ResponseEntity.ok(privileges); 
 	}
 	
 	@GetMapping("/parent-privileges-lists")
 	public ResponseEntity<List<Privilegedto>> getParentPrivileges(){
 		List<Privilegedto> privileges = privilegeService.getParentPrivileges();
-		return ResponseEntity.ok(privileges); // Automatically converted to JSON
+		return ResponseEntity.ok(privileges); 
 	}
 	
 	@GetMapping("/child-privileges-lists/{parentId}")
 	public ResponseEntity<List<Privilegedto>> getChildPrivileges(@PathVariable String parentId){
 		List<Privilegedto> privileges = privilegeService.getChildPrivileges(parentId);
-		return ResponseEntity.ok(privileges); // Automatically converted to JSON
+		return ResponseEntity.ok(privileges);
 	}
 }
