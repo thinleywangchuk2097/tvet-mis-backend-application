@@ -54,5 +54,11 @@ public class MonitoringAssessmentController {
 	    return ResponseEntity.ok(Details);
 	}
 	
+	@GetMapping("/get-institutes-renewal-status/{registrationNo}")
+	public ResponseEntity<List<ObjectNode>> getInstitutesRenewalStatus(@PathVariable String registrationNo){
+	    List<ObjectNode> instituteDetails = monitoringAssessmentService.getInstitutesRenewalStatus(registrationNo);
+	    return ResponseEntity.ok(instituteDetails);
+	}
+	
 	
 }
