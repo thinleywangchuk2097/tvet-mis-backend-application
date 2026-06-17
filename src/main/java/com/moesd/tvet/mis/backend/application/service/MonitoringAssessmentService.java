@@ -19,4 +19,6 @@ public interface MonitoringAssessmentService {
 	
 	List<ObjectNode> getMonitoringAssessmentByApplicationNo(String applicationNo);
 	
+	List<ObjectNode> getInstitutesRenewalStatus(String registrationNo);
+	
 }

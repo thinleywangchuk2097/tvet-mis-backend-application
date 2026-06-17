@@ -89,6 +89,15 @@ public interface MonitoringAssessmentRepository extends JpaRepository<Monitoring
 			+ "  tbl_monitoring_assessment_dtls ma "
 			+ "WHERE "
 			+ "  ma.application_no = ?", nativeQuery = true)
-List<Tuple> getMonitoringAssessmentByApplicationNo(String applicationNo);
+	List<Tuple> getMonitoringAssessmentByApplicationNo(String applicationNo);
+	
+	
+	@Query(value =  
+	"SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_monitoring_assessment_dtls a "
+			+ "WHERE a.registration_no = ?", nativeQuery = true)
+	List<Tuple> getInstitutesRenewalStatus(String registrationNo);
 	
 }
