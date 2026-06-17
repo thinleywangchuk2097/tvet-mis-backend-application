@@ -32,10 +32,11 @@ public class Privilege {
     private String routeName;
     
     @Column(nullable = false)
-    private String disPlayOrder;
+    private Integer disPlayOrder;
     
     @Column(nullable = false)
-    private boolean  isDisplay;
+    //private boolean  isDisplay;
+    private Integer  isDisplay;
     
     @Column(nullable = false)
     private String menuIcon;

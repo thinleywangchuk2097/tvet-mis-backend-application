@@ -2,7 +2,6 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +87,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			// Build AssessorAccreditorQMSAuditor entity
 			AssessorAccreditorQMSAuditor registration = AssessorAccreditorQMSAuditor.builder()
 					.applicationNo(applicationNo).serviceId(serviceId).referenceNo(request.getReferenceNo())
+					.citizenId(request.getCitizenId()).dateOfBirth(request.getDateOfBirth())
 					.fullName(request.getFullName()).genderId(request.getGenderId())
 					.mobileNo(request.getMobileNo()).email(request.getEmail()).dzongkhagId(request.getDzongkhagId())
 					.organizationName(request.getOrganizationName())
@@ -164,7 +164,6 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 	@Override
 	public ResponseEntity<?> verifyAssessorAccreditorQMSAuditor(AssessorAccreditorQMSAuditordto request) {
 		try {
-			System.out.println("request" + request);
 			// 1. Validate required fields
 			if (request.getServiceId() == null)
 				throw new RecordNotFoundException("serviceId is required");
@@ -200,14 +199,10 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			// Get task status
 			Integer taskStatusId;
 			if (statusId == 57) {
-				System.out.println("StatusId 57");
 				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 				// Generate application number
-				System.out.println("taskStatusId" + taskStatusId);
-				System.out.println("serviceId" + serviceId);
 				String licenseNo = generateLicenseNumber.generateLicenseNumber(serviceId);
-				System.out.println("licenseNo" + licenseNo);
 				// Find existing registration by applicationNo
 				AssessorAccreditorQMSAuditor editAssessorAccreditorQMSAuditor = assessorAccreditorQMSAuditorRepository
 						.findByApplicationNo(request.getApplicationNo()) // Returns Optional
@@ -224,25 +219,26 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 					return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
 							"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
 				}
-				System.out.println("Print In");
+				
 				// Create new User
 				User user = new User();
-
-				// Create a request object with role IDs
-				List<Integer> RoleIds = Arrays.asList(11); //roleIDs
-
-				// Assign Roles
-				List<UserRole> userRoles = new ArrayList<>();
-				for (Integer roleId : RoleIds) {
-					Role role = roleRepository.findById(roleId)
-							.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-									"Role with ID " + roleId + " does not exist"));
-					UserRole userRole = new UserRole();
-					userRole.setUser(user);
-					userRole.setRole(role);
-					userRoles.add(userRole);
-					System.out.println("Print userrole");
+				// Get roleId from method
+				final Integer roleId = getRoleIdByServiceId(serviceId);
+				// Validate role mapping
+				if (roleId == null) {
+				    throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
 				}
+				// Fetch the role
+				Role role = roleRepository.findById(roleId)
+				        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+				                "Role with ID " + roleId + " does not exist"));
+				// Assign the single role
+				List<UserRole> userRoles = new ArrayList<>();
+				UserRole userRole = new UserRole();
+				userRole.setUser(user);
+				userRole.setRole(role);
+				userRoles.add(userRole);
+				// Set user properties
 				user.setUserId(licenseNo);
 				user.setPassword(passwordEncoder.encode("password"));
 				user.setFirstName(request.getFullName());
@@ -250,14 +246,16 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 				user.setLastName("");
 				user.setLocationId(request.getDzongkhagId());
 				user.setGenderId(request.getGenderId());
+				user.setDoB(request.getDateOfBirth());
 				user.setMobileNo(request.getMobileNo());
 				user.setEmailId(request.getEmail());
-				user.setCurrentRole(11);
+				user.setCurrentRole(roleId);
 				user.setStatusId("1");
+				user.setLocationId(request.getDzongkhagId());
 				user.setCreatedAt(new Date());
 				user.setCreatedBy(null);
 				user = userRepository.save(user);
-
+				// Save user role
 				userRoleRepository.saveAll(userRoles);
 				user.setUserRoles(userRoles);
 				userRepository.save(user);
@@ -288,6 +286,13 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
 					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
 		}
+	}
+	
+	private Integer getRoleIdByServiceId(Integer serviceId) {
+	    if (serviceId == 32) return 30;
+	    if (serviceId == 5) return 29;
+	    if (serviceId == 3) return 10;
+	    return null;
 	}
 
 }
