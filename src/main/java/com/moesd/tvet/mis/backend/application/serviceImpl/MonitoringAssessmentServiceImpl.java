@@ -153,7 +153,7 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 			Integer locationId = 14;
 			// Get task status
 			Integer taskStatusId;
-			if (statusId == 57 || statusId == 104 ) {
+			if (statusId == 57) {
 				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 			}else {
@@ -179,6 +179,7 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 
 			// Update InstituteRegistration entity
 			monitoringAssessment.setStatusId(request.getStatusId());
+			monitoringAssessment.setDescription(request.getDescription());
 			monitoringAssessment.setUpdatedAt(new java.util.Date());
 			monitoringAssessment.setUpdatedBy(request.getUpdatedBy());
 			//Update ONLY existing records
@@ -215,7 +216,7 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	        }
 			// Save the updated registration
 	        MonitoringAssessment savedMonitoringAssessment = monitoringAssessmentRepository.save(monitoringAssessment);
-            if(statusId == 57) {
+            if(statusId == 57 || statusId == 104) {
             	workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
     					request.getUserId(), request.getRemarks(), serviceId, actorId);
 
@@ -248,6 +249,13 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	@Override
 	public List<ObjectNode> getMonitoringAssessmentByApplicationNo(String applicationNo) {
 		List<Tuple> resultList = monitoringAssessmentRepository.getMonitoringAssessmentByApplicationNo(applicationNo);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> getInstitutesRenewalStatus(String registrationNo) {
+		List<Tuple> resultList = monitoringAssessmentRepository.getInstitutesRenewalStatus(registrationNo);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
