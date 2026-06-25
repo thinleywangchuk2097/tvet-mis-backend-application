@@ -18,6 +18,12 @@ public class BirmsPaymentController {
 
 	private final BirmsPaymentService birmsPaymentService;
 
+	
+	@PostMapping("/create-token")
+	public ResponseEntity<?> createToken() {
+		return birmsPaymentService.createToken();
+	}
+	
 	@PostMapping("/create-payment-advice-no")
 	public String createPaymentAdvice(@RequestBody BirmsPaymentRequestdto paymentRequest) {
 		return birmsPaymentService.createPaymentAdvice(paymentRequest);
@@ -43,7 +49,7 @@ public class BirmsPaymentController {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
-	@GetMapping("/get-payment-receipts/{receiptNo}")
+	@GetMapping("/get-payment-receipt/{receiptNo}")
 	public ResponseEntity<String> getPaymentReceiptDetails(@PathVariable String receiptNo) {
 		return birmsPaymentService.getPaymentReceiptDetails(receiptNo);
 	}
@@ -51,11 +57,6 @@ public class BirmsPaymentController {
 	@PostMapping("/make-payment-cancel")
 	public ResponseEntity<?> makePaymentCancel(@RequestBody BirmsPaymentRequestdto dto) {
 		return birmsPaymentService.makePaymentCancel(dto);
-	}
-
-	@GetMapping("/is-application-exist/{application_no}")
-	public Optional<BirmsPayment> checkDataExist(@PathVariable String application_no) {
-		return birmsPaymentService.checkDataExist(application_no);
 	}
 
 	@PostMapping("/check-bounce")
@@ -77,14 +78,24 @@ public class BirmsPaymentController {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
-
-	@GetMapping("/get-penalty-application-details")
-	public ResponseEntity<List<ObjectNode>> getAllPenaltyApplicationDetails() {
-		return ResponseEntity.ok(birmsPaymentService.getAllPenaltyApplicationDetails());
+	
+	@GetMapping("/get-payment-details/{application_no}")
+	public Optional<BirmsPayment> getPaymentByApplicationNo(@PathVariable String application_no) {
+		return birmsPaymentService.getPaymentByApplicationNo(application_no);
+	}
+	
+	@GetMapping("/get-all-payment-details")
+	public ResponseEntity<List<ObjectNode>> getAllPaymentDetails() {
+		return ResponseEntity.ok(birmsPaymentService.getAllPaymentDetails());
 	}
 
-	@GetMapping("/get-user-penalty-application-details/{user_id}")
+	@GetMapping("/get-payment-by-user/{user_id}")
 	public ResponseEntity<List<ObjectNode>> getByUserPenaltyApplicationDetails(@PathVariable String user_id) {
 		return ResponseEntity.ok(birmsPaymentService.getByUserPenaltyApplicationDetails(user_id));
+	}
+	
+	@GetMapping("/get-course-details/{instituteId}")
+	public ResponseEntity<List<ObjectNode>> getCourseByInstituteId(@PathVariable String instituteId) {
+		return ResponseEntity.ok(birmsPaymentService.getCourseByInstituteId(instituteId));
 	}
 }

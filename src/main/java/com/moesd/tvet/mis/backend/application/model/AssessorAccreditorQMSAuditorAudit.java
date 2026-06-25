@@ -1,26 +1,29 @@
 package com.moesd.tvet.mis.backend.application.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_assessor_accreditor_auditor_registration")
-public class AssessorAccreditorQMSAuditor {
-
-    @Id
+@Table(name = "tbl_assessor_accreditor_auditor_registration_audit")
+public class AssessorAccreditorQMSAuditorAudit {
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -115,11 +118,8 @@ public class AssessorAccreditorQMSAuditor {
 
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
-
-    // Relationships - Work Experiences using application_no
-    @Builder.Default
-    @OneToMany(mappedBy = "assessorAccreditorQMSAuditor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AuditorWorkExperience> workExperiences = new ArrayList<>();
     
-
+	@ManyToOne
+	@JoinColumn(name = "parent_id")
+	private AssessorAccreditorQMSAuditor assessorAccreditorQMSAuditor;
 }

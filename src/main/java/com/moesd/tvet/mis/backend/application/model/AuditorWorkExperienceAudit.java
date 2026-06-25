@@ -1,8 +1,10 @@
 package com.moesd.tvet.mis.backend.application.model;
 
 import java.time.LocalDateTime;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,20 +23,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_work_experience")
-public class WorkExperience {
+@Table(name = "tbl_auditor_work_experience_audit")
+public class AuditorWorkExperienceAudit {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // Many-to-One relationship with AssessorAccreditorQMSAuditor using application_no
-    @ManyToOne
-    @JoinColumn(name = "application_no", // FK column in work_experiences table
-            referencedColumnName = "application_no" // column in AssessorAccreditorQMSAuditor
-    )
-    private AssessorAccreditorQMSAuditor assessorAccreditorQMSAuditor;
-
-    @Column(name = "organization_name")
+	
+	private String applicationNo;
+	
+	@Column(name = "organization_name")
     private String organizationName;
 
     @Column(name = "designation")
@@ -53,4 +50,9 @@ public class WorkExperience {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @ManyToOne
+	@JoinColumn(name = "parent_id")
+	private AuditorWorkExperience auditorWorkExperience;
+	
 }

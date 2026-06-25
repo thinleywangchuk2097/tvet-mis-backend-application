@@ -136,8 +136,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
 		return UserProfileResponse.builder().userId(user.getUserId()).firstName(user.getFirstName())
 				.middleName(user.getMiddleName()).lastName(user.getLastName()).mobileNo(user.getMobileNo())
-				.emailId(user.getEmailId()).profileImageUrl(formatImageUrl(user.getProfilePath())) // Or construct full
-																									// URL
+				.emailId(user.getEmailId()).profileImageUrl(formatImageUrl(user.getProfilePath()))																		
 				.build();
 	}
 

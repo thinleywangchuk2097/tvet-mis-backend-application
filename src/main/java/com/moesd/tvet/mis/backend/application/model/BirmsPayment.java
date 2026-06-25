@@ -47,6 +47,7 @@ public class BirmsPayment {
 	private String issuingBank;
 	private String receiptStatus;
 	private Date cancelledDate;
+	private String cancelledBy;
 	private String paymentMode;
 	private String receiptNo;
 	

@@ -15,11 +15,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AssessorAccreditorQMSAuditordto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.AssessorAccreditorQMSAuditor;
+import com.moesd.tvet.mis.backend.application.model.AuditorWorkExperience;
 import com.moesd.tvet.mis.backend.application.model.Role;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.model.User;
 import com.moesd.tvet.mis.backend.application.model.UserRole;
-import com.moesd.tvet.mis.backend.application.model.WorkExperience;
 import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
 import com.moesd.tvet.mis.backend.application.repository.AssessorAccreditorQMSAuditorRepository;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
@@ -102,8 +102,8 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 
 			// Build work experiences and add to registration
 			if (request.getWorkExperiences() != null && !request.getWorkExperiences().isEmpty()) {
-				List<WorkExperience> workExperiences = request.getWorkExperiences().stream()
-						.map(workExpDto -> WorkExperience.builder().organizationName(workExpDto.getOrganizationName())
+				List<AuditorWorkExperience> workExperiences = request.getWorkExperiences().stream()
+						.map(workExpDto -> AuditorWorkExperience.builder().organizationName(workExpDto.getOrganizationName())
 								.designation(workExpDto.getDesignation()).year(workExpDto.getYear())
 								.responsibility(workExpDto.getResponsibility()).createdAt(LocalDateTime.now())
 								.updatedAt(LocalDateTime.now()).assessorAccreditorQMSAuditor(registration) // Set the

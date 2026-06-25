@@ -57,7 +57,7 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 			Integer serviceId = dto.getServiceId();
 			Integer assignedRoleId = dto.getAssignedRoleId();
 			String userId = dto.getUserId();
-			Integer locationId = dto.getDzongkhagId();
+			Integer locationId = 14;
 			String applicantName = dto.getProposedInstituteName();
 			// 2. Validate service
 			serviceMasterRepository.findById(serviceId)

@@ -85,6 +85,10 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 	
 	@Query(value =  "SELECT "
 			+ "  a.*, "
+			+ "  e.registration_no, "
+			+ "  e.proposed_institute_name AS institute_name, "
+			+ "  e.mobile_no AS institue_mobile_number, "
+			+ "  e.email_id AS institute_email, "
 			+ "  cd.name AS certification_name, "
 			+ "  CASE "
 			+ "    WHEN a.service_id = 37 "
@@ -106,6 +110,8 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    ON d.id = a.course_id "
 			+ "  LEFT JOIN tbl_dropdown_child_master cd "
 			+ "    ON cd.id = a.certification_level_id "
+			+ "    LEFT JOIN tbl_institute_registration_dtls e "
+			+ "    ON e.institute_id = a.institute_id "
 			+ "WHERE a.application_no = ? "
 			+ "  AND a.service_id IN (37, 38, 39)", nativeQuery = true)
 	List<Tuple> getCourseAnnouncementByApplicationNo(String application_no);

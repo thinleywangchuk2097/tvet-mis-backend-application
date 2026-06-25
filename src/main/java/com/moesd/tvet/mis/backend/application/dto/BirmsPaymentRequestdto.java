@@ -20,8 +20,8 @@ public class BirmsPaymentRequestdto {
 	private String taxPayerNo;
 	private String taxPayerName;
 	private String agencyCode;
-	private String payerEmail;
-	private String mobileNo;
+	private String taxPayerEmail;
+	private String taxPayerMobileNo;
 	private String totalPayableAmount;
 	private String serviceCode;
 	private String description;
