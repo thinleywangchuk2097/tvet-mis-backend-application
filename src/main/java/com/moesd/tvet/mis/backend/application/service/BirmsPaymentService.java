@@ -8,7 +8,9 @@ import com.moesd.tvet.mis.backend.application.dto.BirmsPaymentRequestdto;
 import com.moesd.tvet.mis.backend.application.model.BirmsPayment;
 
 public interface BirmsPaymentService {
-
+	
+	ResponseEntity<?> createToken();
+    
     String createPaymentAdvice(BirmsPaymentRequestdto paymentRequest);
 
     BirmsPayment updatePaymentStatus(BirmsPaymentRequestdto dto);
@@ -17,11 +19,14 @@ public interface BirmsPaymentService {
 
     ResponseEntity<?> makePaymentCancel(BirmsPaymentRequestdto dto);
 
-    Optional<BirmsPayment> checkDataExist(String application_no);
+    Optional<BirmsPayment> getPaymentByApplicationNo(String application_no);
 
     BirmsPayment updatePaymentCheckBounce(BirmsPaymentRequestdto dto);
 
-    List<ObjectNode> getAllPenaltyApplicationDetails();
+    List<ObjectNode> getAllPaymentDetails();
 
     List<ObjectNode> getByUserPenaltyApplicationDetails(String user_id);
+    
+    List<ObjectNode> getCourseByInstituteId(String instituteId);
+    
 }

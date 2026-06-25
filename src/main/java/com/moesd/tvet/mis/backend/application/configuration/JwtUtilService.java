@@ -5,13 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javax.crypto.SecretKey;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -19,11 +17,14 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtUtilService {
-	private static final String secretKey = "6D5A7134743777217A25432A462D4A614E645267556B586E3272357538702F31";
-	private static final long jwtExpiration = 3600000; // 1 hour (3600000 milliseconds)
-	//private static final long jwtExpiration = 30000; // 30 seconds (30000 milliseconds)
-	//private static final long jwtExpiration = 1800000; // 30 minutes (1,800,000 milliseconds(30 * 60 * 1000))
-	private static final long refreshExpiration = 7200000; // 2 hours
+	@Value("${jwt.secret}")
+	String secretKey;
+	
+	@Value("${jwt.access-token-expiration}")
+	long jwtExpiration;
+	
+	@Value("${jwt.refresh-token-expiration}")
+	long refreshExpiration;
 
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);

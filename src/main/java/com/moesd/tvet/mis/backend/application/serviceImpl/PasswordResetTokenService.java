@@ -14,6 +14,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,13 +27,20 @@ public class PasswordResetTokenService {
     @Value("${app.password-reset.token-expiration}")
     private long expiration;
     
-    // Convert hex string to SecretKey
-    private static final String SECRET_HEX = "6D5A7134743777217A25432A462D4A614E645267556B586E3272357538702F31";
-    private final SecretKey jwtSecretKey = Keys.hmacShaKeyFor(
-        SECRET_HEX.getBytes(StandardCharsets.UTF_8)
-    );
+    @Value("${app.secret-hex}")
+    private String secretHex;
     
-    public boolean  sendPasswordResetToken(String email) {
+    private SecretKey jwtSecretKey;
+    
+    //FIXED: Initialize after @Value injection
+    @PostConstruct
+    public void init() {
+        this.jwtSecretKey = Keys.hmacShaKeyFor(
+            secretHex.getBytes(StandardCharsets.UTF_8)
+        );
+    }
+    
+    public boolean sendPasswordResetToken(String email) {
     	System.out.println("email" + email);
         User user = userRepository.findByEmailId(email)
             .orElseThrow(() -> new RuntimeException("User not found"));

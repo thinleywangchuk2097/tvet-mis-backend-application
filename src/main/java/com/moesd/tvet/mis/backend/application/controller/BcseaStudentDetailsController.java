@@ -45,7 +45,7 @@ public class BcseaStudentDetailsController {
 	@GetMapping("/get-student-details/{citizenshipNo}")
 	public ResponseEntity<Object> getCitizenDetails(@PathVariable String citizenshipNo) throws ParseException {
 
-		// Step 1: Generate token (no model, no DB)
+		// Step 1: Generate token (no model, noDB)
 		String accessToken = generateNewToken();
 
 		// Step 2: Prepare headers

@@ -2,24 +2,15 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.Ncsdto;
-import com.moesd.tvet.mis.backend.application.model.CourseEnrollmentApp;
 import com.moesd.tvet.mis.backend.application.model.NcsApp;
-import com.moesd.tvet.mis.backend.application.repository.CourseEnrollmentAppRepository;
-import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.repository.NcsRepository;
 import com.moesd.tvet.mis.backend.application.service.NcsService;
-import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
-import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
 import jakarta.persistence.Tuple;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,14 +18,10 @@ import lombok.RequiredArgsConstructor;
 public class NcsServiceImpl implements NcsService{
 	
 	private final NcsRepository ncsRepository;
-	private final GenerateApplicationNumber generateApplicationNumber;
-	private final ServiceMasterRepository serviceMasterRepository;
 	private final ObjectToJson objectTojson;
 	
 	public ResponseEntity<?> submitNcs(Ncsdto request) {
-
 		try {
-
 			// Build entity
 			NcsApp dtls = NcsApp.builder()
 					.occupationId(request.getOccupationId())
@@ -43,14 +30,11 @@ public class NcsServiceImpl implements NcsService{
 					.validityDate(request.getValidityDate())
 					.ncsCode(request.getNcsCode())
 					.publicationType(request.getPublicationType()).build();
-
 			// Save entity
 			ncsRepository.save(dtls);
-
 			// Response
 			return ResponseEntity.status(201).body(Map.of("status", 201, "message",
 					"Created submitted successfully"));
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(500)

@@ -37,4 +37,6 @@ public class InstituteProposalController {
 	public ResponseEntity<?> verifyInstituteProposal(@RequestBody InstituteProposaldto request) {
 		return(instituteProposalService.verifyInstituteProposal(request));
 	}
+	
+	
 }

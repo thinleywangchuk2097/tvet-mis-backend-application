@@ -97,7 +97,7 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 			    "INNER JOIN tbl_user c ON c.user_id = b.registration_no " +
 			    "WHERE a.status_id = 57 " +
 			    "AND c.user_id = ? " +
-			    "AND a.curriculum_type_id = ?", 
+			    "AND a.curriculum_type_id = ?",
 			    nativeQuery = true)
 		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
 		

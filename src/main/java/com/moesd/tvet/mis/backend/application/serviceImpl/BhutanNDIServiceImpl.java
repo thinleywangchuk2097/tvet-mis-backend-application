@@ -26,22 +26,22 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 	private final AuthenticationService authenticationService;
 	private final UserRepository userRepository;
 
-	@Value("${ndi.token_api_url}")
+	@Value("${ndi.token-api-url}")
 	private String tokenApiUrl;
 
-	@Value("${ndi.client_id}")
+	@Value("${ndi.client-id}")
 	private String clientId;
 
-	@Value("${ndi.client_secret}")
+	@Value("${ndi.client-secret}")
 	private String clientSecret;
 
-	@Value("${ndi.grant_type}")
+	@Value("${ndi.grant-type}")
 	private String grantType;
 
-	@Value("${ndi.create_proof_request_url}")
+	@Value("${ndi.create-proof-request-url}")
 	private String createProofRequestUrl;
 
-	@Value("${ndi.schema_name_url}")
+	@Value("${ndi.schema-name-url}")
 	private String schemaNameUrl;
 
 	private final RestTemplate restTemplate = new RestTemplate();
