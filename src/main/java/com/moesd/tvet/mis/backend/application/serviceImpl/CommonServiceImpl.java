@@ -66,7 +66,12 @@ public class CommonServiceImpl implements CommonService {
 		List<Map<String, Object>> children = dropdownChildRepository.findChildByParentId(parentId);
 		return children;
 	}
-
+	
+	@Override
+	public List<Map<String, Object>> getCurriculumServiceType() {
+		List<Map<String, Object>> children = dropdownChildRepository.getCurriculumServiceType();
+		return children;
+	}
 	@Override
 	public List<InstituteRegistrationQualityStandard> getAllQualitystandards(Integer serviceId) {
 		return qualityStandardRepository.findByServiceId(serviceId);
@@ -108,6 +113,8 @@ public class CommonServiceImpl implements CommonService {
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
+
+	
 
 	
 

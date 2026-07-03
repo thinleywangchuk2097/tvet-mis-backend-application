@@ -1,11 +1,14 @@
 package com.moesd.tvet.mis.backend.application.model;
 
 import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +20,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_curriculum_development")
-public class CurriculumDevelopment {
+@Table(name = "tbl_curriculum_development_audit")
+public class CurriculumDevelopmentAudit {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -59,5 +63,9 @@ public class CurriculumDevelopment {
 	private Integer updatedBy;
 
 	private LocalDateTime updatedAt;
+	
+	@ManyToOne
+    @JoinColumn(name = "curriculum_id")
+    private CurriculumDevelopment curriculum;
 	
 }

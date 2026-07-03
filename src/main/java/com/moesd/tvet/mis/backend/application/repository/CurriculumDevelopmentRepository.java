@@ -16,6 +16,14 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 					+ "  c.curriculum_name, "
 					+ "  c.curriculum_type_id, "
 					+ "  c.description, "
+					+ "  c.certificate_level_id, "
+					+ "  c.course_type_id, "
+					+ "  c.entry_requirement, "
+					+ "  c.ncs_id, "
+					+ "  c.total_ojt_duration, "
+					+ "  c.total_practical_duration, "
+					+ "  c.total_program_duration, "
+					+ "  c.total_theory_duration, "
 					+ "  c.institute_id, "
 					+ "  c.status_id, "
 					+ "  c.created_by, "
@@ -57,6 +65,14 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						+ "  c.curriculum_name, "
 						+ "  c.curriculum_type_id, "
 						+ "  c.description, "
+						+ "  c.certificate_level_id, "
+						+ "  c.course_type_id, "
+						+ "  c.entry_requirement, "
+						+ "  c.ncs_id, "
+						+ "  c.total_ojt_duration, "
+						+ "  c.total_practical_duration, "
+						+ "  c.total_program_duration, "
+						+ "  c.total_theory_duration, "
 						+ "  c.institute_id, "
 						+ "  c.status_id, "
 						+ "  c.created_by, "
@@ -101,5 +117,7 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 			    nativeQuery = true)
 		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
 		
-		Optional<CurriculumDevelopment> findByApplicationNo(String applicationNo);
+		//Optional<CurriculumDevelopment> findByApplicationNo(String applicationNo);
+		
+		CurriculumDevelopment findByApplicationNo(String applicationNo);
 }

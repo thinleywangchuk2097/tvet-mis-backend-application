@@ -69,8 +69,9 @@ public class InstituteRegistrationController {
 	                alreadySubmitted = true;
 	            }
 	            else if (registrationStatusId == 58) {
-	                message = "Registration is rejected for application: " + application_no;
+	                message = "Registration is rejected, Resubmit Again " + application_no;
 	                alreadySubmitted = false;
+	               // alreadySubmitted = true;
 	            }
 	            else {
 	                message = "Your application is already submitted for Registration: " + application_no;

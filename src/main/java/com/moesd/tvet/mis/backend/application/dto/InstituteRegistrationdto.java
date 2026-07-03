@@ -29,6 +29,8 @@ public class InstituteRegistrationdto {
 	private List<Trainerdto> trainers;
 	private List<Coursedto> courses;
 	private List<QualityStandardsdto> qualityStandards;
+	private List<AssignedRecsDto> assignedRecs;
+	private List<AssignedRecsDto>assignedAccreditors;
 	private List<TuitionDetailsdto>tuitionDetails;
 	// System fields
 	private Integer serviceId; 

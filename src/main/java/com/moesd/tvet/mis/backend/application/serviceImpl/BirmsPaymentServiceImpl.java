@@ -399,4 +399,9 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 		return DtlsJson;
 	}
 
+	@Override
+	public Optional<BirmsPayment> getPaymentByPaymentAdviceNo(String paymentAdviceNo) {
+		return birmsPaymentRepository.findByPaymentAdviceNo(paymentAdviceNo);
+	}
+
 }

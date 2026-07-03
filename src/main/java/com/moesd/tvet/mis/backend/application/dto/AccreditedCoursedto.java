@@ -28,6 +28,8 @@ public class AccreditedCoursedto {
 	private Integer updatedBy;
 	private Date updatedAt;
 	private List<QualityStandardsdto> qualityStandards;
+	private List<AssignedRecsDto> assignedRecs;
+	private List<AssignedRecsDto>assignedAccreditors;
     
  // System fields
  	private Integer serviceId; 

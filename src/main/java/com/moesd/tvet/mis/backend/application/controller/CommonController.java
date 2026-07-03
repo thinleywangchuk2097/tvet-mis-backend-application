@@ -69,6 +69,12 @@ public class CommonController {
 	    return ResponseEntity.ok(children);
 	}
 	
+	@GetMapping("/get-curriculum-service-types")
+	public ResponseEntity<List<Map<String, Object>>> getCurriculumServiceType() {
+	    List<Map<String, Object>> children = commonService.getCurriculumServiceType();
+	    return ResponseEntity.ok(children);
+	}
+	
 	@GetMapping("/get-service-name/{id}")
 	public ResponseEntity<Optional<ServiceMaster>> getServiceName(@PathVariable Integer id) {
 		Optional<ServiceMaster> data = commonService.getServiceName(id);

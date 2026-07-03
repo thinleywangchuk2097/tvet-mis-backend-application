@@ -3,18 +3,24 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AccreditedCoursedto;
+import com.moesd.tvet.mis.backend.application.dto.AssignedRecsDto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.AccreditedCourse;
 import com.moesd.tvet.mis.backend.application.model.AccreditedCourseQualityStandardResponse;
+import com.moesd.tvet.mis.backend.application.model.AccreditorTaskAssignment;
+import com.moesd.tvet.mis.backend.application.model.RecMemberTaskAssignment;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
+import com.moesd.tvet.mis.backend.application.repository.RecMemberTaskAssignmentRepository;
 import com.moesd.tvet.mis.backend.application.repository.AccreditedCourseRepository;
+import com.moesd.tvet.mis.backend.application.repository.AccreditorTaskAssignmentRepository;
 import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.service.AccreditedCourseService;
@@ -38,7 +44,10 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	private final DocumentFileUploadService documentFileUploadService;
 	private final RoleServiceRepository roleServiceRepository;
 	private final ObjectToJson objectTojson;
-
+	private final RecMemberTaskAssignmentRepository recMemberTaskAssignmentRepository;
+	private final AccreditorTaskAssignmentRepository accreditorTaskAssignmentRepository;
+	
+	
 	@Override
 	public ResponseEntity<?> registerAccreditedCourse(AccreditedCoursedto request) {
 		try {
@@ -215,12 +224,70 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			// Save the updated registration
 			AccreditedCourse savedRegistration = accreditedCourseRepository.save(existingAccreditedCourse);
 
-			workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
-					request.getUserId(), request.getRemarks(), serviceId, null);
+			//starts
+			
+			//save accreditors
+			if (request.getAssignedAccreditors() != null && !request.getAssignedAccreditors().isEmpty()) {
 
+			    List<AccreditorTaskAssignment> assignments = request.getAssignedAccreditors()
+			            .stream()
+			            .map(accreditor -> AccreditorTaskAssignment.builder()
+			                    .userId(accreditor.getUserId())
+			                    .ApplicationNo(request.getApplicationNo())
+			                    .serviceId(serviceId)
+			                    .build())
+			            .toList();
+
+			    accreditorTaskAssignmentRepository.saveAll(assignments);
+			}
+			//save REC members and its assignment to task
+			if (request.getAssignedRecs() != null && !request.getAssignedRecs().isEmpty()) {
+				List<RecMemberTaskAssignment> assignments = request.getAssignedRecs()
+			            .stream()
+			            .map(dto -> RecMemberTaskAssignment.builder()
+			                    .userId(dto.getUserId())
+			                    .ApplicationNo(request.getApplicationNo())
+			                    .serviceId(serviceId)
+			                    .build())
+			            .toList();
+
+			    recMemberTaskAssignmentRepository.saveAll(assignments);
+				
+				List<String> userIds = request.getAssignedRecs().stream()
+				        .map(AssignedRecsDto::getUserId)
+				        .filter(Objects::nonNull)
+				        .filter(id -> !id.trim().isEmpty())
+				        .collect(Collectors.toList());
+
+				// Add current userId only if it is not null
+				if (request.getUserId() != null) {
+				    userIds.add(String.valueOf(request.getUserId()));
+				}
+
+				String assignedRecString = String.join(",", userIds);
+
+				workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
+						request.getUserId(), request.getRemarks(), serviceId, null);
+
+				// update task flow
+				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
+						roleService.getNextRoleId(),assignedRecString, request.getRemarks());
+			} else {
+				workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
+						request.getUserId(), request.getRemarks(), serviceId, null);
+
+				// update task flow
+				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
+						roleService.getNextRoleId(), request.getUserId(), request.getRemarks());
+			}
+			
+			//ends
+			
+			//workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
+			//		request.getUserId(), request.getRemarks(), serviceId, null);
 			// update task flow
-			workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId, roleService.getNextRoleId(),
-					request.getUserId(), request.getRemarks());
+			//workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId, roleService.getNextRoleId(),
+			//		request.getUserId(), request.getRemarks());
 
 			// Save documents
 			if (request.getDocuments() != null && request.getDocuments().length > 0) {
@@ -246,6 +313,13 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	@Override
 	public List<ObjectNode> getAccreditedApprovedCourseByUserId(String user_id) {
 		List<Tuple> resultList = accreditedCourseRepository.getAccreditedApprovedCourseByUserId(user_id);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> getAccreditedCourseByInstituteId(String institute_id) {
+		List<Tuple> resultList = accreditedCourseRepository.getAccreditedCourseByInstituteId(institute_id);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

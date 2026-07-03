@@ -295,4 +295,12 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 	    return null;
 	}
 
+	@Override
+	public List<ObjectNode> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo,String serviceId) {
+		List<Tuple> resultList = assessorAccreditorQMSAuditorRepository
+				.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
 }

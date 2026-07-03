@@ -29,4 +29,6 @@ public interface BirmsPaymentService {
     
     List<ObjectNode> getCourseByInstituteId(String instituteId);
     
+    Optional<BirmsPayment> getPaymentByPaymentAdviceNo(String paymentAdviceNo);
+    
 }

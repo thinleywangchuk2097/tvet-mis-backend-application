@@ -10,8 +10,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.CurriculumDevelopmentdto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.CurriculumDevelopment;
+import com.moesd.tvet.mis.backend.application.model.CurriculumDevelopmentAudit;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
+import com.moesd.tvet.mis.backend.application.repository.CurriculumDevelopmentAuditRepository;
 import com.moesd.tvet.mis.backend.application.repository.CurriculumDevelopmentRepository;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
 import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
@@ -32,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentService {
 
 	private final CurriculumDevelopmentRepository curriculumDevelopmentRepository;
+	private final CurriculumDevelopmentAuditRepository curriculumDevelopmentAuditRepository;
 	private final GenerateApplicationNumber generateApplicationNumber;
 	private final DropdownManagementRepository dropdownManagementRepository;
 	private final WorkTaskFlowService workTaskFlowService;
@@ -41,7 +44,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 	private final RoleServiceRepository roleServiceRepository;
 
 	@Override
-	public ResponseEntity<?> submitCurriculumDevelopment(CurriculumDevelopmentdto request) {
+	public ResponseEntity<?> submitCurriculum(CurriculumDevelopmentdto request) {
 		try {
 			System.out.println("request" + request);
 			//Validate required fields
@@ -59,47 +62,103 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 				log.error("Validation failed: statusId is required");
 				throw new RecordNotFoundException("statusId is required");
 			}
-
+			Integer statusId = request.getStatusId();// workflow statusId
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
 			String userId = request.getUserId();
 			String applicantName = request.getCurriculumName();
 			Integer locationId = 14;
+			
 			//Get initiated statusId
 			Integer taskStatusId = dropdownManagementRepository.findChildById(18)
 					.orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
+			
+			//newly added
+			if (request.getServiceId() == 48 || request.getServiceId() == 49) {
+		
+				CurriculumDevelopment curriculum = curriculumDevelopmentRepository.findByApplicationNo(request.getApplicationNo());
+				//update audit 
+				saveCurriculumAudit(curriculum);
+				
+				curriculum.setApplicationNo(request.getApplicationNo());
+				curriculum.setCurriculumName(request.getCurriculumName());
+				curriculum.setCurriculumTypeId(request.getCurriculumTypeId());
+				curriculum.setDescription(request.getDescription());
+				curriculum.setInstituteId(request.getInstituteId());
+				curriculum.setCourseTypeId(request.getCourseTypeId());
+				curriculum.setNcsId(request.getNcsId());
+				curriculum.setCertificateLevelId(request.getCertificateLevelId());
+				curriculum.setEntryRequirement(request.getEntryRequirement());
+				curriculum.setTotalTheoryDuration(request.getTotalTheoryDuration());
+				curriculum.setTotalPracticalDuration(request.getTotalPracticalDuration());
+				curriculum.setTotalOjtDuration(request.getTotalOjtDuration());
+				curriculum.setTotalProgramDuration(request.getTotalProgramDuration());
+				curriculum.setStatusId(request.getStatusId());
+				curriculum.setCreatedBy(request.getCreatedBy());
+				curriculum.setCreatedAt(LocalDateTime.now());
+				curriculum.setUpdatedAt(LocalDateTime.now());
+				curriculum.setUpdatedBy(request.getUpdatedBy());
+				
+				// update curriculum
+				curriculumDevelopmentRepository.save(curriculum);
+				
+				
+				workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
+						request.getUserId(), request.getRemarks(), serviceId, request.getUpdatedBy());
 
-			//Generate application number
-			String applicationNo = generateApplicationNumber.generateApplicationNumber(serviceId);
+				// update task flow
+				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId, assignedRoleId,
+						request.getUserId(), request.getRemarks());
+				
+				//Save documents
+				if (request.getDocuments() != null && request.getDocuments().length > 0) {
+					documentFileUploadService.saveDocument(request.getDocuments(), request.getApplicationNo(), "curriculum",
+							serviceId, userId, null);
+				}
 
-			//Build entity
-			CurriculumDevelopment curriculumDevelopment = CurriculumDevelopment.builder().applicationNo(applicationNo)
-					.curriculumName(request.getCurriculumName()).curriculumTypeId(request.getCurriculumTypeId())
-					.description(request.getDescription()).instituteId(request.getInstituteId())
-					.statusId(request.getStatusId()).createdBy(request.getCreatedBy()).createdAt(LocalDateTime.now()).build();
+				//Return response
+				return ResponseEntity.status(HttpStatus.CREATED)
+						.body(Map.of("applicationNo", request.getApplicationNo(), "status", HttpStatus.CREATED.value()));
+				  
+			}else {
+				
+				//Generate application number
+				String applicationNo = generateApplicationNumber.generateApplicationNumber(serviceId);
 
-			// Save curriculum development
-			curriculumDevelopmentRepository.save(curriculumDevelopment);
-			log.info("Curriculum development saved with ID: {} and Application No: {}", curriculumDevelopment.getId(),
-					curriculumDevelopment.getApplicationNo());
+				//Build entity
+				CurriculumDevelopment curriculumDevelopment = CurriculumDevelopment.builder().applicationNo(applicationNo)
+						.curriculumName(request.getCurriculumName()).curriculumTypeId(request.getCurriculumTypeId())
+						.description(request.getDescription()).instituteId(request.getInstituteId())
+						.courseTypeId(request.getCourseTypeId()).ncsId(request.getNcsId()).certificateLevelId(request.getCertificateLevelId())
+						.entryRequirement(request.getEntryRequirement()).totalTheoryDuration(request.getTotalTheoryDuration())
+						.totalPracticalDuration(request.getTotalPracticalDuration()).totalOjtDuration(request.getTotalOjtDuration())
+						.totalProgramDuration(request.getTotalProgramDuration())
+						.statusId(request.getStatusId()).createdBy(request.getCreatedBy()).createdAt(LocalDateTime.now()).build();
 
-			//Create workflow
-			WorkFlowList workflow = workTaskFlowService.createWorkflow(applicationNo, applicantName, serviceId,
-					request.getStatusId(), assignedRoleId, request.getRemarks());
+				// Save curriculum development
+				curriculumDevelopmentRepository.save(curriculumDevelopment);
+				log.info("Curriculum development saved with ID: {} and Application No: {}", curriculumDevelopment.getId(),
+						curriculumDevelopment.getApplicationNo());
+				
+				//Create workflow
+				WorkFlowList workflow = workTaskFlowService.createWorkflow(applicationNo, applicantName, serviceId,
+						request.getStatusId(), assignedRoleId, request.getRemarks());
 
-			//Create task flow
-			workTaskFlowService.createTaskFlow(applicationNo, taskStatusId, assignedRoleId, request.getAssignedUserId(),
-					workflow, request.getRemarks(), locationId);
+				//Create task flow
+				workTaskFlowService.createTaskFlow(applicationNo, taskStatusId, assignedRoleId, request.getAssignedUserId(),
+						workflow, request.getRemarks(), locationId);
+				
+				//Save documents
+				if (request.getDocuments() != null && request.getDocuments().length > 0) {
+					documentFileUploadService.saveDocument(request.getDocuments(), applicationNo, "curriculum",
+							serviceId, userId, null);
+				}
 
-			//Save documents
-			if (request.getDocuments() != null && request.getDocuments().length > 0) {
-				documentFileUploadService.saveDocument(request.getDocuments(), applicationNo, "curriculum_development",
-						serviceId, userId, null);
+				//Return response
+				return ResponseEntity.status(HttpStatus.CREATED)
+						.body(Map.of("applicationNo", applicationNo, "status", HttpStatus.CREATED.value()));
 			}
-
-			//Return response
-			return ResponseEntity.status(HttpStatus.CREATED)
-					.body(Map.of("applicationNo", applicationNo, "status", HttpStatus.CREATED.value()));
+			
 
 		} catch (Exception e) {
 			log.error("Error submitting curriculum development: {}", e.getMessage(), e);
@@ -107,6 +166,31 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 					.body(Map.of("message", "Failed to submit curriculum development", "error", e.getMessage(),
 							"timestamp", LocalDateTime.now()));
 		}
+	}
+	
+	private void saveCurriculumAudit(CurriculumDevelopment curriculum) {
+		CurriculumDevelopmentAudit curriculumAudit = CurriculumDevelopmentAudit.builder()
+	                .applicationNo(curriculum.getApplicationNo())
+	                .curriculumName(curriculum.getCurriculumName())
+	                .curriculumTypeId(curriculum.getCurriculumTypeId())
+					.description(curriculum.getDescription())
+					.instituteId(curriculum.getInstituteId())
+					.courseTypeId(curriculum.getCourseTypeId())
+					.ncsId(curriculum.getNcsId())
+					.certificateLevelId(curriculum.getCertificateLevelId())
+					.entryRequirement(curriculum.getEntryRequirement())
+					.totalTheoryDuration(curriculum.getTotalTheoryDuration())
+					.totalPracticalDuration(curriculum.getTotalPracticalDuration())
+					.totalOjtDuration(curriculum.getTotalOjtDuration())
+					.totalProgramDuration(curriculum.getTotalProgramDuration())
+					.curriculum(curriculum)
+					.statusId(curriculum.getStatusId())
+					.createdBy(curriculum.getCreatedBy())
+					.createdAt(curriculum.getCreatedAt())
+	                .build();
+
+		curriculumDevelopmentAuditRepository.save(curriculumAudit);
+		
 	}
 
 	@Override
@@ -138,10 +222,15 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 			Integer statusId = request.getStatusId();// workflow statusId
 			String actorId = String.valueOf(request.getUpdatedBy());
 			//Integer locationId = 14;
+			Integer taskStatusId;
+			if(request.getStatusId() == 57) {
+				taskStatusId = dropdownManagementRepository.findChildById(20) // task completedId
+						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
+			}else {
+				taskStatusId = dropdownManagementRepository.findChildById(18) // initiated 
+						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
+			}
 			
-			
-			Integer taskStatusId = dropdownManagementRepository.findChildById(20) // task completedId
-					.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 			
 			// Validate service
 			serviceMasterRepository.findById(serviceId)
@@ -152,16 +241,19 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 					.orElseThrow(() -> new RecordNotFoundException("Next assigned role not found"));
 
 			// Find existing registration by applicationNo
-			CurriculumDevelopment existingCurriculumDevelopment = curriculumDevelopmentRepository
-					.findByApplicationNo(request.getApplicationNo()) // Returns Optional
-					.orElseThrow(() -> new RecordNotFoundException(
-							"Institute registration not found with applicationNo: " + request.getApplicationNo()));
+			CurriculumDevelopment existingCurriculumDevelopment =
+			        curriculumDevelopmentRepository.findByApplicationNo(request.getApplicationNo());
+
+			if (existingCurriculumDevelopment == null) {
+			    throw new RecordNotFoundException(
+			            "Curriculum not found with applicationNo: " + request.getApplicationNo());
+			}
 			
 			// Update InstituteRegistration entity
 			existingCurriculumDevelopment.setStatusId(request.getStatusId());
 			existingCurriculumDevelopment.setUpdatedAt(LocalDateTime.now());
 			existingCurriculumDevelopment.setUpdatedBy(request.getUpdatedBy());
-
+			
 			// Save the updated registration
 			CurriculumDevelopment savedRegistration = curriculumDevelopmentRepository.save(existingCurriculumDevelopment);
 			

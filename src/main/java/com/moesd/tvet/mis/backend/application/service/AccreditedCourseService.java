@@ -16,6 +16,9 @@ public interface AccreditedCourseService {
 	
 	List<ObjectNode> getAccreditedCourseDetailsByUserId(String user_id);
 	
+	List<ObjectNode> getAccreditedCourseByInstituteId(String institute_id);
+	
+	
 	List<ObjectNode> getAccreditedApprovedCourseByUserId(String user_id);
 	
 	

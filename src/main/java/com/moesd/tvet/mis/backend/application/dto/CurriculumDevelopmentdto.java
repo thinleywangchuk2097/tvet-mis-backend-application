@@ -14,8 +14,17 @@ public class CurriculumDevelopmentdto {
 	private String applicationNo;
 	private String curriculumName;
 	private String curriculumTypeId;
+	private String courseTypeId;
+	private Integer ncsId;
 	private String description;
 	private String instituteId;
+	private Integer certificateLevelId;
+	private String entryRequirement;
+	private String totalTheoryDuration;
+	private String totalPracticalDuration;
+	private String totalOjtDuration;
+	private String totalProgramDuration;
+	
 	//System fields
 	private Integer serviceId;
 	private Integer assignedRoleId;

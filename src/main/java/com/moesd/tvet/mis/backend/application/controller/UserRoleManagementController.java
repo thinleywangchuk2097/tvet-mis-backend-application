@@ -67,4 +67,16 @@ public class UserRoleManagementController {
 	    List<ObjectNode> privileges = userRoleManagementService.getAllUsers();
 	    return ResponseEntity.ok(privileges);
 	}
+	
+	@GetMapping("/get-rec-users")
+	public ResponseEntity<List<ObjectNode>> getActiveRecUsers() {
+	    List<ObjectNode> recUsers = userRoleManagementService.getActiveRecUsers();
+	    return ResponseEntity.ok(recUsers);
+	}
+	
+	@GetMapping("/get-accreditor-users")
+	public ResponseEntity<List<ObjectNode>> getActiveAccreditorUsers() {
+	    List<ObjectNode> accreditorUsers = userRoleManagementService.getActiveAccreditorUsers();
+	    return ResponseEntity.ok(accreditorUsers);
+	}
 }

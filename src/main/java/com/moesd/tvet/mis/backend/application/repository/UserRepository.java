@@ -57,4 +57,20 @@ public interface UserRepository extends JpaRepository<User, Long>{
 			+ "    ON a.current_role = b.id "
 			+ "WHERE a.user_id = ?", nativeQuery = true)
 	List<Tuple> getUserNameCurrentRoleName(String roleId);
+	
+	@Query(value =  "SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_user a "
+			+ "WHERE a.current_role = 23", nativeQuery = true)
+	List<Tuple> getActiveRecUsers();
+	
+	@Query(value =  "SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_user a "
+			+ "WHERE a.current_role IN(29)", nativeQuery = true)
+	List<Tuple> getActiveAccreditorUsers();
+	
+	
 }
