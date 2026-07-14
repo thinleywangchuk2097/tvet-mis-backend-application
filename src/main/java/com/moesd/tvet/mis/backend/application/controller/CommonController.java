@@ -69,6 +69,12 @@ public class CommonController {
 	    return ResponseEntity.ok(children);
 	}
 	
+	@GetMapping("/get-curriculum-service-types")
+	public ResponseEntity<List<Map<String, Object>>> getCurriculumServiceType() {
+	    List<Map<String, Object>> children = commonService.getCurriculumServiceType();
+	    return ResponseEntity.ok(children);
+	}
+	
 	@GetMapping("/get-service-name/{id}")
 	public ResponseEntity<Optional<ServiceMaster>> getServiceName(@PathVariable Integer id) {
 		Optional<ServiceMaster> data = commonService.getServiceName(id);
@@ -96,6 +102,12 @@ public class CommonController {
 	@GetMapping("/get-announcement-course/{application_no}")
 	public ResponseEntity<List<ObjectNode>> getCourseAnnouncementByApplicationNo(@PathVariable String application_no) {
 		List<ObjectNode> Details = commonService.getCourseAnnouncementByApplicationNo(application_no);
+		return ResponseEntity.ok(Details);
+	}
+	
+	@GetMapping("/get-institute-name/{instituteId}")
+	public ResponseEntity<List<ObjectNode>> getInstituteNameByInstituteId(@PathVariable String instituteId) {
+		List<ObjectNode> Details = commonService.getInstituteNameByInstituteId(instituteId);
 		return ResponseEntity.ok(Details);
 	}
 	

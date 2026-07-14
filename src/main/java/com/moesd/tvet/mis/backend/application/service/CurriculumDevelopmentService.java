@@ -9,7 +9,7 @@ import com.moesd.tvet.mis.backend.application.dto.CurriculumDevelopmentdto;
 
 public interface CurriculumDevelopmentService {
 	
-	ResponseEntity<?> submitCurriculumDevelopment(CurriculumDevelopmentdto request);
+	ResponseEntity<?> submitCurriculum(CurriculumDevelopmentdto request);
 	
 	List<ObjectNode> getCurriculumDetails(String application_no);
 	

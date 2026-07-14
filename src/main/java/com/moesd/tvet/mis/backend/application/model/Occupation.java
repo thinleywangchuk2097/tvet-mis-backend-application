@@ -28,6 +28,8 @@ public class Occupation {
 
 	@Column(name = "occupation_name")
 	private String occupationName;
+	
+	private String courseName;
 
 	@Column(name = "isco_code")
 	private String iscoCode;

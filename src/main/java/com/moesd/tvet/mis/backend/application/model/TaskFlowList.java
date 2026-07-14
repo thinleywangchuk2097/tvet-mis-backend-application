@@ -28,7 +28,7 @@ public class TaskFlowList {
 	@Column(name = "application_no")
 	private String applicationNo;
 
-	@Column(name = "assigned_user_id")
+	@Column(name="assigned_user_id",columnDefinition = "TEXT")
 	private String assignedUserId;
 
 	@Column(name = "task_status_id")

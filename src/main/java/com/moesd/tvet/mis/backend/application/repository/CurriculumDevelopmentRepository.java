@@ -1,7 +1,6 @@
 package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import com.moesd.tvet.mis.backend.application.model.CurriculumDevelopment;
@@ -16,6 +15,14 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 					+ "  c.curriculum_name, "
 					+ "  c.curriculum_type_id, "
 					+ "  c.description, "
+					+ "  c.certificate_level_id, "
+					+ "  c.course_type_id, "
+					+ "  c.entry_requirement, "
+					+ "  c.ncs_id, "
+					+ "  c.total_ojt_duration, "
+					+ "  c.total_practical_duration, "
+					+ "  c.total_program_duration, "
+					+ "  c.total_theory_duration, "
 					+ "  c.institute_id, "
 					+ "  c.status_id, "
 					+ "  c.created_by, "
@@ -57,6 +64,14 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						+ "  c.curriculum_name, "
 						+ "  c.curriculum_type_id, "
 						+ "  c.description, "
+						+ "  c.certificate_level_id, "
+						+ "  c.course_type_id, "
+						+ "  c.entry_requirement, "
+						+ "  c.ncs_id, "
+						+ "  c.total_ojt_duration, "
+						+ "  c.total_practical_duration, "
+						+ "  c.total_program_duration, "
+						+ "  c.total_theory_duration, "
 						+ "  c.institute_id, "
 						+ "  c.status_id, "
 						+ "  c.created_by, "
@@ -95,11 +110,12 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 			    "FROM tbl_curriculum_development a " +
 			    "INNER JOIN tbl_institute_registration_dtls b ON a.institute_id = b.institute_id " +
 			    "INNER JOIN tbl_user c ON c.user_id = b.registration_no " +
-			    "WHERE a.status_id = 57 " +
+			    "WHERE a.status_id = 59 " +
 			    "AND c.user_id = ? " +
-			    "AND a.curriculum_type_id = ?",
+			    "AND a.course_type_id = ?",
 			    nativeQuery = true)
 		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
 		
-		Optional<CurriculumDevelopment> findByApplicationNo(String applicationNo);
+		
+		CurriculumDevelopment findByApplicationNo(String applicationNo);
 }

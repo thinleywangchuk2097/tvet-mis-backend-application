@@ -22,25 +22,36 @@ public class CurriculumDevelopment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(name = "application_no")
 	private String applicationNo;
-	
-	@Column(name = "curriculum_name")
+
 	private String curriculumName;
-	
-	@Column(name = "curriculum_type_id")
+
 	private String curriculumTypeId;
-	
-	@Column(name = "description")
+
+	private String courseTypeId;
+
 	private String description;
+
+	private Integer ncsId;
 	
-	@Column(name = "institute_id")
+	private String totalTheoryDuration;
+
+	private String totalPracticalDuration;
+
+	private String totalOjtDuration;
+
+	private String totalProgramDuration;
+	
 	private String instituteId;
-	
-	@Column(name = "status_id")
+
 	private Integer statusId;
-	
+
+	private Integer certificateLevelId;
+
+	private String entryRequirement;
+
 	private String createdBy;
 
 	private LocalDateTime createdAt;
@@ -48,4 +59,5 @@ public class CurriculumDevelopment {
 	private Integer updatedBy;
 
 	private LocalDateTime updatedAt;
+	
 }

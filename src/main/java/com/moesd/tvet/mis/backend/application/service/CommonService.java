@@ -28,6 +28,8 @@ public interface CommonService {
 	
 	List<Map<String, Object>> getByParentId(Integer parentId);
 	
+	List<Map<String, Object>> getCurriculumServiceType();
+	
 	Optional<ServiceMaster> getServiceName(Integer id);
 	
 	List<Occupation> getOccupationsBySectorId(Integer sectorId);
@@ -35,6 +37,8 @@ public interface CommonService {
 	List<ObjectNode> getAllCourseAnnouncement();
 	
 	List<ObjectNode> getCourseAnnouncementByApplicationNo(String application_no);
+	
+	List<ObjectNode> getInstituteNameByInstituteId(String instituteId);
 	
 	List<ObjectNode> getReAssessmentAnnouncementByApplicationNo(String application_no);
 	

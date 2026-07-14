@@ -469,4 +469,18 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
 		return json;
 	}
 
+	@Override
+	public List<ObjectNode> getActiveRecUsers() {
+		List<Tuple> result = userRepository.getActiveRecUsers();
+		List<ObjectNode> json = objectTojson._toJson(result);
+		return json;
+	}
+
+	@Override
+	public List<ObjectNode> getActiveAccreditorUsers() {
+		List<Tuple> result = userRepository.getActiveAccreditorUsers();
+		List<ObjectNode> json = objectTojson._toJson(result);
+		return json;
+	}
+
 }

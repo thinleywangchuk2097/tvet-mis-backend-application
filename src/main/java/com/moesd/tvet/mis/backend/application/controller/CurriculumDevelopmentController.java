@@ -21,8 +21,8 @@ public class CurriculumDevelopmentController {
 	private final CurriculumDevelopmentService curriculumDevelopmentService;
 	
 	@PostMapping("/submit")
-	public ResponseEntity<?> submitCurriculumDevelopment(@RequestBody CurriculumDevelopmentdto request) {
-		return(curriculumDevelopmentService.submitCurriculumDevelopment(request));
+	public ResponseEntity<?> submitCurriculum(@RequestBody CurriculumDevelopmentdto request) {
+		return(curriculumDevelopmentService.submitCurriculum(request));
 	}
 	
 	@GetMapping("/get-curriculum-details/{application_no}")
@@ -43,7 +43,7 @@ public class CurriculumDevelopmentController {
 	    return ResponseEntity.ok(Details);
 	}
 	
-	@PostMapping("/verify-institute-proposal")
+	@PostMapping("/verify-curriculum")
 	public ResponseEntity<?> verifyCurriculumDevelopment(@RequestBody CurriculumDevelopmentdto request) {
 		return(curriculumDevelopmentService.verifyCurriculumDevelopment(request));
 	}

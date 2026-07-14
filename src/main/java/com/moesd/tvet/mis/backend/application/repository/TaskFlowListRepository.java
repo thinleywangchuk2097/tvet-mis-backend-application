@@ -32,22 +32,21 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "  AND b.assigned_user_id IS NULL", nativeQuery = true)
 	List<Tuple>getGroupTaskListDtl(Integer taskStatusId, Integer currentRoleId,String locationId);
 	
-	@Query(value =    "SELECT "
-			+ "  a.application_no, "
-			+ "  a.application_name, "
-			+ "  DATE(a.action_date) AS action_date, "
-			+ "  c.service_name, "
-			+ "  d.name AS current_status, "
-			+ "  c.route "
-			+ "FROM "
-			+ "  tbl_workflow_dtls a "
-			+ "  LEFT JOIN tbl_task_dtls b "
+	@Query(value =   "SELECT "
+			+ "    a.application_no, "
+			+ "    a.application_name, "
+			+ "    DATE(a.action_date) AS action_date, "
+			+ "    c.service_name, "
+			+ "    d.name AS current_status, "
+			+ "    c.route "
+			+ "FROM tbl_workflow_dtls a "
+			+ "LEFT JOIN tbl_task_dtls b "
 			+ "    ON a.application_no = b.application_no "
-			+ "  LEFT JOIN tbl_service_master c "
+			+ "LEFT JOIN tbl_service_master c "
 			+ "    ON c.id = a.service_id "
-			+ "  LEFT JOIN tbl_dropdown_child_master d "
+			+ "LEFT JOIN tbl_dropdown_child_master d "
 			+ "    ON d.id = a.status_id "
-			+ "WHERE b.assigned_user_id = ? "
+			+ "WHERE FIND_IN_SET(?, b.assigned_user_id) > 0 "
 			+ "  AND b.assigned_role_id = ?", nativeQuery = true)
 	List<Tuple>getMyTaskListDtl(String userId, String current_roleId);// current_roleId used for switch role
 	

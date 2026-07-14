@@ -35,4 +35,10 @@ public class AssessorAccreditorQMSAuditorController {
 	public ResponseEntity<?> verifyAssessorAccreditorQMSAuditor(@RequestBody AssessorAccreditorQMSAuditordto request) {
 		return(assessorAccreditorQMSAuditorService.verifyAssessorAccreditorQMSAuditor(request));
 	}
+	
+	@GetMapping("/get-applicant-details/{citizenId}/{referenceNo}/{serviceId}")
+	public ResponseEntity<List<ObjectNode>> getApplicationByCitizenIdOrReferenceNo(@PathVariable String citizenId, @PathVariable String referenceNo, @PathVariable String serviceId){
+	    List<ObjectNode> instituteDetails = assessorAccreditorQMSAuditorService.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId);
+	    return ResponseEntity.ok(instituteDetails);
+	}
 }

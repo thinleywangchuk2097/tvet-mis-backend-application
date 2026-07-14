@@ -25,4 +25,10 @@ public interface UserRoleManagementService {
 	ResponseEntity<?> deleteUser(UserRegisterRequest request);
 	
 	List<ObjectNode> getAllUsers();
+	
+	List<ObjectNode> getActiveRecUsers();
+	
+	List<ObjectNode> getActiveAccreditorUsers();
+	
+	
 }

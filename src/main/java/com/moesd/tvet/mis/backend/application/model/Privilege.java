@@ -25,20 +25,14 @@ public class Privilege {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String privilegeName;
     
-    @Column(nullable = false)
     private String routeName;
     
-    @Column(nullable = false)
     private Integer disPlayOrder;
     
-    @Column(nullable = false)
-    //private boolean  isDisplay;
     private Integer  isDisplay;
     
-    @Column(nullable = false)
     private String menuIcon;
     
     @Column(columnDefinition = "TEXT")

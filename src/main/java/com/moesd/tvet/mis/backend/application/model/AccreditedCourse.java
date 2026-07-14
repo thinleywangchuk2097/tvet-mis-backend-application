@@ -60,7 +60,7 @@ public class AccreditedCourse {
 	private String curriculumId;
 	
 	// Relationships - Using mappedBy to indicate the child owns the relationship
-	@Builder.Default
+	@Builder.Default 
 	@OneToMany(mappedBy = "accreditedCourse", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<AccreditedCourseQualityStandardResponse> qualityStandardResponses = new ArrayList<>();
 

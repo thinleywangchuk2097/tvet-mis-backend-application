@@ -147,4 +147,17 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 						+ "WHERE a.status_id = 57 "
 						+ "  AND d.user_id = ?", nativeQuery = true)
 		List<Tuple> getAccreditedApprovedCourseByUserId(String user_id);
+		
+		@Query(value =  
+				"SELECT "
+						+ "  a.id, "
+						+ "  b.course_name "
+						+ "FROM "
+						+ "  tbl_accredited_course_dtls a "
+						+ "  LEFT JOIN tbl_occupation_master b "
+						+ "  ON a.course_id = b.id "
+						+ "WHERE a.institute_id = ? "
+						+ "  AND a.status_id = 57", nativeQuery = true)
+		List<Tuple> getAccreditedCourseByInstituteId(String institute_id);
+		
 }

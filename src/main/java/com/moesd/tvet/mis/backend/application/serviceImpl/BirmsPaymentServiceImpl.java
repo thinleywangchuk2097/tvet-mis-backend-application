@@ -147,7 +147,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			headers.set("Authorization", "Bearer " + token); // Append the access token
 			// Create the pay load dynamically with request body data and static values
-			String payload = "{\n" + "  \"platform\": \"" + platform + "\",\n" + "  \"refNo\": \"TS" + req.getRefNo()
+			String payload = "{\n" + "  \"platform\": \"" + platform + "\",\n" + "  \"refNo\": \"TVET" + req.getRefNo()
 					+ "\",\n" + "  \"taxPayerNo\": \"" + req.getTaxPayerNo() + "\",\n" + "  \"taxPayerDocumentNo\": \""
 					+ req.getTaxPayerDocumentNo() + "\",\n" + "  \"paymentRequestDate\": \""
 					+ req.getPaymentRequestDate() + "\",\n" + "  \"agencyCode\": \"" + agencyCode + "\",\n"
@@ -191,6 +191,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 					birmsPaymentDetails.setPaymentStatus("pending");
 					birmsPaymentDetails.setRedirectUrl(content.path("redirectUrl").asText());
 					birmsPaymentDetails.setServiceCode(req.getServiceCode());
+					birmsPaymentDetails.setInstituteId(req.getInstituteId());
 					birmsPaymentDetails.setDescription(description);
 					birmsPaymentDetails.setTaxPayerDocumentNo(content.path("taxPayerDocumentNo").asText());
 					birmsPaymentDetails.setPaymentRequestDate(content.path("paymentRequestDate").asText());
@@ -397,6 +398,11 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 		List<Tuple> resultList = birmsPaymentRepository.getCourseByInstituteId(instituteId);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
+	}
+
+	@Override
+	public Optional<BirmsPayment> getPaymentByPaymentAdviceNo(String paymentAdviceNo) {
+		return birmsPaymentRepository.findByPaymentAdviceNo(paymentAdviceNo);
 	}
 
 }

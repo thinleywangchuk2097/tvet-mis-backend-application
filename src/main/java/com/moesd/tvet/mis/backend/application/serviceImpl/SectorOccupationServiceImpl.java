@@ -32,8 +32,9 @@ public class SectorOccupationServiceImpl implements SectorOccupationService{
 	@Override
 	@Transactional
 	public ResponseEntity<?> createSectorWithOccupations(SectorRequestDTO request) {
-		 try {
-	            // Build main entity (Sector)
+		 try {   
+			 System.out.print("sector occupation" + request);	            
+			 // Build main entity (Sector)
 	            Sector sector = Sector.builder()
 	                    .sectorName(request.getSectorName())
 	                    .isActive(request.getIsActive())

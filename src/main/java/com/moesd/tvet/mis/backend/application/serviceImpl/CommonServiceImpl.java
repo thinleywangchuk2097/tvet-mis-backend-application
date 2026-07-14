@@ -15,6 +15,7 @@ import com.moesd.tvet.mis.backend.application.repository.CourseEnrollmentAppRepo
 import com.moesd.tvet.mis.backend.application.repository.DropdownChildRepository;
 import com.moesd.tvet.mis.backend.application.repository.DzongkhagRepository;
 import com.moesd.tvet.mis.backend.application.repository.GewogRepository;
+import com.moesd.tvet.mis.backend.application.repository.InstituteRegistrationDetailsRepository;
 import com.moesd.tvet.mis.backend.application.repository.OccupationRepository;
 import com.moesd.tvet.mis.backend.application.repository.QualityStandardRepository;
 import com.moesd.tvet.mis.backend.application.repository.SectorRepository;
@@ -38,6 +39,7 @@ public class CommonServiceImpl implements CommonService {
     private final ServiceMasterRepository serviceMasterRepository;
     private final CourseEnrollmentAppRepository courseEnrollmentAppRepository;
 	private final ObjectToJson objectTojson;
+	private final InstituteRegistrationDetailsRepository instituteRegistrationDetailsRepository;
 	
 	
 
@@ -66,7 +68,12 @@ public class CommonServiceImpl implements CommonService {
 		List<Map<String, Object>> children = dropdownChildRepository.findChildByParentId(parentId);
 		return children;
 	}
-
+	
+	@Override
+	public List<Map<String, Object>> getCurriculumServiceType() {
+		List<Map<String, Object>> children = dropdownChildRepository.getCurriculumServiceType();
+		return children;
+	}
 	@Override
 	public List<InstituteRegistrationQualityStandard> getAllQualitystandards(Integer serviceId) {
 		return qualityStandardRepository.findByServiceId(serviceId);
@@ -108,6 +115,18 @@ public class CommonServiceImpl implements CommonService {
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
+
+	@Override
+	public List<ObjectNode> getInstituteNameByInstituteId(String instituteId) {
+		
+		
+		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteNameByInstituteId(instituteId);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	
+	}
+
+	
 
 	
 

@@ -98,4 +98,9 @@ public class BirmsPaymentController {
 	public ResponseEntity<List<ObjectNode>> getCourseByInstituteId(@PathVariable String instituteId) {
 		return ResponseEntity.ok(birmsPaymentService.getCourseByInstituteId(instituteId));
 	}
+	
+	@GetMapping("/get-payment/{paymentAdviceNo}")
+	public Optional<BirmsPayment> getPaymentByPaymentAdviceNo(@PathVariable String paymentAdviceNo) {
+		return birmsPaymentService.getPaymentByPaymentAdviceNo(paymentAdviceNo);
+	}
 }
