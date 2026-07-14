@@ -58,5 +58,11 @@ public class OJTTraineeController {
 	    List<ObjectNode> Details = oJTTraineeService.getTraineeByInstituteId(institute_id);
 	    return ResponseEntity.ok(Details);
 	}
+	
+	@GetMapping("/get-trainee-ojt-report")
+	public ResponseEntity<List<ObjectNode>> getTraineeOJTReport(){
+	    List<ObjectNode> Details = oJTTraineeService.getTraineeOJTReport();
+	    return ResponseEntity.ok(Details);
+	}
 
 }

@@ -38,6 +38,8 @@ public interface CommonService {
 	
 	List<ObjectNode> getCourseAnnouncementByApplicationNo(String application_no);
 	
+	List<ObjectNode> getInstituteNameByInstituteId(String instituteId);
+	
 	List<ObjectNode> getReAssessmentAnnouncementByApplicationNo(String application_no);
 	
 	

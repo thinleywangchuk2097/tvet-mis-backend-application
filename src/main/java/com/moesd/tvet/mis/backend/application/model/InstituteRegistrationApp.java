@@ -76,7 +76,7 @@ public class InstituteRegistrationApp {
 	private LocalDateTime updatedAt;
 	
 	@Column(name = "updated_by")
-	private String updatedBy;
+	private Integer updatedBy;
 
 	//Relationships - Using mappedBy to indicate the child owns the relationship
 	@Builder.Default

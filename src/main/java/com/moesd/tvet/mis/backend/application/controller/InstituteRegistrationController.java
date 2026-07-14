@@ -122,4 +122,16 @@ public class InstituteRegistrationController {
 	    List<ObjectNode> instituteDetails = instituteRegistrationService.getInstituteRenewalDetails(registration_no);
 	    return ResponseEntity.ok(instituteDetails);
 	}
+	
+	@GetMapping("/get-institute-change-details/{registration_no}")
+	public ResponseEntity<List<ObjectNode>> getInstituteChangeDetails(@PathVariable String registration_no){
+	    List<ObjectNode> instituteDetails = instituteRegistrationService.getInstituteChangeDetails(registration_no);
+	    return ResponseEntity.ok(instituteDetails);
+	}
+	
+//	@PostMapping("/change-institute")
+//	public ResponseEntity<?>instituteChange(@RequestBody InstituteRegistrationdto request) {
+//		return (instituteRegistrationService.instituteChange(request));
+//	}
+	
 }

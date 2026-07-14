@@ -40,14 +40,13 @@ public class BirmsPaymentRequestdto {
 	private Date cancelledDate;
 	private String cancelledReason;
 	private String remarks;
-	private String instrumentNo;
-	private String instrumentDate;
 	private String issuingBank;
 	private String paymentMode;
 	private String journalNo;
 	private Integer currentRoleId;
 	private Long userId;
 	private Integer statusId;
+	private Integer instituteId;
 	private String user;
 	private String totalReceiptAmount;
 	private List<BirmsPaymentReceiptDto> receiptList;

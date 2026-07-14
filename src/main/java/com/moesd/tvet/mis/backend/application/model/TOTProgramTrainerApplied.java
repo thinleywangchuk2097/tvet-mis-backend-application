@@ -1,6 +1,6 @@
 package com.moesd.tvet.mis.backend.application.model;
 
-import jakarta.persistence.Column;
+import java.util.Date;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,14 +16,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_tot_assessment_dtls")
-public class ToTAssessment {
-	
+@Table(name = "tbl_tot_program_trainer_applied_dtls")
+public class TOTProgramTrainerApplied {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	@Column(name = "application_no", nullable = false)
 	private String applicationNo;
+	private Integer instituteId;
+	private Integer trainerId;
+	private Integer programAnnouncementId;
+	private Integer createdBy;
+	private Date createdAt;
+	private Integer updatedBy;
+	private Date updatedAt;
+	
 	
 }

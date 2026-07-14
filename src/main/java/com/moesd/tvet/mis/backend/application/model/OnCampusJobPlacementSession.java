@@ -1,5 +1,8 @@
 package com.moesd.tvet.mis.backend.application.model;
 
+import java.time.LocalTime;
+import java.util.Date;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,14 +18,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_rec_member_task_assignment")
-public class RecMemberTaskAssignment {
+@Table(name = "tbl_campus_job_placement_session_dtls")
+public class OnCampusJobPlacementSession {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String ApplicationNo;
-	private String userId;
-	private Integer serviceId;
-	private String remarks;
-	
+	private String sessionName;
+	private String sessionDate;
+	private LocalTime sessionTime;
+	private String venue;
+	private String description;
+	private String instituteId;
+	private Integer createdBy;
+	private Date createdAt;
+	private Integer updatedBy;
+	private Date updatedAt;
+
 }

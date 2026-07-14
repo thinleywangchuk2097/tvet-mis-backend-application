@@ -156,6 +156,13 @@ public class OJTTraineeServiceImpl implements OJTTraineeService{
 		return DtlsJson;
 	}
 
+	@Override
+	public List<ObjectNode> getTraineeOJTReport() {
+		List<Tuple> result = oJTTraineeDetailsRepository.getTraineeOJTReport();
+		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
+		return DtlsJson;
+	}
+
 	
 	
 	

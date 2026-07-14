@@ -1,7 +1,6 @@
 package com.moesd.tvet.mis.backend.application.dto;
 
-import java.util.Date;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,22 +10,20 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Totdto {
-	private String applicationNo;
-	private String courseId;
-	//private String totalNoTrainees;
-	private Date applicationStartDate;
-	private Date applicationEndDate;
-	private Date courseStartDate;
-	private Date courseEndDate;
-	private String courseDescription;
+public class TotProgramDto {
+	
+	private Long id;
+	private String programName;
+	private String programCode;
+	private Integer programTypeId;
+	private String description;
+	private Integer statusId;
 	private Integer createdBy;
 	private Integer updatedBy;
-
+	private List<TotModuleDto> modules;
 	// System fields
 	private Integer serviceId;
 	private Integer assignedRoleId;
 	private String userId;
-	private Integer statusId;
 	private String remarks;
 }

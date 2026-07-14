@@ -23,4 +23,7 @@ public interface OJTTraineeService {
 	
 	List<ObjectNode> getTraineeByInstituteId(String institute_id);
 	
+	List<ObjectNode> getTraineeOJTReport();
+	
+	
 }

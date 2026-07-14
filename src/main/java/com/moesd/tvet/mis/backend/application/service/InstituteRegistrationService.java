@@ -20,5 +20,8 @@ public interface InstituteRegistrationService {
 	ResponseEntity<?> verifyInstituteRegistration(InstituteRegistrationdto request);
 	
 	List<ObjectNode> getInstituteRenewalDetails(String registration_no);
+	
+	List<ObjectNode> getInstituteChangeDetails(String registration_no);
+	
 
 }

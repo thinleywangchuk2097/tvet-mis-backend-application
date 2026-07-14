@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class InstituteRegistrationdto {
 	private String applicationNo;
 	private String instituteName;
+	private Integer currentRoleId;
 	private String dzongkhagId;
 	private String exactLocation;
 	private String telephoneNo;
@@ -26,6 +27,8 @@ public class InstituteRegistrationdto {
 	private String keyContactName;
 	private String keyContactDesignation;
 	private String keyContactMobileNo;
+	private String recMemberUserId;
+	private String overallRemarks;
 	private List<Trainerdto> trainers;
 	private List<Coursedto> courses;
 	private List<QualityStandardsdto> qualityStandards;
@@ -40,7 +43,7 @@ public class InstituteRegistrationdto {
 	private Integer statusId; 
 	private String remarks;
 	private String createdBy;
-	private String updatedBy;
+	private Integer updatedBy;
 	// Documents
 	private Documentdto[] documents;
 }

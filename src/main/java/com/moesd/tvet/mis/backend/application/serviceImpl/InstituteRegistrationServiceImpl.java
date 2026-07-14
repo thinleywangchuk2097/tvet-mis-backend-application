@@ -2,6 +2,7 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails
 import com.moesd.tvet.mis.backend.application.model.RecMemberTaskAssignment;
 import com.moesd.tvet.mis.backend.application.model.Role;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
+import com.moesd.tvet.mis.backend.application.model.TaskFlowList;
 import com.moesd.tvet.mis.backend.application.model.User;
 import com.moesd.tvet.mis.backend.application.model.UserRole;
 import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
@@ -37,6 +39,7 @@ import com.moesd.tvet.mis.backend.application.repository.RecMemberTaskAssignment
 import com.moesd.tvet.mis.backend.application.repository.RoleRepository;
 import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
+import com.moesd.tvet.mis.backend.application.repository.TaskFlowListRepository;
 import com.moesd.tvet.mis.backend.application.repository.UserRepository;
 import com.moesd.tvet.mis.backend.application.repository.UserRoleRepository;
 import com.moesd.tvet.mis.backend.application.service.InstituteRegistrationService;
@@ -59,6 +62,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	private final DropdownManagementRepository dropdownManagementRepository;
 	private final RoleServiceRepository roleServiceRepository;
 	private final WorkTaskFlowService workTaskFlowService;
+	private final TaskFlowListRepository taskFlowListRepository;
 	private final DocumentFileUploadService documentFileUploadService;
 	private final ObjectToJson objectTojson;
 	private final GenerateLicenseNumber generateLicenseNumber;
@@ -112,7 +116,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 					.keyContactDesignation(request.getKeyContactDesignation())
 					.keyContactMobileNo(request.getKeyContactMobileNo()).statusId(request.getStatusId())
 					.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).serviceId(serviceId)
-					.createdBy(request.getCreatedBy()).updatedBy(userId).build();
+					.createdBy(request.getCreatedBy()).build();
 
 			// Build trainers that were added while institute registration
 			if (request.getTrainers() != null && !request.getTrainers().isEmpty()) {
@@ -170,9 +174,9 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			// Save everything - cascade will automatically save trainers and quality
 			InstituteRegistrationApp savedRegistration = instituteRegistrationRepository.save(registration);
 
-			// Get unclaimed statusId
+			// Get initiated statusId
 			Integer taskStatusId = dropdownManagementRepository.findChildById(18)
-					.orElseThrow(() -> new RecordNotFoundException("Unclaimed status not found"));
+					.orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
 
 			// Create workflow
 			WorkFlowList workflow = workTaskFlowService.createWorkflow(applicationNo, request.getInstituteName(),
@@ -364,7 +368,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 				taskStatusId = dropdownManagementRepository.findChildById(18) // task unclaimed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 			}
-			//save accreditors
+			//save accreditor
 			if (request.getAssignedAccreditors() != null && !request.getAssignedAccreditors().isEmpty()) {
 
 			    List<AccreditorTaskAssignment> assignments = request.getAssignedAccreditors()
@@ -411,12 +415,56 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
 						roleService.getNextRoleId(),assignedRecString, request.getRemarks());
 			} else {
-				workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
-						request.getUserId(), request.getRemarks(), serviceId, null);
+				//new starts
+				Long recCount = recMemberTaskAssignmentRepository
+				        .getRECMemberCount(request.getApplicationNo());
+				if (request.getCurrentRoleId() == 23 && recCount > 1) {
+                    
+				    RecMemberTaskAssignment recMember = recMemberTaskAssignmentRepository
+				            .findRecMemberUser(request.getRecMemberUserId(), request.getApplicationNo())
+				            .orElseThrow(() -> new RecordNotFoundException(
+				                    "Rec Member not found with User Id: " + request.getRecMemberUserId()));
 
-				// update task flow
-				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
-						roleService.getNextRoleId(), request.getUserId(), request.getRemarks());
+				    recMember.setRemarks(request.getOverallRemarks());
+				    recMemberTaskAssignmentRepository.save(recMember);
+
+				    String removeUserId = request.getRecMemberUserId();
+
+				    TaskFlowList taskFlowList = taskFlowListRepository
+				            .findByApplicationNo(request.getApplicationNo());
+
+				    if (taskFlowList != null) {
+
+				        String assignedUsers = taskFlowList.getAssignedUserId();
+
+				        if (assignedUsers != null && !assignedUsers.isBlank()) {
+
+				            String updatedAssignedUsers = Arrays.stream(assignedUsers.split(","))
+				                    .map(String::trim)
+				                    .filter(id -> !id.equals(removeUserId))
+				                    .collect(Collectors.joining(","));
+
+				            taskFlowList.setAssignedUserId(
+				                    updatedAssignedUsers.isEmpty() ? null : updatedAssignedUsers
+				            );
+
+				            taskFlowListRepository.save(taskFlowList);
+				        }
+				    }
+				}else {
+					
+					//new ends
+					workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
+							request.getUserId(), request.getRemarks(), serviceId, null);
+
+					// update task flow
+					workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
+							roleService.getNextRoleId(), request.getUserId(), request.getRemarks());
+				}
+				
+				
+				
+			
 			}
 
 			// Save documents
@@ -461,6 +509,13 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	@Override
 	public List<ObjectNode> getInstituteRenewalDetails(String registration_no) {
 		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteRenewalDetails(registration_no);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> getInstituteChangeDetails(String registration_no) {
+		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteChangeDetails(registration_no);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
