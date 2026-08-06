@@ -224,6 +224,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 		if (data.isPresent()) {
 			BirmsPayment p = data.get();
 			p.setPaymentStatus("paid");
+			p.setBirmsPaymentStatus(dto.getReceiptList().get(0).getPaymentAdviceStatus());
 			p.setReceiptNo(dto.getReceiptList().get(0).getReceiptNo());
 			p.setIssuingBank(dto.getIssuingBank());
 			p.setJournalNo(dto.getJournalNo());

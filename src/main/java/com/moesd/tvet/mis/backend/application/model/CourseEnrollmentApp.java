@@ -29,13 +29,13 @@ public class CourseEnrollmentApp {
 
 	private String courseId;
 
-	private String courseFee;
+	private String feesPerTrainee;
 
 	private Integer serviceId;
 
 	private Integer statusId;
 
-	private String totalNoTrainees;
+	private String enrollmentCapacity;
 
 	private Date applicationStartDate;
 

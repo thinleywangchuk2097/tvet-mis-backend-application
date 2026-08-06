@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,10 +16,13 @@ import com.moesd.tvet.mis.backend.application.dto.TraineeMarksdto;
 import com.moesd.tvet.mis.backend.application.dto.TraineeStatusdto;
 import com.moesd.tvet.mis.backend.application.dto.TraineeVivadto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
+import com.moesd.tvet.mis.backend.application.model.AssessorTaskAssignment;
 import com.moesd.tvet.mis.backend.application.model.CourseEnrollmentApp;
 import com.moesd.tvet.mis.backend.application.model.CourseEnrollmentTraineeApp;
+import com.moesd.tvet.mis.backend.application.model.CourseEnrollmentTraineeAppSubjectMarks;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
+import com.moesd.tvet.mis.backend.application.repository.AssessorTaskAssignmentRepository;
 import com.moesd.tvet.mis.backend.application.repository.CourseEnrollmentAppRepository;
 import com.moesd.tvet.mis.backend.application.repository.CourseEnrollmentTraineeAppRepository;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
@@ -50,7 +52,9 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	private final ObjectToJson objectTojson;
 	private final WorkTaskFlowService workTaskFlowService;
 	private final DropdownManagementRepository dropdownManagementRepository;
-
+    private final AssessorTaskAssignmentRepository assessorTaskAssignmentRepository;
+    
+    
 	@Override
 	@Transactional
 	public ResponseEntity<?> submitTrainee(CourseEnrollmentTraineeAppdto request) {
@@ -71,19 +75,36 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(request.getServiceId());
 			CourseEnrollmentApp course = courseEnrollmentAppRepository.findByApplicationNo(request.getApplicationNo())
 					.orElseThrow(() -> new RuntimeException("Course not found"));
+
 			// Build entity
 			CourseEnrollmentTraineeApp trainee = CourseEnrollmentTraineeApp.builder().applicationNo(applicationNo)
 					.applicantName(request.getName()).emailId(request.getEmail()).mobileNo(request.getMobileNo())
 					.course(course).academicQualificationId(request.getAcademicQualificationId())
 					.cidNo(request.getCidNo()).referenceNo(request.getReferenceNo()).dob(request.getDob())
 					.genderId(request.getGenderId()).traineeTypeId(request.getTraineeTypeId())
-					.employmentStatusId(request.getEmploymentStatusId()).remarks(request.getRemarks())
+					.employmentStatusId(request.getEmploymentStatusId()).examYear(request.getExamYear())
+					.schoolName(request.getSchoolName()).stream(request.getStream())
 					.presentDzongkhagId(request.getPresentDzongkhagId()).presentGewogId(request.getPresentGewogId())
-					.parentOccupationId(request.getParentOccupationId())
-					.parentMaritalStatusId(request.getParentMaritalStatusId()).statusId(request.getStatusId())
+					.guardianName(request.getGuardianName()).guardianMobileNo(request.getGuardianMobileNo())
+					.guardianOccupationId(request.getGuardianOccupationId())
+					.guardianMaritalStatusId(request.getGuardianMaritalStatusId()).statusId(request.getStatusId())
 					.createdAt(new java.util.Date()).build();
 
-			// Save entity
+			// Process trainee marks - set the relationship
+			if (request.getTraineeMarks() != null && !request.getTraineeMarks().isEmpty()) {
+				List<CourseEnrollmentTraineeAppSubjectMarks> studentresults = request.getTraineeMarks().stream()
+						.map(studentresultsDto -> {
+							CourseEnrollmentTraineeAppSubjectMarks mark = CourseEnrollmentTraineeAppSubjectMarks
+									.builder().subject(studentresultsDto.getSubject())
+									.markScore(studentresultsDto.getTotal()).build();
+							// IMPORTANT: Set the courseTrainee relationship
+							mark.setCourseTrainee(trainee);
+							return mark;
+						}).collect(Collectors.toList());
+				trainee.setTraineeMarks(studentresults);
+			}
+
+			// Save entity (cascade will save the marks too)
 			courseEnrollmentTraineeAppRepository.save(trainee);
 
 			// Documents
@@ -212,7 +233,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			// Get task statusId
 			Integer taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 					.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
-			
+
 			Integer resultId;
 			// Validate required fields
 			if (request.getCaStartDate() != null && request.getCaEndDate() != null) {
@@ -242,7 +263,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					if (dto.getTheoryAssessment() != null && dto.getPracticalAssessment() != null) {
 						trainee.setTheoryAssessment(String.valueOf(dto.getTheoryAssessment()));
 						trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
-						if (request.getCertificationlevelId() == 36) {
+						trainee.setRemarks(String.valueOf(dto.getRemarks()));
+						if (request.getCertificationlevelId() == 111 || request.getCertificationlevelId() == 112) {
 							if (dto.getTheoryAssessment() >= 40 && dto.getPracticalAssessment() >= 40) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
@@ -282,7 +304,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					if (dto.getVivaAssessment() != null && dto.getPracticalAssessment() != null) {
 						trainee.setVivaAssessment(String.valueOf(dto.getVivaAssessment()));
 						trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
-						if (request.getCertificationlevelId() == 36) {
+						if (request.getCertificationlevelId() == 111 || request.getCertificationlevelId() == 112) {
 							if (dto.getVivaAssessment() >= 40 && dto.getPracticalAssessment() >= 40) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
@@ -307,6 +329,20 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 				// save changes
 				courseEnrollmentTraineeAppRepository.saveAll(trainees);
 			}
+			//save assessor
+			if (request.getAssignedAssessors() != null && !request.getAssignedAssessors().isEmpty()) {
+			    List<AssessorTaskAssignment> assignments = request.getAssignedAssessors()
+			            .stream()
+			            .map(assessor -> AssessorTaskAssignment.builder()
+			                    .userId(assessor.getUserId())
+			                    .ApplicationNo(request.getApplicationNo())
+			                    .serviceId(request.getServiceId())
+			                    .build())
+			            .toList();
+
+			    assessorTaskAssignmentRepository.saveAll(assignments);
+			}
+			
 			// Fetch next role
 			RoleService roleService = roleServiceRepository
 					.getNextAssignedRole(request.getAssignedRoleId(), request.getServiceId(), request.getStatusId())
@@ -425,12 +461,10 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							.cidNo(existingTrainee.getCidNo()).referenceNo(existingTrainee.getReferenceNo())
 							.dob(existingTrainee.getDob()).genderId(existingTrainee.getGenderId())
 							.traineeTypeId(existingTrainee.getTraineeTypeId())
-							.employmentStatusId(existingTrainee.getEmploymentStatusId()).remarks(request.getRemarks())
+							.employmentStatusId(existingTrainee.getEmploymentStatusId())
 							.presentDzongkhagId(existingTrainee.getPresentDzongkhagId())
-							.presentGewogId(existingTrainee.getPresentGewogId())
-							.parentOccupationId(existingTrainee.getParentOccupationId())
-							.parentMaritalStatusId(existingTrainee.getParentMaritalStatusId())
-							.createdAt(new java.util.Date()).build();
+							.presentGewogId(existingTrainee.getPresentGewogId()).createdAt(new java.util.Date())
+							.build();
 
 					newTrainees.add(newTrainee);
 				}
@@ -498,5 +532,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
+
+	
 
 }

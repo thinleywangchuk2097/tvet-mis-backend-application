@@ -24,7 +24,7 @@ public class SelectedTraineedto {
 	private List<TraineeMarksdto> traineeMarks;
 	private List<TraineeVivadto> traineeVivaAssessments;
 	private List<TraineeInternaldto> traineeInternalAssessments;
-
+	private List<AssignedAssessorsDto>assignedAssessors;
 	// System fields
 	private Integer serviceId;
 	private Integer assignedRoleId;

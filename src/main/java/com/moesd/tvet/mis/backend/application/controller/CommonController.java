@@ -99,6 +99,12 @@ public class CommonController {
 		return ResponseEntity.ok(Details);
 	}
 	
+	@GetMapping("/get-all-certificate-levels")
+	public ResponseEntity<List<ObjectNode>> getAllCertificateLevels() {
+		List<ObjectNode> Details = commonService.getAllCertificateLevels();
+		return ResponseEntity.ok(Details);
+	}
+	
 	@GetMapping("/get-announcement-course/{application_no}")
 	public ResponseEntity<List<ObjectNode>> getCourseAnnouncementByApplicationNo(@PathVariable String application_no) {
 		List<ObjectNode> Details = commonService.getCourseAnnouncementByApplicationNo(application_no);

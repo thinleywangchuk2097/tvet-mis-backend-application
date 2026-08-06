@@ -55,10 +55,10 @@ public class CourseEnrollmentAppServiceImpl implements CourseEnrollmentAppServic
 					.applicationEndDate(request.getApplicationEndDate()).courseStartDate(request.getCourseStartDate())
 					.courseEndDate(request.getCourseEndDate()).caEndDate(request.getCaEndDate())
 					.caStartDate(request.getCaStartDate()).certificationLevelId(request.getCertificationLevelId())
-					.courseDescription(request.getCourseDescription()).courseFee(request.getCourseFee())
+					.courseDescription(request.getCourseDescription()).feesPerTrainee(request.getFeesPerTrainee())
 					.courseId(request.getCourseId()).fundingSourceId(request.getFundingSourceId())
 					.instituteId(request.getInstituteId()).remarks(request.getRemarks())
-					.serviceId(request.getServiceId()).totalNoTrainees(request.getTotalNoTrainees())
+					.serviceId(request.getServiceId()).enrollmentCapacity(request.getEnrollmentCapacity())
 					.courseDescription(request.getCourseDescription())
 					.trainingLocationId(request.getTrainingLocationId()).statusId(request.getStatusId())
 					.createdAt(new java.util.Date()).createdBy(request.getCreatedBy()).build();

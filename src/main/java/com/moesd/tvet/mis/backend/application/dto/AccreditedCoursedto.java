@@ -16,13 +16,15 @@ public class AccreditedCoursedto {
 	private String applicationNo;
 	private String instituteId;
 	private String courseId;
-	private String courseFee;
+	private String feesPerTrainee;
+	private String enrolmentCapacity;
 	private String applicantName;
 	private String is_active;
 	private String sectorId;
 	private Date registration_date;
 	private String curriculumId;
 	private String validity_date;
+	private boolean isRenewal;
 	private Integer createdBy;
 	private Date createdAt;
 	private Integer updatedBy;

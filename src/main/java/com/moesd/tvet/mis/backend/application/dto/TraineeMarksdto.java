@@ -13,4 +13,5 @@ public class TraineeMarksdto {
 	private Long traineeId;
     private Integer theoryAssessment;
     private Integer practicalAssessment;
+    private String remarks;
 }

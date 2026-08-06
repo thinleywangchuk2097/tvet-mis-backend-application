@@ -18,5 +18,5 @@ public class Coursedto {
 	private String ojtHours;
 	private String feesPerTrainee;
 	private String enrollmentCapacity;
-	private String courseLevel;
+	private String courseLevelId;
 }

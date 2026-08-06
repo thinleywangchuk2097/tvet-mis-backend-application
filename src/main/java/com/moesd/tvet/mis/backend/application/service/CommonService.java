@@ -36,6 +36,8 @@ public interface CommonService {
 	
 	List<ObjectNode> getAllCourseAnnouncement();
 	
+	List<ObjectNode> getAllCertificateLevels();
+	
 	List<ObjectNode> getCourseAnnouncementByApplicationNo(String application_no);
 	
 	List<ObjectNode> getInstituteNameByInstituteId(String instituteId);

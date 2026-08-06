@@ -10,6 +10,8 @@ public interface TaskFlowListService {
 	
 	List<ObjectNode> getMyTaskListDtl(String userId, String current_roleId);
 	
+	List<ObjectNode> getApplicationStatusAuditCurrentTaskDtl(String applicationNo);
+	
 	List<ObjectNode> getApplicationStatusDtl(String application_no, String applicant_name, String application_date);
 	
 	ObjectNode claimTask(TaskFlowListdto request);

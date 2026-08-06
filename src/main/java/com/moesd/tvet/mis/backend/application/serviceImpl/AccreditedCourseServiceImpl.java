@@ -77,7 +77,9 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			AccreditedCourse course = AccreditedCourse.builder().applicationNo(applicationNo)
 					.instituteId(request.getInstituteId()).courseId(request.getCourseId())
 					.curriculumId(request.getCurriculumId()).serviceId(serviceId)
-					.courseFee(request.getCourseFee()).sectorId(request.getSectorId()).is_active(request.getIs_active())
+					.feesPerTrainee(request.getFeesPerTrainee())
+					.enrolmentCapacity(request.getEnrolmentCapacity())
+					.sectorId(request.getSectorId()).is_active(request.getIs_active())
 					.registration_date(request.getRegistration_date()).validity_date(request.getValidity_date())
 					.statusId(request.getStatusId()).createdBy(request.getCreatedBy()).updatedBy(request.getUpdatedBy())
 					.createdAt(new java.util.Date()).updatedAt(new java.util.Date()).build();
@@ -163,13 +165,13 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			// Integer locationId = 14;
 			// Get task status
 			Integer taskStatusId;
-			if (statusId == 57) {
+			if (statusId == 57 || statusId == 126) {
 				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
+			}else {
+				taskStatusId = dropdownManagementRepository.findChildById(18) // initiated taskId
+						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 			}
-
-			taskStatusId = dropdownManagementRepository.findChildById(18) // initiated taskId
-					.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 
 			// Validate service
 			serviceMasterRepository.findById(serviceId)
@@ -189,6 +191,9 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			existingAccreditedCourse.setStatusId(request.getStatusId());
 			existingAccreditedCourse.setUpdatedAt(new java.util.Date());
 			existingAccreditedCourse.setUpdatedBy(request.getUpdatedBy());
+			if(statusId == 126) {
+				existingAccreditedCourse.setRenewalDate(LocalDateTime.now().plusYears(1));
+			}
 			//Update ONLY existing records
 	        if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
 	            
@@ -280,14 +285,6 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
 						roleService.getNextRoleId(), request.getUserId(), request.getRemarks());
 			}
-			
-			//ends
-			
-			//workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
-			//		request.getUserId(), request.getRemarks(), serviceId, null);
-			// update task flow
-			//workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId, roleService.getNextRoleId(),
-			//		request.getUserId(), request.getRemarks());
 
 			// Save documents
 			if (request.getDocuments() != null && request.getDocuments().length > 0) {
@@ -323,5 +320,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
+
+	
 
 }

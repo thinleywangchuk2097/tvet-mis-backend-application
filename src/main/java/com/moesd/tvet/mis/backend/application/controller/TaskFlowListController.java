@@ -35,6 +35,13 @@ public class TaskFlowListController {
 		return new ResponseEntity<List<ObjectNode>>(taskFlowListService.getMyTaskListDtl(userId, current_roleId),
 				HttpStatus.OK);
 	}
+	
+	@GetMapping("/get-application-status-history/{applicationNo}")
+	public ResponseEntity<List<ObjectNode>> getApplicationStatusAuditCurrentTaskDtl(@PathVariable String applicationNo) {
+		return new ResponseEntity<List<ObjectNode>>(taskFlowListService.getApplicationStatusAuditCurrentTaskDtl(applicationNo),
+				HttpStatus.OK);
+	}
+	
     //It is in process not completed yet
 	@GetMapping("/get-application-dtl-status")
 	public ResponseEntity<List<ObjectNode>> getApplicationStatusDtl(

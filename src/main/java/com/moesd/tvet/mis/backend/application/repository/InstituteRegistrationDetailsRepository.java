@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -200,11 +201,14 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 	
 	
 	
-	@Query(value = "SELECT "
+	@Query(value =  "SELECT "
+			+ "  a.*, "
 			+ "  a.proposed_institute_name AS institute_name "
 			+ "FROM "
 			+ "  tbl_institute_registration_dtls a "
 			+ "WHERE a.institute_id = ?", nativeQuery = true)
 	List<Tuple> getInstituteNameByInstituteId(String registration_no);
+	
+	Optional<InstituteRegistrationDetails> findByRegistrationNo(String registrationNo);
 	
 }

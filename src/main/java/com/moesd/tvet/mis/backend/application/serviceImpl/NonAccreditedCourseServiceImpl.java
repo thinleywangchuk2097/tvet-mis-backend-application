@@ -75,10 +75,9 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 			// 5. Build entity
 			NonAccreditedCourse course = NonAccreditedCourse.builder().applicationNo(applicationNo)
 					.instituteId(request.getInstituteId()).courseTitle(request.getCourseTitle())
-					.theoryHour(request.getTheoryHour()).practicalHour(request.getPracticalHour())
-					.ojtHour(request.getOjtHour()).feesPerTrainee(request.getFeesPerTrainee())
+					.feesPerTrainee(request.getFeesPerTrainee())
 					.enrolmentCapacity(request.getEnrolmentCapacity()).serviceId(serviceId)
-					.certificateLevelId(request.getCertificateLevelId()).curriculumId(request.getCurriculumId())
+					.curriculumId(request.getCurriculumId())
 					.statusId(request.getStatusId()).registrationDate(new Date()).createdBy(request.getCreatedBy())
 					.createdAt(LocalDateTime.now()).build();
 			// Build NonAccreditedCourseQualityStandardResponse that were added while course apply

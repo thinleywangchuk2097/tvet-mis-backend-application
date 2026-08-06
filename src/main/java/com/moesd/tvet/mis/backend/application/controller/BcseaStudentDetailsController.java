@@ -42,7 +42,7 @@ public class BcseaStudentDetailsController {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@GetMapping("/get-student-details/{citizenshipNo}")
+	@GetMapping("/get-student-result-details/{citizenshipNo}")
 	public ResponseEntity<Object> getCitizenDetails(@PathVariable String citizenshipNo) throws ParseException {
 
 		// Step 1: Generate token (no model, noDB)

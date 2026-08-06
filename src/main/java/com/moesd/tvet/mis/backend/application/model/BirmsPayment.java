@@ -39,6 +39,7 @@ public class BirmsPayment {
 	private String redirectUrl;
 	private String paymentDueDate;
 	private String paymentStatus;
+	private String birmsPaymentStatus;
 	private Integer instituteId;
 	private Date updatedAt;
 	private Date createdAt;

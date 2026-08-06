@@ -140,5 +140,9 @@ public interface AssessorAccreditorQMSAuditorRepository extends JpaRepository<As
 						+ "  ) "
 						+ "  AND a.service_id = ?", 
 			    nativeQuery = true)
-			List<Tuple> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo, String serviceId);
+		
+		List<Tuple> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo, String serviceId);
+		
+		
+		
 }

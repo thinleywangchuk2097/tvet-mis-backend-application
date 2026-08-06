@@ -79,4 +79,10 @@ public class UserRoleManagementController {
 	    List<ObjectNode> accreditorUsers = userRoleManagementService.getActiveAccreditorUsers();
 	    return ResponseEntity.ok(accreditorUsers);
 	}
+	
+	@GetMapping("/get-assessors")
+	public ResponseEntity<List<ObjectNode>> getRegisteredAssessors() {
+	    List<ObjectNode> assessorUsers = userRoleManagementService.getRegisteredAssessors();
+	    return ResponseEntity.ok(assessorUsers);
+	}
 }

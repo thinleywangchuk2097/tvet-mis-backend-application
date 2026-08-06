@@ -301,4 +301,11 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 		return DtlsJson;
 	}
 
+	@Override
+	public CurriculumDevelopment getCurriculumById(Long id) {
+	    return curriculumDevelopmentRepository.findById(id)
+	            .orElseThrow(() -> new RecordNotFoundException(
+	                    "Curriculum not found with id: " + id));
+	}
+
 }

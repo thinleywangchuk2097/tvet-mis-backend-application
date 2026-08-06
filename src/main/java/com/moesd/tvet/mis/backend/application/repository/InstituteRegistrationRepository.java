@@ -29,6 +29,7 @@ public interface InstituteRegistrationRepository extends JpaRepository<Institute
 			"SELECT "
 					+ "  ir.id, "
 					+ "  ir.application_no, "
+					+ "  ir.renewal_registration_no, "
 					+ "  ir.proposal_application_no, "
 					+ "  ir.proposed_institute_name, "
 					+ "  ir.dzongkhag_id, "

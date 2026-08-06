@@ -45,7 +45,7 @@ public class InstituteRegistrationDetails {
 	private Integer serviceId;
 	
 	@Column(name = "registration_no", unique = true)
-	private String RegistrationNo;
+	private String registrationNo;
 
 	@Column(name = "website")
 	private String website;
@@ -84,8 +84,9 @@ public class InstituteRegistrationDetails {
 	private LocalDateTime updatedAt;
 	
 	@Column(name = "updated_by")
-	private String updatedBy;
+	private Integer updatedBy;
 
-
+	private LocalDateTime instituteRenewalDate;
+	
 	
 }

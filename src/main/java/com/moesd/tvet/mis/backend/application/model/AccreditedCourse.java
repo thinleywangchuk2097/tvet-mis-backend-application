@@ -2,6 +2,7 @@ package com.moesd.tvet.mis.backend.application.model;
 
 import java.util.Date;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -35,7 +36,9 @@ public class AccreditedCourse {
 
 	private String courseId;
 
-	private String courseFee;
+	private String feesPerTrainee;
+	
+	private String enrolmentCapacity;
 
 	private String is_active;
 
@@ -56,6 +59,8 @@ public class AccreditedCourse {
 	private Integer updatedBy;
 
 	private Date updatedAt;
+	
+	private LocalDateTime renewalDate;
 	
 	private String curriculumId;
 	

@@ -1,0 +1,72 @@
+package com.moesd.tvet.mis.backend.application.repository;
+
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import com.moesd.tvet.mis.backend.application.model.InstituteChangeDetails;
+import jakarta.persistence.Tuple;
+
+public interface InstituteChangeRepository extends JpaRepository<InstituteChangeDetails, Integer>{
+	@Query(value =  
+			"SELECT "
+					+ "  c.id, "
+					+ "  c.application_no, "
+					+ "  c.institute_id, "
+					+ "  c.change_type, "
+					+ "  c.reason_for_change, "
+					+ "  c.dzongkhag_id, "
+					+ "  c.exact_location, "
+					+ "  c.institute_name, "
+					+ "  c.ownership_type_id, "
+					+ "  c.promoter_citizen_id, "
+					+ "  c.promoter_name, "
+					+ "  c.other_ownership_type_id, "
+					+ "  c.registration_no, "
+					+ "  c.company_name, "
+					+ "  c.other_name, "
+					+ "  c.other_address, "
+					+ "  c.status_id, "
+					+ "  c.service_id, "
+					+ "  c.created_by, "
+					+ "  c.created_at, "
+					+ "  c.updated_by, "
+					+ "  c.updated_at, "
+					+ "  ir.proposed_institute_name AS institute_name, "
+					+ "  (SELECT "
+					+ "    JSON_ARRAYAGG( "
+					+ "      JSON_OBJECT( "
+					+ "        'id', "
+					+ "        cp.id, "
+					+ "        'typeOfOwnerId', "
+					+ "        cp.type_of_owner_id, "
+					+ "        'partnerCidNo', "
+					+ "        cp.partner_cid_no, "
+					+ "        'partnerName', "
+					+ "        cp.partner_name, "
+					+ "        'partnerCompanyRegistrationNo', "
+					+ "        cp.partner_company_registration_no, "
+					+ "        'partnerCompanyName', "
+					+ "        cp.partner_company_name "
+					+ "      ) "
+					+ "    ) "
+					+ "  FROM tbl_institute_change_partnership cp "
+					+ "  WHERE cp.application_no = c.application_no) AS partnerships, "
+					+ "  (SELECT "
+					+ "    JSON_ARRAYAGG( "
+					+ "      JSON_OBJECT( "
+					+ "         'id', "
+					+ "        d.id, "
+					+ "        'name', "
+					+ "        d.document_name, "
+					+ "        'url', "
+					+ "        d.upload_url "
+					+ "      ) "
+					+ "    ) "
+					+ "  FROM tbl_document_master d "
+					+ "  WHERE d.application_no = c.application_no) AS documents "
+					+ "FROM tbl_institute_change_dtls c "
+					+ "LEFT JOIN tbl_institute_registration_dtls ir "
+					+ "ON c.institute_id = ir.institute_id "
+					+ "WHERE c.application_no = ?", nativeQuery = true)
+		List<Tuple> getInstituteChangeByApplicationNo(String application_no);
+}

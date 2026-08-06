@@ -483,4 +483,11 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
 		return json;
 	}
 
+	@Override
+	public List<ObjectNode> getRegisteredAssessors() {
+		List<Tuple> result = userRepository.getActiveRegisteredAssessors();
+		List<ObjectNode> json = objectTojson._toJson(result);
+		return json;
+	}
+
 }

@@ -96,7 +96,14 @@ public class CommonServiceImpl implements CommonService {
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
-
+	
+	@Override
+	public List<ObjectNode> getAllCertificateLevels() {
+		List<Tuple> resultList = courseEnrollmentAppRepository.getAllCertificateLevels();
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+	
 	@Override
 	public List<ObjectNode> getCourseAnnouncementByApplicationNo(String application_no) {
 		List<Tuple> resultList = courseEnrollmentAppRepository.getCourseAnnouncementByApplicationNo(application_no);
@@ -118,13 +125,13 @@ public class CommonServiceImpl implements CommonService {
 
 	@Override
 	public List<ObjectNode> getInstituteNameByInstituteId(String instituteId) {
-		
-		
 		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteNameByInstituteId(instituteId);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	
 	}
+
+	
 
 	
 

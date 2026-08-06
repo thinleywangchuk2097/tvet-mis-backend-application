@@ -78,4 +78,40 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "  AND b.assigned_role_id = ?"
 			, nativeQuery = true)
 	List<Tuple>getApplicationStatusDtl(String application_no, String applicant_name, String application_date);
+	
+	@Query(value =
+		    "SELECT * FROM ( " +
+		    "SELECT " +
+		    "  'CURRENT' AS record_type, " +
+		    "  a.id, " +
+		    "  a.application_no, " +
+		    "  a.application_name, " +
+		    "  a.status_id, " +
+		    "  a.service_id, " +
+		    "  a.role_id, " +
+		    "  a.wf_remarks, " +
+		    "  a.action_date " +
+		    "FROM tbl_workflow_dtls a " +
+		    "WHERE a.application_no = ?1 " +
+
+		    "UNION ALL " +
+
+		    "SELECT " +
+		    "  'AUDIT' AS record_type, " +
+		    "  b.id, " +
+		    "  b.application_no, " +
+		    "  b.application_name, " +
+		    "  b.status_id, " +
+		    "  b.service_id, " +
+		    "  b.role_id, " +
+		    "  b.wf_remarks, " +
+		    "  b.action_date " +
+		    "FROM tbl_workflow_dtls_audit b " +
+		    "WHERE b.application_no = ?1 " +
+		    ") t " +
+		    "ORDER BY " +
+		    "CASE WHEN t.record_type = 'CURRENT' THEN 0 ELSE 1 END, " +
+		    "t.action_date",
+		    nativeQuery = true)
+		List<Tuple> getApplicationStatusAuditCurrentTaskDtl(String applicationNo);
 }

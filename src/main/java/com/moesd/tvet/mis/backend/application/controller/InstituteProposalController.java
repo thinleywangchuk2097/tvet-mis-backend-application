@@ -24,7 +24,6 @@ public class InstituteProposalController {
 	
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitInstituteProposal(@RequestBody InstituteProposaldto request) {
-		System.out.println("InstituteProposaldto" + request);
 		return(instituteProposalService.submitInstituteProposal(request));
 	}
 	

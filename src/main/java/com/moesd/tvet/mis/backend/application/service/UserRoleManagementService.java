@@ -30,5 +30,8 @@ public interface UserRoleManagementService {
 	
 	List<ObjectNode> getActiveAccreditorUsers();
 	
+	List<ObjectNode> getRegisteredAssessors();
+	
+	
 	
 }
