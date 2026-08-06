@@ -72,5 +72,13 @@ public interface UserRepository extends JpaRepository<User, Long>{
 			+ "WHERE a.current_role IN(29)", nativeQuery = true)
 	List<Tuple> getActiveAccreditorUsers();
 	
+	@Query(value =  "SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_user a "
+			+ "WHERE a.current_role IN(30)", nativeQuery = true)
+	List<Tuple> getActiveRegisteredAssessors();
+	
+	
 	
 }

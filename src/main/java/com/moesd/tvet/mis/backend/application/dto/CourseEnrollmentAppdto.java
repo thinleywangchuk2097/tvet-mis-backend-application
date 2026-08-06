@@ -14,8 +14,8 @@ public class CourseEnrollmentAppdto {
 
 	private String instituteId;
 	private String courseId;
-	private String courseFee;
-	private String totalNoTrainees;
+	private String feesPerTrainee;
+	private String enrollmentCapacity;
 	private Date applicationStartDate;
 	private Date applicationEndDate;
 	private Date courseStartDate;

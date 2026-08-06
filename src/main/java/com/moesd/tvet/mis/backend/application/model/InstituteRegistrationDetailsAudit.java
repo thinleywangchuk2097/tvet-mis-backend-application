@@ -44,9 +44,11 @@ public class InstituteRegistrationDetailsAudit {
 	private String emailId;
 
 	private String sectorId;
-
+	
+	private Integer serviceId;
+	
 	@Column(name = "registration_no", nullable = false, unique = true, length = 50)
-	private String RegistrationNo;
+	private String registrationNo;
 
 	@Column(name = "website")
 	private String website;
@@ -71,7 +73,7 @@ public class InstituteRegistrationDetailsAudit {
 	
 	private String keyContactMobileNo;
 
-	private String statusId;
+	private Integer statusId;
 
 	private Date licenseExpiryDate;
 
@@ -85,8 +87,10 @@ public class InstituteRegistrationDetailsAudit {
 	private LocalDateTime updatedAt;
 
 	@Column(name = "updated_by")
-	private String updatedBy;
-
+	private Integer updatedBy;
+	
+	private LocalDateTime instituteRenewalDate;
+	
 	@ManyToOne
 	@JoinColumn(name = "institute_id")
 	private InstituteRegistrationDetails instituteRegistrationDetails;

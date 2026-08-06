@@ -83,6 +83,14 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
 	List<Tuple> getAllCourseAnnouncement();
 	
+	@Query(value = "SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_dropdown_child_master a "
+			+ "WHERE a.id IN(108, 109, 110, 111, 112, 35, 36)", nativeQuery = true)
+	List<Tuple> getAllCertificateLevels();
+	
+	
 	@Query(value =  "SELECT "
 			+ "  a.*, "
 			+ "  e.registration_no, "

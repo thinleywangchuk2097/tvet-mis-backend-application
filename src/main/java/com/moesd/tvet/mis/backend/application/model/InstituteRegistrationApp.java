@@ -63,7 +63,9 @@ public class InstituteRegistrationApp {
 	private String keyContactDesignation;
 	
 	private String keyContactMobileNo;
-
+	
+	private String renewalRegistrationNo;
+	
 	private Integer statusId;
 
 	@Column(name = "created_at", updatable = false)

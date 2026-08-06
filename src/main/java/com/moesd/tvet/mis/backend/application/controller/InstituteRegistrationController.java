@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.moesd.tvet.mis.backend.application.dto.InstituteChangeRequestDto;
 import com.moesd.tvet.mis.backend.application.dto.InstituteRegistrationdto;
 import com.moesd.tvet.mis.backend.application.service.InstituteRegistrationService;
 
@@ -29,7 +30,6 @@ public class InstituteRegistrationController {
 	public ResponseEntity<?> registerInstitute(@RequestBody InstituteRegistrationdto request) {
 		return (instituteRegistrationService.registerInstitute(request));
 	}
-	
 	
 	@GetMapping("/get-application-status/{application_no}/{service_id}")
 	public ResponseEntity<?> applicationExistOrNot(@PathVariable String application_no, @PathVariable String service_id){
@@ -129,9 +129,16 @@ public class InstituteRegistrationController {
 	    return ResponseEntity.ok(instituteDetails);
 	}
 	
-//	@PostMapping("/change-institute")
-//	public ResponseEntity<?>instituteChange(@RequestBody InstituteRegistrationdto request) {
-//		return (instituteRegistrationService.instituteChange(request));
-//	}
+	@PostMapping("/change-institute")
+	public ResponseEntity<?>instituteChange(@RequestBody InstituteChangeRequestDto request) {
+		return (instituteRegistrationService.instituteChange(request));
+	}
+	
+	@GetMapping("/get-change-institute/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getInstituteChangeByApplicationNo(@PathVariable String application_no){
+	    List<ObjectNode> instituteDetails = instituteRegistrationService.getInstituteChangeByApplicationNo(application_no);
+	    return ResponseEntity.ok(instituteDetails);
+	}
+	
 	
 }

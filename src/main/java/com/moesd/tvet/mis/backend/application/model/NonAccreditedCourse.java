@@ -38,17 +38,9 @@ public class NonAccreditedCourse {
 
 	private String courseTitle;
 
-	private String theoryHour;
-
-	private String practicalHour;
-
-	private String ojtHour;
-
 	private String feesPerTrainee;
 
 	private String enrolmentCapacity;
-
-	private String certificateLevelId;
 
 	private String curriculumId;
 

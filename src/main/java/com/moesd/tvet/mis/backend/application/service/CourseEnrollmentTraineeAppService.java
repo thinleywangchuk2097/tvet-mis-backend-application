@@ -26,4 +26,5 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	ResponseEntity<?> selectUnselectTrainee(SelectedTraineedto request);
 	
+	
 }

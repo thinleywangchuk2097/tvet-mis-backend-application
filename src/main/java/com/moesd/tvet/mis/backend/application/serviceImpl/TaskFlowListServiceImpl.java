@@ -42,6 +42,13 @@ public class TaskFlowListServiceImpl implements TaskFlowListService{
 		List<ObjectNode> TaskDtlsJson = objectTojson._toJson(resultList);
 		return TaskDtlsJson;
 	}
+	
+	@Override
+	public List<ObjectNode> getApplicationStatusAuditCurrentTaskDtl(String applicationNo) {
+		List<Tuple> resultList = taskFlowListRepository.getApplicationStatusAuditCurrentTaskDtl(applicationNo);
+		List<ObjectNode> TaskDtlsJson = objectTojson._toJson(resultList);
+		return TaskDtlsJson;
+	}
 
 	@Override
 	public ObjectNode claimTask(TaskFlowListdto request) {

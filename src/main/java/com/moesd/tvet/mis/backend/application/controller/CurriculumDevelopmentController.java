@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.CurriculumDevelopmentdto;
+import com.moesd.tvet.mis.backend.application.model.CurriculumDevelopment;
 import com.moesd.tvet.mis.backend.application.service.CurriculumDevelopmentService;
 import lombok.RequiredArgsConstructor;
 
@@ -41,6 +42,11 @@ public class CurriculumDevelopmentController {
 	public ResponseEntity<List<ObjectNode>> getApprovedCurriculumDataByUserId(@PathVariable String user_id, @PathVariable String curriculum_type){
 	    List<ObjectNode> Details = curriculumDevelopmentService.getApprovedCurriculumDataByUserId(user_id, curriculum_type);
 	    return ResponseEntity.ok(Details);
+	}
+	
+	@GetMapping("/get-curriculums-by-id/{id}")
+	public ResponseEntity<CurriculumDevelopment> getCurriculumById(@PathVariable Long id) {
+	    return ResponseEntity.ok(curriculumDevelopmentService.getCurriculumById(id));
 	}
 	
 	@PostMapping("/verify-curriculum")

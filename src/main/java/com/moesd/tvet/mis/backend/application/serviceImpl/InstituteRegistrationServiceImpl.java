@@ -15,15 +15,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AssignedRecsDto;
+import com.moesd.tvet.mis.backend.application.dto.InstituteChangeRequestDto;
 import com.moesd.tvet.mis.backend.application.dto.InstituteRegistrationdto;
+import com.moesd.tvet.mis.backend.application.dto.PartnerDto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.AccreditorTaskAssignment;
+import com.moesd.tvet.mis.backend.application.model.InstituteChangeDetails;
+import com.moesd.tvet.mis.backend.application.model.InstituteChangePartnership;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationApp;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppCourse;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppQualityStandardResponse;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppTrainer;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppTuitionDetails;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
+import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetailsAudit;
 import com.moesd.tvet.mis.backend.application.model.RecMemberTaskAssignment;
 import com.moesd.tvet.mis.backend.application.model.Role;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
@@ -33,6 +38,8 @@ import com.moesd.tvet.mis.backend.application.model.UserRole;
 import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
 import com.moesd.tvet.mis.backend.application.repository.AccreditorTaskAssignmentRepository;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
+import com.moesd.tvet.mis.backend.application.repository.InstituteChangeRepository;
+import com.moesd.tvet.mis.backend.application.repository.InstituteRegistrationDetailsAuditRepository;
 import com.moesd.tvet.mis.backend.application.repository.InstituteRegistrationDetailsRepository;
 import com.moesd.tvet.mis.backend.application.repository.InstituteRegistrationRepository;
 import com.moesd.tvet.mis.backend.application.repository.RecMemberTaskAssignmentRepository;
@@ -73,6 +80,8 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	private final InstituteRegistrationDetailsRepository instituteRegistrationDetailsRepository;
     private final RecMemberTaskAssignmentRepository recMemberTaskAssignmentRepository;
     private final AccreditorTaskAssignmentRepository accreditorTaskAssignmentRepository;
+    private final InstituteRegistrationDetailsAuditRepository instituteRegistrationDetailsAuditRepository;
+    private final InstituteChangeRepository instituteChangeRepository;
     
     
 	@Override
@@ -89,8 +98,8 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			if (request.getStatusId() == null)
 				throw new RecordNotFoundException("statusId is required");
 
-			if (request.getApplicationNo() == null || request.getApplicationNo().isEmpty())
-				throw new RecordNotFoundException("applicationNo is required");
+//			if (request.getApplicationNo() == null || request.getApplicationNo().isEmpty())
+//				throw new RecordNotFoundException("applicationNo is required");
 
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
@@ -103,20 +112,23 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 
 			// Generate application number
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(serviceId);
-
 			// Build InstituteRegistration entity
-			InstituteRegistrationApp registration = InstituteRegistrationApp.builder().applicationNo(applicationNo)
+			InstituteRegistrationApp registration = InstituteRegistrationApp.builder()
+					.applicationNo(applicationNo)
 					.proposedInstituteName(request.getInstituteName()).dzongkhagId(request.getDzongkhagId())
 					.emailId(request.getEmailId()).proposalApplicationNo(request.getApplicationNo())
 					.exactLocation(request.getExactLocation()).mobileNo(request.getMobileNo())
 					.telephoneNo(request.getTelephoneNo()).website(request.getWebsite())
+					.renewalRegistrationNo(request.getRegistrationNo())
 					.ownershipTypeId(request.getOwnershipTypeId()).bhutaneseEmployees(request.getBhutaneseEmployees())
 					.nonBhutaneseEmployees(request.getNonBhutaneseEmployees())
 					.businessLicenseNo(request.getBusinessLicenseNo()).keyContactName(request.getKeyContactName())
 					.keyContactDesignation(request.getKeyContactDesignation())
-					.keyContactMobileNo(request.getKeyContactMobileNo()).statusId(request.getStatusId())
-					.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).serviceId(serviceId)
-					.createdBy(request.getCreatedBy()).build();
+					.keyContactMobileNo(request.getKeyContactMobileNo())
+					.serviceId(serviceId).statusId(request.getStatusId())
+					.createdAt(LocalDateTime.now())
+					.createdBy(request.getCreatedBy())
+					.build();
 
 			// Build trainers that were added while institute registration
 			if (request.getTrainers() != null && !request.getTrainers().isEmpty()) {
@@ -141,7 +153,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 								.practicalHours(courseDto.getPracticalHours()).ojtHours(courseDto.getOjtHours())
 								.feesPerTrainee(courseDto.getFeesPerTrainee())
 								.enrollmentCapacity(courseDto.getEnrollmentCapacity())
-								.courseLevelId(courseDto.getCourseLevel()).instituteRegistration(registration).build())
+								.courseLevelId(courseDto.getCourseLevelId()).instituteRegistration(registration).build())
 						.collect(Collectors.toList());
 
 				registration.setCourses(courses);
@@ -302,70 +314,110 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			if (statusId == 57) {
 				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
-				// Generate application number
-				String licenseNo = generateLicenseNumber.generateLicenseNumber(serviceId);
-				// Build Institute Registration Details entity
-				InstituteRegistrationDetails registrationDetails = InstituteRegistrationDetails.builder()
-						.applicationNo(request.getApplicationNo()).RegistrationNo(licenseNo)
-						.proposedInstituteName(request.getInstituteName()).dzongkhagId(request.getDzongkhagId())
-						.emailId(request.getEmailId()).exactLocation(request.getExactLocation())
-						.mobileNo(request.getMobileNo()).telephoneNo(request.getTelephoneNo())
-						.website(request.getWebsite()).ownershipTypeId(request.getOwnershipTypeId())
-						.bhutaneseEmployees(request.getBhutaneseEmployees())
-						.nonBhutaneseEmployees(request.getNonBhutaneseEmployees())
-						.businessLicenseNo(request.getBusinessLicenseNo()).keyContactName(request.getKeyContactName())
-						.keyContactDesignation(request.getKeyContactDesignation())
-						.keyContactMobileNo(request.getKeyContactMobileNo()).statusId(request.getStatusId())
-						.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).serviceId(serviceId)
-						.createdBy(userId).updatedBy(userId).build();
-				// save registration details
-				instituteRegistrationDetailsRepository.save(registrationDetails);
-				// create user
-				// Check if user ID already exists
-				if (userRepository.findByUserId(licenseNo).isPresent()) {
-					return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
-							"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
-				}
+				if(serviceId == 8 || serviceId == 52 || serviceId == 53) {
+					
+					InstituteRegistrationDetails instituteRegistration = instituteRegistrationDetailsRepository
+				                .findByRegistrationNo(request.getRegistrationNo())
+				                .orElseThrow(() -> new RecordNotFoundException("Institute registration not found with registrationNo: " + request.getRegistrationNo()));
+					//save audit
+					saveInstituteRegistrationAudit(instituteRegistration);
+				    // Update basic fields
+					instituteRegistration.setApplicationNo(request.getApplicationNo());
+					instituteRegistration.setProposedInstituteName(request.getInstituteName());
+					instituteRegistration.setDzongkhagId(request.getDzongkhagId());
+					instituteRegistration.setEmailId(request.getEmailId());
+					instituteRegistration.setExactLocation(request.getExactLocation());
+					instituteRegistration.setMobileNo(request.getMobileNo());
+					instituteRegistration.setTelephoneNo(request.getTelephoneNo());
+					instituteRegistration.setWebsite(request.getWebsite());
+					instituteRegistration.setOwnershipTypeId(request.getOwnershipTypeId());
+					instituteRegistration.setBhutaneseEmployees(request.getBhutaneseEmployees());
+					instituteRegistration.setNonBhutaneseEmployees(request.getNonBhutaneseEmployees());
+					instituteRegistration.setBusinessLicenseNo(request.getBusinessLicenseNo());
+					instituteRegistration.setKeyContactName(request.getKeyContactName());
+					instituteRegistration.setKeyContactDesignation(request.getKeyContactDesignation());
+					instituteRegistration.setKeyContactMobileNo(request.getKeyContactMobileNo());
+					instituteRegistration.setStatusId(request.getStatusId());
+					instituteRegistration.setInstituteRenewalDate(
+						    instituteRegistration.getInstituteRenewalDate() != null
+						        ? instituteRegistration.getInstituteRenewalDate().plusYears(1)
+						        : LocalDateTime.now().plusYears(1)
+						);
+					instituteRegistration.setServiceId(serviceId);
+					instituteRegistration.setUpdatedAt(LocalDateTime.now());
+					instituteRegistration.setUpdatedBy(request.getUpdatedBy());
+					
+					instituteRegistrationDetailsRepository.save(instituteRegistration);
+					
+				}else {
+					// Generate application number
+					String licenseNo = generateLicenseNumber.generateLicenseNumber(serviceId);
+					// Build Institute Registration Details entity
+					InstituteRegistrationDetails registrationDetails = InstituteRegistrationDetails.builder()
+							.applicationNo(request.getApplicationNo()).registrationNo(licenseNo)
+							.proposedInstituteName(request.getInstituteName()).dzongkhagId(request.getDzongkhagId())
+							.emailId(request.getEmailId()).exactLocation(request.getExactLocation())
+							.mobileNo(request.getMobileNo()).telephoneNo(request.getTelephoneNo())
+							.website(request.getWebsite()).ownershipTypeId(request.getOwnershipTypeId())
+							.bhutaneseEmployees(request.getBhutaneseEmployees())
+							.nonBhutaneseEmployees(request.getNonBhutaneseEmployees())
+							.businessLicenseNo(request.getBusinessLicenseNo()).keyContactName(request.getKeyContactName())
+							.keyContactDesignation(request.getKeyContactDesignation())
+							.instituteRenewalDate(LocalDateTime.now())
+							.keyContactMobileNo(request.getKeyContactMobileNo()).statusId(request.getStatusId())
+							.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).serviceId(serviceId)
+							.createdBy(userId).build();
+					// save registration details
+					instituteRegistrationDetailsRepository.save(registrationDetails);
+					// create user
+					// Check if user ID already exists
+					if (userRepository.findByUserId(licenseNo).isPresent()) {
+						return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
+								"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
+					}
 
-				// Create new User
-				User user = new User();
-				// Get roleId from method
-				final Integer roleId = getRoleIdByServiceId(serviceId);
-				// Validate role mapping
-				if (roleId == null) {
-					throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
+					// Create new User
+					User user = new User();
+					// Get roleId from method
+					final Integer roleId = getRoleIdByServiceId(serviceId);
+					// Validate role mapping
+					if (roleId == null) {
+						throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
+					}
+					// Fetch the role
+					Role role = roleRepository.findById(roleId)
+							.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+									"Role with ID " + roleId + " does not exist"));
+					// Assign the single role
+					List<UserRole> userRoles = new ArrayList<>();
+					UserRole userRole = new UserRole();
+					userRole.setUser(user);
+					userRole.setRole(role);
+					userRoles.add(userRole);
+					// Set user properties
+					user.setUserId(licenseNo);
+					user.setPassword(passwordEncoder.encode("password"));
+					user.setFirstName(request.getInstituteName());
+					user.setMiddleName("");
+					user.setLastName("");
+					user.setGenderId("");
+					user.setMobileNo(request.getMobileNo());
+					user.setEmailId(request.getEmailId());
+					user.setCurrentRole(roleId);
+					user.setStatusId("1");
+					user.setLocationId(request.getDzongkhagId());
+					user.setCreatedAt(new Date());
+					user.setCreatedBy(null);
+					user = userRepository.save(user);
+					// Save user role
+					userRoleRepository.saveAll(userRoles);
+					user.setUserRoles(userRoles);
+					userRepository.save(user);
 				}
-				// Fetch the role
-				Role role = roleRepository.findById(roleId)
-						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-								"Role with ID " + roleId + " does not exist"));
-				// Assign the single role
-				List<UserRole> userRoles = new ArrayList<>();
-				UserRole userRole = new UserRole();
-				userRole.setUser(user);
-				userRole.setRole(role);
-				userRoles.add(userRole);
-				// Set user properties
-				user.setUserId(licenseNo);
-				user.setPassword(passwordEncoder.encode("password"));
-				user.setFirstName(request.getInstituteName());
-				user.setMiddleName("");
-				user.setLastName("");
-				user.setGenderId("");
-				user.setMobileNo(request.getMobileNo());
-				user.setEmailId(request.getEmailId());
-				user.setCurrentRole(roleId);
-				user.setStatusId("1");
-				user.setLocationId(request.getDzongkhagId());
-				user.setCreatedAt(new Date());
-				user.setCreatedBy(null);
-				user = userRepository.save(user);
-				// Save user role
-				userRoleRepository.saveAll(userRoles);
-				user.setUserRoles(userRoles);
-				userRepository.save(user);
+				
+				
 			} else {
-				taskStatusId = dropdownManagementRepository.findChildById(18) // task unclaimed Id
+				taskStatusId = dropdownManagementRepository.findChildById(18) // task initiated
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 			}
 			//save accreditor
@@ -498,7 +550,30 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			return 12;
 		return null;
 	}
+	
+	private void saveInstituteRegistrationAudit(InstituteRegistrationDetails registration) {
+		InstituteRegistrationDetailsAudit registrationAudit = InstituteRegistrationDetailsAudit.builder()
+				.applicationNo(registration.getApplicationNo())
+				.registrationNo(registration.getRegistrationNo())
+				.proposedInstituteName(registration.getProposedInstituteName())
+				.dzongkhagId(registration.getDzongkhagId())
+				.emailId(registration.getEmailId()).exactLocation(registration.getExactLocation())
+				.mobileNo(registration.getMobileNo()).telephoneNo(registration.getTelephoneNo())
+				.website(registration.getWebsite()).ownershipTypeId(registration.getOwnershipTypeId())
+				.bhutaneseEmployees(registration.getBhutaneseEmployees())
+				.nonBhutaneseEmployees(registration.getNonBhutaneseEmployees())
+				.businessLicenseNo(registration.getBusinessLicenseNo()).keyContactName(registration.getKeyContactName())
+				.keyContactDesignation(registration.getKeyContactDesignation())
+				.instituteRenewalDate(registration.getInstituteRenewalDate())
+				.keyContactMobileNo(registration.getKeyContactMobileNo()).statusId(registration.getStatusId())
+				.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).serviceId(registration.getServiceId())
+				.instituteRegistrationDetails(registration)
+				.createdBy(registration.getCreatedBy()).build();
 
+		instituteRegistrationDetailsAuditRepository.save(registrationAudit);
+		
+	}
+	
 	@Override
 	public List<ObjectNode> getInstituteDetails(String registration_no) {
 		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteDetails(registration_no);
@@ -519,5 +594,101 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
+
+	@Override
+	public ResponseEntity<?> instituteChange(InstituteChangeRequestDto request) {
+		try {
+			// 1. Validate required fields
+			if (request.getServiceId() == null)
+				throw new RecordNotFoundException("serviceId is required");
+
+			if (request.getAssignedRoleId() == null)
+				throw new RecordNotFoundException("assigned RoleId is required");
+
+			if (request.getStatusId() == null)
+				throw new RecordNotFoundException("statusId is required");
+
+			Integer serviceId = request.getServiceId();
+			Integer assignedRoleId = request.getAssignedRoleId();
+			Integer locationId = 14;
+			String applicantName = request.getInstituteName();
+			// 2. Validate service
+			serviceMasterRepository.findById(serviceId)
+					.orElseThrow(() -> new RecordNotFoundException("Service Id not found"));
+
+			// 3. Get unclaimed statusId
+			Integer taskStatusId = dropdownManagementRepository.findChildById(18)
+					.orElseThrow(() -> new RecordNotFoundException("Unclaimed status not found"));
+
+			// 4. Generate application number
+			String applicationNo = generateApplicationNumber.generateApplicationNumber(serviceId);
+
+			// 5. Build entity
+			InstituteChangeDetails instituteChange = InstituteChangeDetails.builder().applicationNo(applicationNo)
+					.instituteId(request.getInstituteId()).reasonForChange(request.getReasonForChange())
+					.ownershipTypeId(request.getOwnershipTypeId()).otherOwnershipTypeId(request.getOtherOwnershipTypeId())
+					.registrationNo(request.getRegistrationNo()).companyName(request.getCompanyName())
+					.otherName(request.getOtherName()).otherAddress(request.getOtherAddress())
+					.instituteName(request.getInstituteName()).changeType(request.getChangeType())
+					.dzongkhagId(request.getDzongkhagId()).exactLocation(request.getExactLocation())
+					.promoterCitizenId(request.getPromoterCitizenId()).promoterName(request.getPromoterName())
+					.createdBy(request.getCreatedBy())
+					.statusId(request.getStatusId()).createdAt(LocalDateTime.now()).build();
+
+			// 6. Handle partners safely
+			// handle partners safely
+			PartnerDto[] partners = request.getPartners();
+			if (partners != null && partners.length > 0) {
+				List<InstituteChangePartnership> partnerEntities = new ArrayList<>();
+				for (PartnerDto partnerDto : partners) {
+					InstituteChangePartnership partner = InstituteChangePartnership.builder()
+							.typeOfOwnerId(partnerDto.getTypeOfOwner()).partnerCidNo(partnerDto.getCitizenId())
+							.partnerName(partnerDto.getPartnerName())
+							.partnerCompanyRegistrationNo(partnerDto.getRegistrationNo())
+							.partnerCompanyName(partnerDto.getCompanyName()).parent(instituteChange).build();
+
+					partnerEntities.add(partner);
+				}
+				instituteChange.setInstituteChangePartnership(partnerEntities);
+			} else {
+				instituteChange.setInstituteChangePartnership(new ArrayList<>()); // safe empty list
+			}
+
+			// 7. Save proposal
+			instituteChangeRepository.save(instituteChange);
+
+			// 8. Create workflow
+			WorkFlowList workflow = workTaskFlowService.createWorkflow(applicationNo, applicantName, serviceId,
+					request.getStatusId(), assignedRoleId, request.getRemarks());
+
+			// 9. Create task flow
+			workTaskFlowService.createTaskFlow(applicationNo, taskStatusId, assignedRoleId, request.getAssignedUserId(),
+					workflow, request.getRemarks(), locationId);
+
+			// 10. Save documents
+			if (request.getDocuments() != null && request.getDocuments().length > 0) {
+				documentFileUploadService.saveDocument(request.getDocuments(), applicationNo, "institute_change",
+						serviceId, null, null);
+			}
+
+			// 11. Return response
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(Map.of("applicationNo", applicationNo, "status", HttpStatus.CREATED.value()));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
+					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+		}
+	}
+
+	@Override
+	public List<ObjectNode> getInstituteChangeByApplicationNo(String application_no) {
+		List<Tuple> resultList = instituteChangeRepository.getInstituteChangeByApplicationNo(application_no);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	
+	
 
 }
