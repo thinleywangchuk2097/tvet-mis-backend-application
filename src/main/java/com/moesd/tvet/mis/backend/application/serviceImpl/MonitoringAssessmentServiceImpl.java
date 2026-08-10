@@ -19,6 +19,7 @@ import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.service.MonitoringAssessmentService;
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
+import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 
@@ -37,6 +38,7 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	private final DropdownManagementRepository dropdownManagementRepository;
 	private final WorkTaskFlowService workTaskFlowService;
 	private final RoleServiceRepository roleServiceRepository;
+	private final DocumentFileUploadService documentFileUploadService;
 	
 	@Override
 	public List<ObjectNode> getInstituteTypeDropdown() {
@@ -150,6 +152,7 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 			Integer assignedRoleId = request.getAssignedRoleId();
 			Integer statusId = request.getStatusId();// workflow statusId
 			Integer actorId = request.getUpdatedBy();
+			String userId = request.getUserId();
 			Integer locationId = 14;
 			// Get task status
 			Integer taskStatusId;
@@ -214,6 +217,7 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	               
 	            }
 	        }
+	        
 			// Save the updated registration
 	        MonitoringAssessment savedMonitoringAssessment = monitoringAssessmentRepository.save(monitoringAssessment);
             if(statusId == 57 || statusId == 104) {
@@ -230,7 +234,11 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
     			workTaskFlowService.createTaskFlow(request.getApplicationNo(), taskStatusId, roleService.getNextRoleId(), request.getAssignedUserId(),
     					workflow, request.getRemarks(), locationId);
             }
-			
+            //Save documents
+         	if (request.getDocuments() != null && request.getDocuments().length > 0) {
+         		documentFileUploadService.saveDocument(request.getDocuments(), request.getApplicationNo(), "institute_monitoring",
+         		serviceId, userId, null);
+         	}
 			// Return response
 			return ResponseEntity
 					.ok(Map.of("applicationNo", request.getApplicationNo(), "id", savedMonitoringAssessment.getId(), "status",
