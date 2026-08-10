@@ -34,7 +34,9 @@ public class MonitoringAssessmentDto {
 	private Integer updatedBy;
 	
     private String description;
-	
+    // Documents
+ 	private Documentdto[] documents;
+ 	
 	private List<MonitoringAssessmentChecklistDto> qualityStandards;
 	// System fields
 	private Integer serviceId; 

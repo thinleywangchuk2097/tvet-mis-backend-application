@@ -19,6 +19,7 @@ import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.service.ProgramMonitoringService;
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
+import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.persistence.Tuple;
@@ -36,6 +37,7 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 	private final DropdownManagementRepository dropdownManagementRepository;
 	private final WorkTaskFlowService workTaskFlowService;
 	private final RoleServiceRepository roleServiceRepository;
+	private final DocumentFileUploadService documentFileUploadService;
 	
 	@Override
 	public ResponseEntity<?> submitProgramMonitoring(ProgramMonitoringDto request) {
@@ -49,7 +51,6 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 				throw new RuntimeException("statusId is required");
 
 			Integer serviceId = request.getServiceId();
-
 			// Validate service
 			serviceMasterRepository.findById(serviceId).orElseThrow(() -> new RuntimeException("Service Id not found"));
 
@@ -105,6 +106,7 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 	@Transactional
 	public ResponseEntity<?> verifyProgramMonitoring(ProgramMonitoringDto request) {
 		try {
+			System.out.println("dato" + request);
 			// Validate required fields for editing
 			if (request.getApplicationNo() == null || request.getApplicationNo().isEmpty())
 				throw new RecordNotFoundException("applicationNo is required");
@@ -121,8 +123,9 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
 			Integer statusId = request.getStatusId();// workflow statusId
-			Integer actorId = request.getUpdatedBy();
+			Integer actorId = request.getActionId();
 			Integer locationId = 14;
+			//String userId = request.getUserId();
 			// Get task status
 			Integer taskStatusId;
 			if (statusId == 57) {
@@ -150,18 +153,15 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 							"Monitoring Assessment not found with applicationNo: " + request.getApplicationNo()));
 
 			// Update InstituteRegistration entity
-			
 			programMonitoring.setStatusId(request.getStatusId());
 			programMonitoring.setDescription(request.getDescription());
 			programMonitoring.setUpdatedAt(new java.util.Date());
-			programMonitoring.setUpdatedBy(request.getUpdatedBy());
+			programMonitoring.setUpdatedBy(actorId);
 			//Update ONLY existing records
 	        if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
-	            
 	            // Get existing quality standards for this registration
 	            List<ProgramMonitoringCheckList> existingStandards = 
 	            		programMonitoring.getChecklists();
-	           
 	            if (existingStandards != null && !existingStandards.isEmpty()) {
 	                Map<Long, ProgramMonitoringCheckList> existingMap = 
 	                    existingStandards.stream()
@@ -203,7 +203,11 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
     			workTaskFlowService.createTaskFlow(request.getApplicationNo(), taskStatusId, roleService.getNextRoleId(), request.getAssignedUserId(),
     					workflow, request.getRemarks(), locationId);
             }
-			
+            // Save documents
+         	if (request.getDocuments() != null && request.getDocuments().length > 0) {
+         		documentFileUploadService.saveDocument(request.getDocuments(), request.getApplicationNo(), "program_monitoring",
+         						serviceId, null, null);
+         	}
 			// Return response
 			return ResponseEntity
 					.ok(Map.of("applicationNo", request.getApplicationNo(), "id", savedMonitoringAssessment.getId(), "status",
@@ -235,7 +239,6 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 
 	@Override
 	public List<ObjectNode> getCourseByInstituteId(Integer institute_id, Integer course_type_id) {
-		System.out.println("course_type_id" + course_type_id);
 		if(course_type_id == 26) {
 			List<Tuple> resultList = programMonitoringRepository.getAccreditedCourse(institute_id);
 			List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);

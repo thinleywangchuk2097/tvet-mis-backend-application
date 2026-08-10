@@ -38,9 +38,12 @@ public class ProgramMonitoringDto {
 	private Integer updatedBy;
 	
     private String description;
-	
+    // Documents
+ 	private Documentdto[] documents;
+ 	
 	private List<ProgramMonitoringChecklistDto> qualityStandards;
 	// System fields
+	private Integer actionId;
 	private Integer serviceId; 
  	private Integer assignedRoleId;
  	private String assignedUserId; 
