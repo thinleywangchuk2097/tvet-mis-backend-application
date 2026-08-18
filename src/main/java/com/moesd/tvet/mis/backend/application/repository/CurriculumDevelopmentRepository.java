@@ -18,9 +18,12 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 					+ "  c.curriculum_type_id, "
 					+ "  c.description, "
 					+ "  c.certificate_level_id, "
-					+ "  c.course_type_id, "
+					+ "  c.programme_type_id, "
 					+ "  c.entry_requirement, "
-					+ "  c.ncs_id, "
+					+ "  c.sector_id, "
+					+ "  c.occupation_id, "
+					+ "  c.programme_title, "
+					+ "  c.programme_id, "
 					+ "  c.total_ojt_duration, "
 					+ "  c.total_practical_duration, "
 					+ "  c.total_program_duration, "
@@ -67,9 +70,12 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						+ "  c.curriculum_type_id, "
 						+ "  c.description, "
 						+ "  c.certificate_level_id, "
-						+ "  c.course_type_id, "
+						+ "  c.programme_type_id, "
 						+ "  c.entry_requirement, "
-						+ "  c.ncs_id, "
+						+ "  c.sector_id, "
+						+ "  c.occupation_id, "
+						+ "  c.programme_title, "
+						+ "  c.programme_id, "
 						+ "  c.total_ojt_duration, "
 						+ "  c.total_practical_duration, "
 						+ "  c.total_program_duration, "
@@ -114,7 +120,7 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 			    "INNER JOIN tbl_user c ON c.user_id = b.registration_no " +
 			    "WHERE a.status_id = 59 " +
 			    "AND c.user_id = ? " +
-			    "AND a.course_type_id = ?",
+			    "AND a.programme_type_id = ?",
 			    nativeQuery = true)
 		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
 		

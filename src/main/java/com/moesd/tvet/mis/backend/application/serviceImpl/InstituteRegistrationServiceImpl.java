@@ -58,8 +58,10 @@ import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class InstituteRegistrationServiceImpl implements InstituteRegistrationService {
 
@@ -213,10 +215,10 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("message", "Failed to submit institute registration", "error", e.getMessage(),
-							"timestamp", LocalDateTime.now()));
+		    log.error("Failed to submit institute registration", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("message", "Failed to submit institute registration", 
+		                    "timestamp", LocalDateTime.now()));
 		}
 	}
 
@@ -534,10 +536,10 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("message", "Failed to update institute registration", "error", e.getMessage(),
-							"timestamp", LocalDateTime.now()));
+		    log.error("Failed to update institute registration", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("message", "Failed to update institute registration", 
+		                    "timestamp", LocalDateTime.now()));
 		}
 	}
 

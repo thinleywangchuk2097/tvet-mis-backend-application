@@ -26,12 +26,15 @@
 		<tomcat.version>10.1.55</tomcat.version>
 		<jjwt.version>0.12.6</jjwt.version>
 		<commons-io.version>2.15.1</commons-io.version>
+
+		<!-- Security Patches -->
+		<spring-framework.version>6.2.19</spring-framework.version>
+		<spring-data-commons.version>3.5.12</spring-data-commons.version>
 	</properties>
 
-	<!-- CRITICAL: Import Jackson BOM BEFORE Spring Boot -->
 	<dependencyManagement>
 		<dependencies>
-			<!-- Jackson BOM - Forces ALL Jackson modules to 2.18.8 -->
+			<!-- Jackson BOM -->
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
@@ -40,7 +43,12 @@
 				<scope>import</scope>
 			</dependency>
 
-			<!-- Spring Boot's BOM is already imported via parent -->
+			<!-- Override Spring Data Commons - No warning this way -->
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-commons</artifactId>
+				<version>${spring-data-commons.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -63,7 +71,9 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
-		<!-- JWT with Jackson EXCLUDED -->
+		<!-- REMOVED: spring-data-commons from here -->
+
+		<!-- JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>

@@ -30,11 +30,17 @@ public class CurriculumDevelopment {
 
 	private String curriculumTypeId;
 
-	private String courseTypeId;
+	private Long programmeTypeId;
 
 	private String description;
+	
+	private Integer sectorId;
+	
+	private Integer occupationId;
 
-	private Integer ncsId;
+	private String programmeTitle;
+	
+	private Long programmeId;
 	
 	private String totalTheoryDuration;
 
@@ -43,7 +49,7 @@ public class CurriculumDevelopment {
 	private String totalOjtDuration;
 
 	private String totalProgramDuration;
-	
+
 	private String instituteId;
 
 	private Integer statusId;
@@ -59,5 +65,5 @@ public class CurriculumDevelopment {
 	private Integer updatedBy;
 
 	private LocalDateTime updatedAt;
-	
+
 }

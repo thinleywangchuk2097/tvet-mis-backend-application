@@ -14,7 +14,11 @@ public class CurriculumDevelopmentdto {
 	private String applicationNo;
 	private String curriculumName;
 	private String curriculumTypeId;
-	private String courseTypeId;
+	private Long programmeTypeId;
+	private Integer sectorId;
+	private Integer occupationId;
+	private String programmeTitle;
+	private Long programmeId;
 	private Integer ncsId;
 	private String description;
 	private String instituteId;

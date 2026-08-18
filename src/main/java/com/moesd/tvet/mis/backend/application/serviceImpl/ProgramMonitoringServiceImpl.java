@@ -25,8 +25,10 @@ import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 
@@ -89,9 +91,9 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 					"status", 201, "message", "Accredited course submitted successfully"));
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(500)
-					.body(java.util.Map.of("message", "Failed to submit accredited course", "error", e.getMessage()));
+		    log.error("Failed to submit accredited course", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(java.util.Map.of("message", "Failed to submit accredited course"));
 		}
 	}
 
@@ -217,9 +219,10 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to update  Monitoring Assessment", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+		    log.error("Failed to update Monitoring Assessment", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("message", "Failed to update Monitoring Assessment", 
+		                    "timestamp", LocalDateTime.now()));
 		}
 	}
 
