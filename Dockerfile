@@ -16,14 +16,14 @@ COPY src ./src
 # Build the application
 RUN mvn clean package -DskipTests
 
-
-# Stage 2: Run the project
-FROM eclipse-temurin:21-jdk
+# Stage 2: Run the project with Alpine (No Go vulnerabilities!)
+FROM eclipse-temurin:21-jre-alpine
 
 # Set working directory
 WORKDIR /app
 
 # Create upload directories (will be overridden by PVC)
+# Alpine uses 'mkdir -p' just like Ubuntu
 RUN mkdir -p /app/uploads/profile-images /app/uploads/documents
 
 # Create logs directory
