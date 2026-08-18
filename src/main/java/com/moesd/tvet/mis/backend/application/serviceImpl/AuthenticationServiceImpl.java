@@ -28,13 +28,14 @@ import com.moesd.tvet.mis.backend.application.model.UserRole;
 import com.moesd.tvet.mis.backend.application.repository.RoleRepository;
 import com.moesd.tvet.mis.backend.application.repository.TokenRepository;
 import com.moesd.tvet.mis.backend.application.repository.UserRepository;
-//import com.moesd.tvet.mis.backend.application.repository.UserRoleRepository;
 import com.moesd.tvet.mis.backend.application.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -45,7 +46,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	private final JwtUtilService jwtUtilService;
 	private final TokenRepository tokenRepository;
 	private final AuthenticationManager authenticationManager;
-	//private final UserRoleRepository userRoleRepository;
 
 	@Override
 	@Transactional
@@ -84,11 +84,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			user.setLocationId(request.getLocationId());
 			user.setCreatedAt(new Date());
 			user.setCreatedBy(request.getCreatedBy());
-			//user = userRepository.save(user);
-
-			//userRoleRepository.saveAll(userRoles);
-			//user.setUserRoles(userRoles);
-			//var savedUser = userRepository.save(user);
 			user.setUserRoles(userRoles);
 			user = userRepository.save(user);
 
@@ -96,20 +91,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			var jwtToken = jwtUtilService.generateToken(user);
 			var refreshToken = jwtUtilService.generateRefreshToken(user);
 			saveUserToken(user, jwtToken);
-//			return ResponseEntity.status(HttpStatus.CREATED)
-//					.body(Map.of("status", HttpStatus.CREATED.value(), "message", "User registration successful",
-//							"user_id", savedUser.getUserId(), "access_token", jwtToken, "refresh_token", refreshToken));
 			
 			return ResponseEntity.ok(Map.of("access_token", jwtToken, "refresh_token", refreshToken, "current_role",
 					user.getCurrentRole(), "userId", user.getUserId(), "id", user.getId(), "locationId",
 					user.getLocationId()));
 			
-			
-			
 		} catch (ResponseStatusException e) {
 			return ResponseEntity.status(e.getStatusCode()).body(
 					Map.of("status", e.getStatusCode().value(), "error", e.getReason(), "message", e.getReason()));
 		} catch (Exception e) {
+			log.error("Registration failed for userId: {}", request.getUserId(), e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("status", HttpStatus.INTERNAL_SERVER_ERROR.value(), "error", "Internal Server Error",
 							"message", "An unexpected error occurred. Please try again later."));
@@ -136,10 +127,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 					user.getLocationId()));
 
 		} catch (BadCredentialsException e) {
+			log.warn("Authentication failed for username: {}", request.getUsername());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("status", HttpStatus.UNAUTHORIZED.value(),
 					"error", "Unauthorized", "message", "Invalid credentials. Please check your userId and password."));
 
 		} catch (Exception e) {
+			log.error("Authentication error for username: {}", request.getUsername(), e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("status", HttpStatus.INTERNAL_SERVER_ERROR.value(), "error", "Internal Server Error",
 							"message", "An unexpected error occurred during authentication. Please try again later."));
@@ -173,25 +166,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		refreshToken = authHeader.substring(7);
 		userName = jwtUtilService.extractUsername(refreshToken);
 		if (userName != null) {
-			var user = this.userRepository.findByUsername(userName, 1).orElseThrow();
-			if (jwtUtilService.isTokenValid(refreshToken, user)) {
-				var accessToken = jwtUtilService.generateToken(user);
-				revokeAllUserTokens(user);
-				saveUserToken(user, accessToken);
-				var authResponse = AuthenticationResponse.builder().accessToken(accessToken).refreshToken(refreshToken)
-						.build();
-				try {
+			try {
+				var user = this.userRepository.findByUsername(userName, 1).orElseThrow();
+				if (jwtUtilService.isTokenValid(refreshToken, user)) {
+					var accessToken = jwtUtilService.generateToken(user);
+					revokeAllUserTokens(user);
+					saveUserToken(user, accessToken);
+					var authResponse = AuthenticationResponse.builder().accessToken(accessToken).refreshToken(refreshToken)
+							.build();
 					new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-				} catch (StreamWriteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (DatabindException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
+			} catch (StreamWriteException e) {
+				log.error("Stream write error while refreshing token for user: {}", userName, e);
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			} catch (DatabindException e) {
+				log.error("Data binding error while refreshing token for user: {}", userName, e);
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			} catch (IOException e) {
+				log.error("IO error while refreshing token for user: {}", userName, e);
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			} catch (Exception e) {
+				log.error("Unexpected error while refreshing token for user: {}", userName, e);
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
 		}
 	}
@@ -212,11 +208,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 					user.getCurrentRole(), "userId", user.getUserId(), "id", user.getId(), "locationId",
 					user.getLocationId()));
 		} catch (Exception e) {
+			log.error("Bhutan NDI authentication failed for username: {}", request.getUsername(), e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("status", HttpStatus.INTERNAL_SERVER_ERROR.value(), "error", "Internal Server Error",
 							"message", "An unexpected error occurred. Please try again later."));
 		}
 	}
-
-	
 }

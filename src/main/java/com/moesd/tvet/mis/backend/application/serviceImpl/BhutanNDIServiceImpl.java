@@ -17,7 +17,9 @@ import com.moesd.tvet.mis.backend.application.service.AuthenticationService;
 import com.moesd.tvet.mis.backend.application.service.BhutanNDIService;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BhutanNDIServiceImpl implements BhutanNDIService {
@@ -171,17 +173,15 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 			return ResponseEntity.ok(response);
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("message", "Failed to process NATS response"));
+		    log.error("Failed to process NATS response", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("message", "Failed to process NATS response"));
 		}
 	}
 
 	@Override
 	public ResponseEntity<?> processAuthNatsResponse(JsonNode payload) {
 		try {
-			// Log the received pay load
-			System.out.println("Received payload: " + payload.toString());
 
 			// Extract the "data" node
 			JsonNode dataNode = payload.path("data");
@@ -234,13 +234,15 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 				}
 
 			} catch (RuntimeException e) {
-				System.err.println("Error: " + e.getMessage());
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+			    log.error("User not found error", e);
+			    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			            .body("User not found");
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User has denied");
+		    log.error("Failed to process request", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body("User has denied");
 		}
 	}
 }

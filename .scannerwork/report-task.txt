@@ -1,6 +1,0 @@
-projectKey=tvet-mis-backend
-serverUrl=http://localhost:9000
-serverVersion=26.6.0.123539
-dashboardUrl=http://localhost:9000/dashboard?id=tvet-mis-backend
-ceTaskId=2963e9aa-4370-4133-9fd1-8a19d4e7d0d5
-ceTaskUrl=http://localhost:9000/api/ce/task?id=2963e9aa-4370-4133-9fd1-8a19d4e7d0d5

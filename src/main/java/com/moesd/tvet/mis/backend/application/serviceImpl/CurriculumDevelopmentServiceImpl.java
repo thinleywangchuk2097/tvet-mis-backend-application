@@ -46,7 +46,6 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 	@Override
 	public ResponseEntity<?> submitCurriculum(CurriculumDevelopmentdto request) {
 		try {
-			System.out.println("request" + request);
 			//Validate required fields
 			if (request.getServiceId() == null) {
 				log.error("Validation failed: serviceId is required");
@@ -85,8 +84,11 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 				curriculum.setCurriculumTypeId(request.getCurriculumTypeId());
 				curriculum.setDescription(request.getDescription());
 				curriculum.setInstituteId(request.getInstituteId());
-				curriculum.setCourseTypeId(request.getCourseTypeId());
-				curriculum.setNcsId(request.getNcsId());
+				curriculum.setProgrammeTypeId(request.getProgrammeTypeId());
+				curriculum.setSectorId(request.getSectorId());
+				curriculum.setOccupationId(request.getOccupationId());
+				curriculum.setProgrammeTitle(request.getProgrammeTitle());
+				curriculum.setProgrammeId(request.getProgrammeId());;
 				curriculum.setCertificateLevelId(request.getCertificateLevelId());
 				curriculum.setEntryRequirement(request.getEntryRequirement());
 				curriculum.setTotalTheoryDuration(request.getTotalTheoryDuration());
@@ -129,7 +131,12 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 				CurriculumDevelopment curriculumDevelopment = CurriculumDevelopment.builder().applicationNo(applicationNo)
 						.curriculumName(request.getCurriculumName()).curriculumTypeId(request.getCurriculumTypeId())
 						.description(request.getDescription()).instituteId(request.getInstituteId())
-						.courseTypeId(request.getCourseTypeId()).ncsId(request.getNcsId()).certificateLevelId(request.getCertificateLevelId())
+						.programmeTypeId(request.getProgrammeTypeId())
+						.sectorId(request.getSectorId())
+						.occupationId(request.getOccupationId())
+						.programmeTitle(request.getProgrammeTitle())
+						.programmeId(request.getProgrammeId())
+						.certificateLevelId(request.getCertificateLevelId())
 						.entryRequirement(request.getEntryRequirement()).totalTheoryDuration(request.getTotalTheoryDuration())
 						.totalPracticalDuration(request.getTotalPracticalDuration()).totalOjtDuration(request.getTotalOjtDuration())
 						.totalProgramDuration(request.getTotalProgramDuration())
@@ -175,8 +182,11 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 	                .curriculumTypeId(curriculum.getCurriculumTypeId())
 					.description(curriculum.getDescription())
 					.instituteId(curriculum.getInstituteId())
-					.courseTypeId(curriculum.getCourseTypeId())
-					.ncsId(curriculum.getNcsId())
+					.programmeTypeId(curriculum.getProgrammeTypeId())
+					.programmeTitle(curriculum.getProgrammeTitle())
+					.programmeId(curriculum.getProgrammeId())
+					.sectorId(curriculum.getSectorId())
+					.occupationId(curriculum.getOccupationId())
 					.certificateLevelId(curriculum.getCertificateLevelId())
 					.entryRequirement(curriculum.getEntryRequirement())
 					.totalTheoryDuration(curriculum.getTotalTheoryDuration())
@@ -280,10 +290,10 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("message", "Failed to update institute registration", "error", e.getMessage(),
-							"timestamp", LocalDateTime.now()));
+		    log.error("Failed to update institute registration", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("message", "Failed to update institute registration", 
+		                    "timestamp", LocalDateTime.now()));
 		}
 	}
 

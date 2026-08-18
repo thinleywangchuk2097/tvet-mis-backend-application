@@ -27,8 +27,10 @@ import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseService {
 
@@ -243,10 +245,10 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("message", "Failed to update Non Accredited Course registration", "error",
-							e.getMessage(), "timestamp", LocalDateTime.now()));
+		    log.error("Failed to update Non Accredited Course registration", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("message", "Failed to update Non Accredited Course registration", 
+		                    "timestamp", LocalDateTime.now()));
 		}
 	}
 

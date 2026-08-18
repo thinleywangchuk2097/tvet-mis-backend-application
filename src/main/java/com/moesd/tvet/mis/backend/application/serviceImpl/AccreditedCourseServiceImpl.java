@@ -31,7 +31,10 @@ import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccreditedCourseServiceImpl implements AccreditedCourseService {
@@ -119,11 +122,11 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			return ResponseEntity.status(201).body(java.util.Map.of("applicationNo", applicationNo, "id", saved.getId(),
 					"status", 201, "message", "Accredited course submitted successfully"));
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(500)
-					.body(java.util.Map.of("message", "Failed to submit accredited course", "error", e.getMessage()));
-		}
+		}  catch (Exception e) {
+	        log.error("Failed to submit accredited course", e);  // Log for debugging
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Failed to submit accredited course");  // User-friendly only
+	    }
 	}
 
 	@Override
@@ -301,10 +304,11 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to update  Accredited Course", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
-		}
+	        log.error("Failed to update Accredited Course", e);  // Log for debugging
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("message", "Failed to update Accredited Course", 
+	                        "timestamp", LocalDateTime.now()));
+	    }
 	}
 
 	@Override

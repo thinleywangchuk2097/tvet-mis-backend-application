@@ -118,9 +118,9 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					Map.of("applicationNo", applicationNo, "status", 201, "message", "Trainee submitted successfully"));
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(500)
-					.body(Map.of("message", "Failed to submit Trainee", "error", e.getMessage()));
+		    log.error("Failed to submit Trainee", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("message", "Failed to submit Trainee"));
 		}
 	}
 

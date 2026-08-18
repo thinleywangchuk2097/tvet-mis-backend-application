@@ -36,7 +36,10 @@ import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccreditorQMSAuditorService {
@@ -146,11 +149,11 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("message", "Failed to submit assessor/accreditor/qms auditor registration", "error",
-							e.getMessage(), "timestamp", LocalDateTime.now()));
-		}
+	        log.error("Failed to submit assessor/accreditor/qms auditor registration", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("message", "Failed to submit assessor/accreditor/qms auditor registration", 
+	                        "timestamp", LocalDateTime.now()));
+	    }
 	}
 
 	@Override

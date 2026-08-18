@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "tbl_curriculum_development_audit")
 public class CurriculumDevelopmentAudit {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -34,12 +34,18 @@ public class CurriculumDevelopmentAudit {
 
 	private String curriculumTypeId;
 
-	private String courseTypeId;
+	private Long programmeTypeId;
+	
+	private Integer sectorId;
 
+	private Integer occupationId;
+
+	private String programmeTitle;
+	
+	private Long programmeId;
+	
 	private String description;
 
-	private Integer ncsId;
-	
 	private String totalTheoryDuration;
 
 	private String totalPracticalDuration;
@@ -47,7 +53,7 @@ public class CurriculumDevelopmentAudit {
 	private String totalOjtDuration;
 
 	private String totalProgramDuration;
-	
+
 	private String instituteId;
 
 	private Integer statusId;
@@ -63,9 +69,9 @@ public class CurriculumDevelopmentAudit {
 	private Integer updatedBy;
 
 	private LocalDateTime updatedAt;
-	
+
 	@ManyToOne
-    @JoinColumn(name = "curriculum_id")
-    private CurriculumDevelopment curriculum;
-	
+	@JoinColumn(name = "curriculum_id")
+	private CurriculumDevelopment curriculum;
+
 }

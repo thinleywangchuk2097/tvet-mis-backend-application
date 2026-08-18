@@ -17,9 +17,7 @@ import com.moesd.tvet.mis.backend.application.model.TracerSurveyResponseDetails;
 import com.moesd.tvet.mis.backend.application.model.TracerSurveySendDetails;
 import com.moesd.tvet.mis.backend.application.service.TracerQuestionGeneratorService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/tracer")
@@ -38,21 +36,31 @@ public class PublicTracerController {
 
 			return ResponseEntity.ok(Map.of("success", true, "data", survey, "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("success", false, "message",
-					"Failed to fetch survey", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Failed to fetch survey");
 		}
 	}
 	
 	@GetMapping("/get-tracer/{application_no}")
-	public ResponseEntity<List<ObjectNode>> getTracerDetailsByApplicationNo(@PathVariable String application_no){
-	    List<ObjectNode> tracerDetails = tracerQuestionGeneratorService.getTracerDetailsByApplicationNo(application_no);
-	    return ResponseEntity.ok(tracerDetails);
+	public ResponseEntity<?> getTracerDetailsByApplicationNo(@PathVariable String application_no){
+		try {
+			List<ObjectNode> tracerDetails = tracerQuestionGeneratorService.getTracerDetailsByApplicationNo(application_no);
+			return ResponseEntity.ok(Map.of("success", true, "data", tracerDetails));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Failed to fetch tracer details");
+		}
 	}
 	
 	@GetMapping("/get-tracer-question-dropdown")
-	public ResponseEntity<List<ObjectNode>> getTracerQuestionDropdownType() {
-		List<ObjectNode> data = tracerQuestionGeneratorService.getTracerQuestionDropdownType();
-		return ResponseEntity.ok(data);
+	public ResponseEntity<?> getTracerQuestionDropdownType() {
+		try {
+			List<ObjectNode> data = tracerQuestionGeneratorService.getTracerQuestionDropdownType();
+			return ResponseEntity.ok(Map.of("success", true, "data", data));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Failed to fetch dropdown data");
+		}
 	}
 	
 	@PostMapping("/submit-survey-response")
@@ -69,11 +77,8 @@ public class PublicTracerController {
 					"timestamp", LocalDateTime.now()));
 			
 		} catch (Exception e) {
-			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("success", false, "message", "Failed to submit survey responses", 
-							"error", e.getMessage(),
-							"timestamp", LocalDateTime.now()));
+					.body("Failed to submit survey responses");
 		}
 	}
 }

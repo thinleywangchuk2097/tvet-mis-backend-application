@@ -33,16 +33,7 @@ public class NcsUnit {
     @Column(name = "unit_title", nullable = false, length = 255)
     private String unitTitle;
     
-    @Column(name = "created_by")
-    private Integer createdBy;
-    
-    @Column(name = "updated_by")
-    private Integer updatedBy;
-    
-    @Column(name = "is_active")
-    private Boolean isActive = true;
-    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "publication_id", referencedColumnName = "publication_id", nullable = false)
+    @JoinColumn(name = "ncs_id", referencedColumnName = "id", nullable = false)
     private NcsApp ncsApp;
 }

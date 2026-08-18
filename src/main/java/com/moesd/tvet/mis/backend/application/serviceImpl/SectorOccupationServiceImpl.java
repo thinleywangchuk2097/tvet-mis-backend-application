@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,7 +15,6 @@ import com.moesd.tvet.mis.backend.application.model.Sector;
 import com.moesd.tvet.mis.backend.application.repository.SectorOccupationRepository;
 import com.moesd.tvet.mis.backend.application.service.SectorOccupationService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -60,10 +60,10 @@ public class SectorOccupationServiceImpl implements SectorOccupationService{
 						"status", 201, "message", "Sector and occupations created successfully"));
 	            
 	        } catch (Exception e) {
-				e.printStackTrace();
-				return ResponseEntity.status(500)
-						.body(java.util.Map.of("message", "Failed to Sector and occupations created", "error", e.getMessage()));
-			}
+	            log.error("Failed to create Sector and occupations", e);
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                    .body(java.util.Map.of("message", "Failed to create Sector and occupations"));
+	        }
 	}
 
 	@Override

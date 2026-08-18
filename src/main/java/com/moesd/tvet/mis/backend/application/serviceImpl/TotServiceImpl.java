@@ -30,8 +30,10 @@ import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TotServiceImpl implements TotService {
 
@@ -116,9 +118,9 @@ public class TotServiceImpl implements TotService {
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", e.getMessage()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("status", 500, "message", "Failed to submit TOT Program", "error", e.getMessage()));
+		    log.error("Failed to submit TOT Program", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("status", 500, "message", "Failed to submit TOT Program"));
 		}
 	}
 
@@ -194,9 +196,9 @@ public class TotServiceImpl implements TotService {
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", e.getMessage()));
 		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-					Map.of("status", 500, "message", "Failed to submit TOT Announcement", "error", e.getMessage()));
+		    log.error("Failed to submit TOT Announcement", e);
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		            .body(Map.of("status", 500, "message", "Failed to submit TOT Announcement"));
 		}
 	}
 
@@ -325,14 +327,11 @@ public class TotServiceImpl implements TotService {
 	                ));
 
 	    } catch (Exception e) {
-
-	        e.printStackTrace();
-
+	        log.error("Failed to apply trainers", e);
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 	                .body(Map.of(
 	                        "status", 500,
-	                        "message", "Failed to apply trainers.",
-	                        "error", e.getMessage()
+	                        "message", "Failed to apply trainers."
 	                ));
 	    }
 	}

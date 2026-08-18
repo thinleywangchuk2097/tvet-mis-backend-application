@@ -94,14 +94,12 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 			return ResponseEntity.ok(jsonNode);
 
 		} catch (Exception e) {
-			e.printStackTrace();
-
-			Map<String, Object> error = new HashMap<>();
-			error.put("statusCode", 500);
-			error.put("message", "Token generation failed");
-			error.put("error", e.getMessage());
-
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+		    log.error("Token generation failed", e);
+		    Map<String, Object> error = new HashMap<>();
+		    error.put("statusCode", 500);
+		    error.put("message", "Token generation failed");
+		
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
 		}
 	}
 

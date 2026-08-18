@@ -14,7 +14,10 @@ import com.moesd.tvet.mis.backend.application.dto.Documentdto;
 import com.moesd.tvet.mis.backend.application.model.DocumentFile;
 import com.moesd.tvet.mis.backend.application.repository.DocumentRepository;
 import jakarta.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @Service
 public class DocumentFileUploadService {
 	@Value("${file.store.path}")
@@ -50,8 +53,7 @@ public class DocumentFileUploadService {
 	            try {
 	                FileCopyUtils.copy(content, new File(filePath));
 	            } catch (IOException e) {
-	                e.printStackTrace(); // Print stack trace for debugging
-	                // Handle the exception, e.g., throw an exception or log the error.
+	                log.error("IO error occurred, skipping to next iteration", e);
 	                continue; // Skip to the next iteration
 	            }
 	            
