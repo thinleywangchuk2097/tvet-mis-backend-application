@@ -31,7 +31,8 @@ public class NcsServiceImpl implements NcsService {
 	private final ObjectToJson objectTojson;
 	private final DocumentFileUploadService documentFileUploadService;
 	private final NcsUnitRepository ncsUnitRepository;
-
+	private static final String MESSAGE_KEY = "message";
+	
 	@Override
 	@Transactional
 	public ResponseEntity<?> submitNcs(Ncsdto request) {
@@ -61,13 +62,13 @@ public class NcsServiceImpl implements NcsService {
 						request.getServiceId(), null, null);
 			}
 
-			return ResponseEntity.status(201).body(Map.of("status", 201, "message", "NCS created successfully"
+			return ResponseEntity.status(201).body(Map.of("status", 201, MESSAGE_KEY, "NCS created successfully"
 
 			));
 
 		} catch (Exception e) {
 			log.error("Error submitting NCS: ", e);
-			return ResponseEntity.status(500).body(Map.of("message", "Failed to submit NCS", "error", e.getMessage()));
+			return ResponseEntity.status(500).body(Map.of(MESSAGE_KEY, "Failed to submit NCS", "error", e.getMessage()));
 		}
 	}
 
@@ -98,10 +99,10 @@ public class NcsServiceImpl implements NcsService {
 						request.getServiceId(), null, null);
 			}
 
-			return ResponseEntity.ok(Map.of("status", 200, "message", "NCS updated successfully"));
+			return ResponseEntity.ok(Map.of("status", 200, MESSAGE_KEY, "NCS updated successfully"));
 		} catch (Exception e) {
 			log.error("Error updating NCS: ", e);
-			return ResponseEntity.status(500).body(Map.of("message", "Failed to update NCS", "error", e.getMessage()));
+			return ResponseEntity.status(500).body(Map.of(MESSAGE_KEY, "Failed to update NCS", "error", e.getMessage()));
 		}
 	}
 
