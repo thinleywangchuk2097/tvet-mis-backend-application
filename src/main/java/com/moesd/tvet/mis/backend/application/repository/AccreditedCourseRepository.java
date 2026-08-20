@@ -92,7 +92,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 						+ "  ac.updated_by, "
 						+ "  ir.proposed_institute_name, "
 						+ "  ir.registration_no, "
-						+ "  cd.curriculum_name, "
+						+ "  cd.curriculum_title, "
 						+ "  om.occupation_name AS course_name, "
 						+ "  (SELECT "
 						+ "    JSON_ARRAYAGG( "

@@ -65,7 +65,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
 			String userId = request.getUserId();
-			String applicantName = request.getCurriculumName();
+			String applicantName = request.getCurriculumTitle();
 			Integer locationId = 14;
 			
 			//Get initiated statusId
@@ -80,7 +80,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 				saveCurriculumAudit(curriculum);
 				
 				curriculum.setApplicationNo(request.getApplicationNo());
-				curriculum.setCurriculumName(request.getCurriculumName());
+				curriculum.setCurriculumTitle(request.getCurriculumTitle());
 				curriculum.setCurriculumTypeId(request.getCurriculumTypeId());
 				curriculum.setDescription(request.getDescription());
 				curriculum.setInstituteId(request.getInstituteId());
@@ -129,7 +129,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 
 				//Build entity
 				CurriculumDevelopment curriculumDevelopment = CurriculumDevelopment.builder().applicationNo(applicationNo)
-						.curriculumName(request.getCurriculumName()).curriculumTypeId(request.getCurriculumTypeId())
+						.curriculumTitle(request.getCurriculumTitle()).curriculumTypeId(request.getCurriculumTypeId())
 						.description(request.getDescription()).instituteId(request.getInstituteId())
 						.programmeTypeId(request.getProgrammeTypeId())
 						.sectorId(request.getSectorId())
@@ -178,7 +178,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 	private void saveCurriculumAudit(CurriculumDevelopment curriculum) {
 		CurriculumDevelopmentAudit curriculumAudit = CurriculumDevelopmentAudit.builder()
 	                .applicationNo(curriculum.getApplicationNo())
-	                .curriculumName(curriculum.getCurriculumName())
+	                .curriculumTitle(curriculum.getCurriculumTitle())
 	                .curriculumTypeId(curriculum.getCurriculumTypeId())
 					.description(curriculum.getDescription())
 					.instituteId(curriculum.getInstituteId())

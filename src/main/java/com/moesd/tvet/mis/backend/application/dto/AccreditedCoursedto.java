@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccreditedCoursedto {
-	
+
 	private String applicationNo;
 	private String instituteId;
 	private String courseId;
@@ -25,21 +25,26 @@ public class AccreditedCoursedto {
 	private String curriculumId;
 	private String validity_date;
 	private boolean isRenewal;
+	private String LeadTrainerCidNo;
+	private Integer genderId;
+	private String leadTrainerName;
+	private String professionalExperience;
+	private Integer qualificationId;
 	private Integer createdBy;
 	private Date createdAt;
 	private Integer updatedBy;
 	private Date updatedAt;
 	private List<QualityStandardsdto> qualityStandards;
 	private List<AssignedRecsDto> assignedRecs;
-	private List<AssignedRecsDto>assignedAccreditors;
-    
- // System fields
- 	private Integer serviceId; 
- 	private Integer assignedRoleId;
- 	private String assignedUserId; 
- 	private String userId; 
- 	private Integer statusId; 
- 	private String remarks;
- 	// Documents
- 	private Documentdto[] documents;
+	private List<AssignedRecsDto> assignedAccreditors;
+
+	// System fields
+	private Integer serviceId;
+	private Integer assignedRoleId;
+	private String assignedUserId;
+	private String userId;
+	private Integer statusId;
+	private String remarks;
+	// Documents
+	private Documentdto[] documents;
 }

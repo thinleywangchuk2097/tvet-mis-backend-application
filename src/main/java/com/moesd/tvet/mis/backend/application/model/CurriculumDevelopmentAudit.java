@@ -30,7 +30,7 @@ public class CurriculumDevelopmentAudit {
 	@Column(name = "application_no")
 	private String applicationNo;
 
-	private String curriculumName;
+	private String curriculumTitle;
 
 	private String curriculumTypeId;
 

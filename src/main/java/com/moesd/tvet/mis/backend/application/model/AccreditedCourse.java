@@ -52,6 +52,16 @@ public class AccreditedCourse {
 	
 	private Integer serviceId;
 	
+	private String LeadTrainerCidNo;
+	
+	private Integer genderId;
+	
+	private String leadTrainerName;
+	
+	private String professionalExperience;
+	
+	private Integer qualificationId;
+	
 	private Integer createdBy;
 
 	private Date createdAt;

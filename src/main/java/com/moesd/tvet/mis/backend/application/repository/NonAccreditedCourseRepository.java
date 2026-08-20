@@ -31,7 +31,7 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 					 + "  k.mobile_no, "
 					 + "  k.registration_no, "
 					 + "  t.task_status_id, "
-					 + "  cd.curriculum_name, "
+					 + "  cd.curriculum_title, "
 					 + "  cd.total_ojt_duration, "
 					 + "  cd.total_practical_duration, "
 					 + "  cd.total_theory_duration, "

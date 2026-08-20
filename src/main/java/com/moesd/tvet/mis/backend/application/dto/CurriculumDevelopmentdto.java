@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class CurriculumDevelopmentdto {
 
 	private String applicationNo;
-	private String curriculumName;
+	private String curriculumTitle;
 	private String curriculumTypeId;
 	private Long programmeTypeId;
 	private Integer sectorId;
