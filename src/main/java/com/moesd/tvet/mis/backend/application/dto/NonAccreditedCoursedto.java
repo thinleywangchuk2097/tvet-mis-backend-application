@@ -15,13 +15,10 @@ import lombok.NoArgsConstructor;
 public class NonAccreditedCoursedto {
 	
 	private String instituteId;
-	private String courseTitle;
-	//private String theoryHour;
-	//private String practicalHour;
-	//private String ojtHour;
+	private String programmeTitle;
+	private Integer programmeTypeId;
 	private String feesPerTrainee;
 	private String enrolmentCapacity;
-//	private String certificateLevelId;
 	private String curriculumId;
 	private Date registrationDate;
 	private Date validityDate;

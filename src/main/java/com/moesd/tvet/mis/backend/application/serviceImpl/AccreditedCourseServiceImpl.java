@@ -78,17 +78,22 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 
 			// Build main entity
 			AccreditedCourse course = AccreditedCourse.builder().applicationNo(applicationNo)
-					.instituteId(request.getInstituteId()).courseId(request.getCourseId())
+					.instituteId(request.getInstituteId())
 					.curriculumId(request.getCurriculumId()).serviceId(serviceId)
 					.feesPerTrainee(request.getFeesPerTrainee())
 					.enrolmentCapacity(request.getEnrolmentCapacity())
-					.LeadTrainerCidNo(request.getLeadTrainerCidNo()).leadTrainerName(request.getLeadTrainerName())
-					.genderId(request.getGenderId()).professionalExperience(request.getProfessionalExperience())
+					.LeadTrainerCidNo(request.getLeadTrainerCidNo())
+					.leadTrainerName(request.getLeadTrainerName())
+					.genderId(request.getGenderId())
+					.professionalExperience(request.getProfessionalExperience())
 					.qualificationId(request.getQualificationId())
-					.sectorId(request.getSectorId()).is_active(request.getIs_active())
-					.registration_date(request.getRegistration_date()).validity_date(request.getValidity_date())
-					.statusId(request.getStatusId()).createdBy(request.getCreatedBy()).updatedBy(request.getUpdatedBy())
-					.createdAt(new java.util.Date()).updatedAt(new java.util.Date()).build();
+					.registration_date(request.getRegistration_date())
+					.validity_date(request.getValidity_date())
+					.statusId(request.getStatusId())
+					.createdBy(request.getCreatedBy())
+					.updatedBy(request.getUpdatedBy())
+					.createdAt(new java.util.Date())
+					.updatedAt(new java.util.Date()).build();
 			// Build AccreditedCourseQualityStandardResponse that were added while course add 
 			if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
 				List<AccreditedCourseQualityStandardResponse> qualitystandards = request.getQualityStandards()
@@ -324,6 +329,13 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	@Override
 	public List<ObjectNode> getAccreditedCourseByInstituteId(String institute_id) {
 		List<Tuple> resultList = accreditedCourseRepository.getAccreditedCourseByInstituteId(institute_id);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> curriculumExist(Long curriculumId, String registration_no) {
+		List<Tuple> resultList = accreditedCourseRepository.curriculumExist(curriculumId, registration_no);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

@@ -70,5 +70,12 @@ public class CourseEnrollmentTraineeAppController {
 	public ResponseEntity<?> selectUnselectTrainee(@RequestBody SelectedTraineedto request) {
 		return (courseEnrollmentTraineeAppService.selectUnselectTrainee(request));
 	}
+	
+	
+	@GetMapping("/get-assigned-assessors/{application_no}")
+	public ResponseEntity<List<ObjectNode>> fetchAssignedAssessors(@PathVariable String application_no) {
+		List<ObjectNode> Details = courseEnrollmentTraineeAppService.fetchAssignedAssessors(application_no);
+		return ResponseEntity.ok(Details);
+	}
 
 }

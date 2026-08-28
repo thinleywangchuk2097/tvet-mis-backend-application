@@ -36,12 +36,6 @@ public class CurriculumDevelopmentAudit {
 
 	private Long programmeTypeId;
 	
-	private Integer sectorId;
-
-	private Integer occupationId;
-
-	private String programmeTitle;
-	
 	private Long programmeId;
 	
 	private String description;

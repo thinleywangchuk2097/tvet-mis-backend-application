@@ -59,7 +59,7 @@ public class CourseEnrollmentAppServiceImpl implements CourseEnrollmentAppServic
 					.courseEndDate(request.getCourseEndDate()).caEndDate(request.getCaEndDate())
 					.caStartDate(request.getCaStartDate()).certificationLevelId(request.getCertificationLevelId())
 					.courseDescription(request.getCourseDescription()).feesPerTrainee(request.getFeesPerTrainee())
-					.courseId(request.getCourseId()).fundingSourceId(request.getFundingSourceId())
+					.programmeId(request.getProgrammeId()).fundingSourceId(request.getFundingSourceId())
 					.instituteId(request.getInstituteId()).remarks(request.getRemarks())
 					.serviceId(request.getServiceId()).enrollmentCapacity(request.getEnrollmentCapacity())
 					.courseDescription(request.getCourseDescription())
@@ -97,6 +97,13 @@ public class CourseEnrollmentAppServiceImpl implements CourseEnrollmentAppServic
 	@Override
 	public List<ObjectNode> getReAssessmentServiceName() {
 		List<Tuple> resultList = courseEnrollmentAppRepository.getReAssessmentServiceName();
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> getTraineeDetailsById(String traineeId) {
+		List<Tuple> resultList = courseEnrollmentAppRepository.getTraineeDetailsById(traineeId);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

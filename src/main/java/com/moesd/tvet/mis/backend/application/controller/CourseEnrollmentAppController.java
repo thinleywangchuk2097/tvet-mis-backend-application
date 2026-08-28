@@ -40,6 +40,12 @@ public class CourseEnrollmentAppController {
 		return ResponseEntity.ok(Details);
 	}
 	
+	@GetMapping("/get-trainee-verification-details/{traineeId}")
+	public ResponseEntity<List<ObjectNode>> getTraineeDetailsById(@PathVariable String traineeId) {
+		List<ObjectNode> Details = courseEnrollmentAppService.getTraineeDetailsById(traineeId);
+		return ResponseEntity.ok(Details);
+	}
+	
 	
 
 }

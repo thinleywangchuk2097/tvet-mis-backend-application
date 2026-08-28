@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_course_enrollment_trainee_subject_marks")
+@Table(name = "tbl_programme_trainee_enrollment_subject_marks")
 public class CourseEnrollmentTraineeAppSubjectMarks {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

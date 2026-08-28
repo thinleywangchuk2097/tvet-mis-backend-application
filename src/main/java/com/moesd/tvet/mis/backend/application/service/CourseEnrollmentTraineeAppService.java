@@ -26,5 +26,7 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	ResponseEntity<?> selectUnselectTrainee(SelectedTraineedto request);
 	
+	List<ObjectNode> fetchAssignedAssessors(String application_no);
+	
 	
 }

@@ -14,15 +14,12 @@ import lombok.NoArgsConstructor;
 public class AccreditedCoursedto {
 
 	private String applicationNo;
-	private String instituteId;
-	private String courseId;
+	private Integer instituteId;
 	private String feesPerTrainee;
 	private String enrolmentCapacity;
 	private String applicantName;
-	private String is_active;
-	private String sectorId;
 	private Date registration_date;
-	private String curriculumId;
+	private Integer curriculumId;
 	private String validity_date;
 	private boolean isRenewal;
 	private String LeadTrainerCidNo;
