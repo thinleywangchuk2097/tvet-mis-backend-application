@@ -41,7 +41,8 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	private final WorkTaskFlowService workTaskFlowService;
 	private final RoleServiceRepository roleServiceRepository;
 	private final DocumentFileUploadService documentFileUploadService;
-	
+	private static final String MESSAGE_KEY = "message";
+	 
 	@Override
 	public List<ObjectNode> getInstituteTypeDropdown() {
 		List<Tuple> resultList = monitoringAssessmentRepository.getInstituteTypeDropdown();
@@ -117,12 +118,12 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 
 			// Response
 			return ResponseEntity.status(201).body(java.util.Map.of("applicationNo", applicationNo, "id", saved.getId(),
-					"status", 201, "message", "monitoring submitted successfully"));
+					"status", 201, MESSAGE_KEY, "monitoring submitted successfully"));
 
 		} catch (Exception e) {
 		    log.error("Failed to submit monitoring ", e);
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-		            .body(java.util.Map.of("message", "Failed to submit monitoring assessment"));
+		            .body(java.util.Map.of(MESSAGE_KEY, "Failed to submit monitoring assessment"));
 		}
 	}
 
@@ -244,15 +245,15 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 			// Return response
 			return ResponseEntity
 					.ok(Map.of("applicationNo", request.getApplicationNo(), "id", savedMonitoringAssessment.getId(), "status",
-							HttpStatus.OK.value(), "message", "Monitoring Assessment updated successfully"));
+							HttpStatus.OK.value(), MESSAGE_KEY, "Monitoring Assessment updated successfully"));
 
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
+					.body(Map.of(MESSAGE_KEY, e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
 		    log.error("Failed to update Monitoring Assessment", e);
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-		            .body(Map.of("message", "Failed to update Monitoring Assessment", 
+		            .body(Map.of(MESSAGE_KEY, "Failed to update Monitoring Assessment", 
 		                    "timestamp", LocalDateTime.now()));
 		}
 	}

@@ -15,6 +15,9 @@ public interface CourseEnrollmentAppService {
 	
 	List<ObjectNode> getReAssessmentServiceName();
 	
+	List<ObjectNode> getTraineeDetailsById(String traineeId);
+	
+	
 	
 	
 	

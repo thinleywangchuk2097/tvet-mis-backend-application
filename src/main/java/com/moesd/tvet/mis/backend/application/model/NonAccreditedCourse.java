@@ -36,8 +36,12 @@ public class NonAccreditedCourse {
 	@Column(name = "institute_id")
 	private String instituteId;
 
+	private String programmeTitle;
+	//time being
 	private String courseTitle;
-
+	
+    private Integer programmeTypeId;
+    
 	private String feesPerTrainee;
 
 	private String enrolmentCapacity;

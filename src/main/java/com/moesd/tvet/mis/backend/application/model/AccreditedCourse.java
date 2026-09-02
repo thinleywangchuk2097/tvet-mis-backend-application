@@ -32,17 +32,16 @@ public class AccreditedCourse {
 	@Column(name = "application_no", nullable = false, unique = true)
 	private String applicationNo;
 
-	private String instituteId;
+	private Integer instituteId;
+	
+	//for time being
+    //private Integer courseId;
 
-	private String courseId;
-
+	private Integer curriculumId;
+	
 	private String feesPerTrainee;
 	
 	private String enrolmentCapacity;
-
-	private String is_active;
-
-	private String sectorId;
 
 	private Date registration_date;
 
@@ -51,6 +50,16 @@ public class AccreditedCourse {
 	private Integer statusId;
 	
 	private Integer serviceId;
+	
+	private String LeadTrainerCidNo;
+	
+	private Integer genderId;
+	
+	private String leadTrainerName;
+	
+	private String professionalExperience;
+	
+	private Integer qualificationId;
 	
 	private Integer createdBy;
 
@@ -61,8 +70,6 @@ public class AccreditedCourse {
 	private Date updatedAt;
 	
 	private LocalDateTime renewalDate;
-	
-	private String curriculumId;
 	
 	// Relationships - Using mappedBy to indicate the child owns the relationship
 	@Builder.Default 

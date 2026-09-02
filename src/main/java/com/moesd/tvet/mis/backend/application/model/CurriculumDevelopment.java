@@ -26,7 +26,7 @@ public class CurriculumDevelopment {
 	@Column(name = "application_no")
 	private String applicationNo;
 
-	private String curriculumName;
+	private String curriculumTitle;
 
 	private String curriculumTypeId;
 
@@ -34,11 +34,9 @@ public class CurriculumDevelopment {
 
 	private String description;
 	
-	private Integer sectorId;
+	//private Integer sectorId;
 	
-	private Integer occupationId;
-
-	private String programmeTitle;
+	//private Integer occupationId;
 	
 	private Long programmeId;
 	

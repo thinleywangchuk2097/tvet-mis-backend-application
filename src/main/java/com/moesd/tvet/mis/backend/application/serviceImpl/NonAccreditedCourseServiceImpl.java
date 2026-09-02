@@ -76,7 +76,8 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 
 			// 5. Build entity
 			NonAccreditedCourse course = NonAccreditedCourse.builder().applicationNo(applicationNo)
-					.instituteId(request.getInstituteId()).courseTitle(request.getCourseTitle())
+					.instituteId(request.getInstituteId()).programmeTitle(request.getProgrammeTitle())
+					.programmeTypeId(request.getProgrammeTypeId())
 					.feesPerTrainee(request.getFeesPerTrainee())
 					.enrolmentCapacity(request.getEnrolmentCapacity()).serviceId(serviceId)
 					.curriculumId(request.getCurriculumId())
@@ -262,6 +263,13 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 	@Override
 	public List<ObjectNode> getNonAccreditedApprovedCourseByUserId(String user_id) {
 		List<Tuple> resultList = nonAccreditedCourseRepository.getNonAccreditedApprovedCourseByUserId(user_id);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> curriculumAlreadyExist(Long curriculumId, String registration_no) {
+		List<Tuple> resultList = nonAccreditedCourseRepository.curriculumAlreadyExist(curriculumId,registration_no);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

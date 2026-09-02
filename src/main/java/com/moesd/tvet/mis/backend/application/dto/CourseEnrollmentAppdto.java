@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class CourseEnrollmentAppdto {
 
 	private String instituteId;
-	private String courseId;
+	private Integer programmeId;
 	private String feesPerTrainee;
 	private String enrollmentCapacity;
 	private Date applicationStartDate;

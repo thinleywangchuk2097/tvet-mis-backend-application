@@ -65,7 +65,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
 			String userId = request.getUserId();
-			String applicantName = request.getCurriculumName();
+			String applicantName = request.getCurriculumTitle();
 			Integer locationId = 14;
 			
 			//Get initiated statusId
@@ -80,14 +80,11 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 				saveCurriculumAudit(curriculum);
 				
 				curriculum.setApplicationNo(request.getApplicationNo());
-				curriculum.setCurriculumName(request.getCurriculumName());
+				curriculum.setCurriculumTitle(request.getCurriculumTitle());
 				curriculum.setCurriculumTypeId(request.getCurriculumTypeId());
 				curriculum.setDescription(request.getDescription());
 				curriculum.setInstituteId(request.getInstituteId());
 				curriculum.setProgrammeTypeId(request.getProgrammeTypeId());
-				curriculum.setSectorId(request.getSectorId());
-				curriculum.setOccupationId(request.getOccupationId());
-				curriculum.setProgrammeTitle(request.getProgrammeTitle());
 				curriculum.setProgrammeId(request.getProgrammeId());;
 				curriculum.setCertificateLevelId(request.getCertificateLevelId());
 				curriculum.setEntryRequirement(request.getEntryRequirement());
@@ -129,12 +126,9 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 
 				//Build entity
 				CurriculumDevelopment curriculumDevelopment = CurriculumDevelopment.builder().applicationNo(applicationNo)
-						.curriculumName(request.getCurriculumName()).curriculumTypeId(request.getCurriculumTypeId())
+						.curriculumTitle(request.getCurriculumTitle()).curriculumTypeId(request.getCurriculumTypeId())
 						.description(request.getDescription()).instituteId(request.getInstituteId())
 						.programmeTypeId(request.getProgrammeTypeId())
-						.sectorId(request.getSectorId())
-						.occupationId(request.getOccupationId())
-						.programmeTitle(request.getProgrammeTitle())
 						.programmeId(request.getProgrammeId())
 						.certificateLevelId(request.getCertificateLevelId())
 						.entryRequirement(request.getEntryRequirement()).totalTheoryDuration(request.getTotalTheoryDuration())
@@ -178,15 +172,12 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 	private void saveCurriculumAudit(CurriculumDevelopment curriculum) {
 		CurriculumDevelopmentAudit curriculumAudit = CurriculumDevelopmentAudit.builder()
 	                .applicationNo(curriculum.getApplicationNo())
-	                .curriculumName(curriculum.getCurriculumName())
+	                .curriculumTitle(curriculum.getCurriculumTitle())
 	                .curriculumTypeId(curriculum.getCurriculumTypeId())
 					.description(curriculum.getDescription())
 					.instituteId(curriculum.getInstituteId())
 					.programmeTypeId(curriculum.getProgrammeTypeId())
-					.programmeTitle(curriculum.getProgrammeTitle())
 					.programmeId(curriculum.getProgrammeId())
-					.sectorId(curriculum.getSectorId())
-					.occupationId(curriculum.getOccupationId())
 					.certificateLevelId(curriculum.getCertificateLevelId())
 					.entryRequirement(curriculum.getEntryRequirement())
 					.totalTheoryDuration(curriculum.getTotalTheoryDuration())

@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_course_enrollment_app")
+@Table(name = "tbl_programme_announcement_dtls")
 public class CourseEnrollmentApp {
 
 	@Id
@@ -27,14 +27,16 @@ public class CourseEnrollmentApp {
 
 	private String instituteId;
 
-	private String courseId;
+	private Integer programmeId;
 
 	private String feesPerTrainee;
 
 	private Integer serviceId;
 
 	private Integer statusId;
-
+	
+	private Integer applicationStatusId;
+	
 	private String enrollmentCapacity;
 
 	private Date applicationStartDate;

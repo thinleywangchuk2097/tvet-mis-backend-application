@@ -231,15 +231,24 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	public ResponseEntity<?> updateTraineeApplication(SelectedTraineedto request) {
 		try {
 			// Get task statusId
-			Integer taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
+			Integer taskStatusId;
+			if(request.getStatusId() == 57) {
+				taskStatusId = dropdownManagementRepository.findChildById(18)// task Initiated Id
 					.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
-
+			}else {
+				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
+						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
+			}
+			
 			Integer resultId;
 			// Validate required fields
+			CourseEnrollmentApp course = courseEnrollmentAppRepository
+					.findByApplicationNo(request.getApplicationNo())
+					.orElseThrow(() -> new RuntimeException("Course not found"));
+			//this status is being used while trainee selection
+			course.setApplicationStatusId(request.getStatusId());
 			if (request.getCaStartDate() != null && request.getCaEndDate() != null) {
-				CourseEnrollmentApp course = courseEnrollmentAppRepository
-						.findByApplicationNo(request.getApplicationNo())
-						.orElseThrow(() -> new RuntimeException("Course not found"));
+				
 				course.setCaStartDate(request.getCaStartDate());
 				course.setCaEndDate(request.getCaEndDate());
 				// save
@@ -529,6 +538,14 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	public List<ObjectNode> getCourseAppliedTraineesReAssessmentByApplicationNo(String application_no) {
 		List<Tuple> resultList = courseEnrollmentTraineeAppRepository
 				.getCourseAppliedTraineesReAssessmentByApplicationNo(application_no);
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
+
+	@Override
+	public List<ObjectNode> fetchAssignedAssessors(String application_no) {
+		List<Tuple> resultList = courseEnrollmentTraineeAppRepository
+				.fetchAssignedAssessors(application_no);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}

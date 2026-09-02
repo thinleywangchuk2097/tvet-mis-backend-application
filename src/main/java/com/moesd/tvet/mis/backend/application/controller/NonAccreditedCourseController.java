@@ -47,4 +47,10 @@ public class NonAccreditedCourseController {
 	    List<ObjectNode> Details = instituteNonAccreditedCourseService.getNonAccreditedApprovedCourseByUserId(user_id);
 	    return ResponseEntity.ok(Details);
 	}
+	
+	@GetMapping("/curriculum-already-exist/{curriculumId}/{registration_no}")
+	public ResponseEntity<List<ObjectNode>> curriculumAlreadyExist(@PathVariable Long curriculumId, @PathVariable String registration_no){
+	    List<ObjectNode> Details = instituteNonAccreditedCourseService.curriculumAlreadyExist(curriculumId,registration_no);
+	    return ResponseEntity.ok(Details);
+	}
 }

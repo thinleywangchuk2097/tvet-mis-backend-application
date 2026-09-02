@@ -53,4 +53,10 @@ public class AccreditedCourseController {
 	public ResponseEntity<?> verifyAccreditedCourse(@RequestBody AccreditedCoursedto request) {
 		return(instituteAccreditedCourseService.verifyAccreditedCourse(request));
 	}
+	
+	@GetMapping("/get-curriculum-exist/{curriculumId}/{registration_no}")
+	public ResponseEntity<List<ObjectNode>> curriculumExist(@PathVariable Long curriculumId, @PathVariable String registration_no){
+	    List<ObjectNode> Details = instituteAccreditedCourseService.curriculumExist(curriculumId, registration_no);
+	    return ResponseEntity.ok(Details);
+	}
 }

@@ -30,17 +30,11 @@ public class CurriculumDevelopmentAudit {
 	@Column(name = "application_no")
 	private String applicationNo;
 
-	private String curriculumName;
+	private String curriculumTitle;
 
 	private String curriculumTypeId;
 
 	private Long programmeTypeId;
-	
-	private Integer sectorId;
-
-	private Integer occupationId;
-
-	private String programmeTitle;
 	
 	private Long programmeId;
 	

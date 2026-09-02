@@ -19,6 +19,9 @@ RUN mvn clean package -DskipTests
 # Stage 2: Run the project with Alpine (No Go vulnerabilities!)
 FROM eclipse-temurin:21-jre-alpine
 
+# ✅ FIX: Update all Alpine packages to latest versions
+RUN apk update && apk upgrade --no-cache
+
 # Set working directory
 WORKDIR /app
 
