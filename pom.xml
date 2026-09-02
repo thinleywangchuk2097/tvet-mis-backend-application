@@ -21,33 +21,24 @@
 		<java.version>21</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<!-- Jackson version override -->
-		<jackson.version>2.18.8</jackson.version>
-		<tomcat.version>10.1.55</tomcat.version>
+		<!-- Security Patched Versions -->
+		<jackson.version>2.18.9</jackson.version>
 		<jjwt.version>0.12.6</jjwt.version>
 		<commons-io.version>2.15.1</commons-io.version>
-
-		<!-- Security Patches -->
+		<log4j2.version>2.25.4</log4j2.version>
 		<spring-framework.version>6.2.19</spring-framework.version>
+		<tomcat.version>10.1.55</tomcat.version>
 		<spring-data-commons.version>3.5.12</spring-data-commons.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- Jackson BOM -->
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
 				<version>${jackson.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-
-			<!-- Override Spring Data Commons - No warning this way -->
-			<dependency>
-				<groupId>org.springframework.data</groupId>
-				<artifactId>spring-data-commons</artifactId>
-				<version>${spring-data-commons.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -71,7 +62,103 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
-		<!-- REMOVED: spring-data-commons from here -->
+		<!-- Spring Framework Overrides -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jcl</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+
+		<!-- Tomcat Overrides -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-core</artifactId>
+			<version>${tomcat.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-el</artifactId>
+			<version>${tomcat.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-websocket</artifactId>
+			<version>${tomcat.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+
+		<!-- Spring Data Commons -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<version>${spring-data-commons.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+
+		<!-- Log4j Overrides -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j2.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-to-slf4j</artifactId>
+			<version>${log4j2.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
 
 		<!-- JWT -->
 		<dependency>
