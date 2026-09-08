@@ -16,7 +16,7 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	List<ObjectNode> getCourseAppliedTraineesReAssessmentByApplicationNo(String application_no);
 	
-	ResponseEntity<?> selectedTrainee(SelectedTraineedto request);
+	ResponseEntity<?> submitSelectedTrainee(SelectedTraineedto request);
 	
 	ResponseEntity<?> submitReassessmentTrainees(SelectedTraineedto request);
 	

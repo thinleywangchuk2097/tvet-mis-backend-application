@@ -85,6 +85,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 				curriculum.setDescription(request.getDescription());
 				curriculum.setInstituteId(request.getInstituteId());
 				curriculum.setProgrammeTypeId(request.getProgrammeTypeId());
+				curriculum.setProgrammeTitle(request.getProgrammeTitle());
 				curriculum.setProgrammeId(request.getProgrammeId());;
 				curriculum.setCertificateLevelId(request.getCertificateLevelId());
 				curriculum.setEntryRequirement(request.getEntryRequirement());
@@ -127,6 +128,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 				//Build entity
 				CurriculumDevelopment curriculumDevelopment = CurriculumDevelopment.builder().applicationNo(applicationNo)
 						.curriculumTitle(request.getCurriculumTitle()).curriculumTypeId(request.getCurriculumTypeId())
+						.programmeTitle(request.getProgrammeTitle())
 						.description(request.getDescription()).instituteId(request.getInstituteId())
 						.programmeTypeId(request.getProgrammeTypeId())
 						.programmeId(request.getProgrammeId())
@@ -178,6 +180,7 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 					.instituteId(curriculum.getInstituteId())
 					.programmeTypeId(curriculum.getProgrammeTypeId())
 					.programmeId(curriculum.getProgrammeId())
+					.programmeTitle(curriculum.getProgrammeTitle())
 					.certificateLevelId(curriculum.getCertificateLevelId())
 					.entryRequirement(curriculum.getEntryRequirement())
 					.totalTheoryDuration(curriculum.getTotalTheoryDuration())

@@ -22,7 +22,11 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 					+ "  c.entry_requirement, "
 					+ "  ncs.sector_id, "
 					+ "  ncs.occupation_id, "
-					+ "  ncs.programme_title, "
+					+ "  CASE "
+					+ "    WHEN ncs.programme_title IS NOT NULL "
+					+ "    THEN ncs.programme_title "
+					+ "    ELSE c.programme_title "
+					+ "  END AS programme_title, "
 					+ "  c.programme_id, "
 					+ "  c.total_ojt_duration, "
 					+ "  c.total_practical_duration, "
@@ -76,7 +80,11 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						 + "  c.entry_requirement, "
 						 + "  ncs.sector_id, "
 						 + "  ncs.occupation_id, "
-						 + "  ncs.programme_title, "
+						 + "  CASE "
+						 + "    WHEN ncs.programme_title IS NOT NULL "
+						 + "    THEN ncs.programme_title "
+						 + "    ELSE c.programme_title "
+						 + "  END AS programme_title, "
 						 + "  c.programme_id, "
 						 + "  c.total_ojt_duration, "
 						 + "  c.total_practical_duration, "
@@ -117,6 +125,32 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						 + "WHERE u.user_id = ?", nativeQuery = true)
 		List<Tuple> getCurriculumDetailsByUserId(String user_id);
 		
+//		@Query(value = 
+//				"SELECT "
+//						+ "  cd.id, "
+//						+ "  cd.curriculum_title, "
+//						+ "  ncs.occupation_id, "
+//						+ "  ncs.sector_id, "
+//						+ "  cd.total_theory_duration, "
+//						+ "  cd.total_practical_duration, "
+//						+ "  cd.total_ojt_duration, "
+//						+ "  cd.total_program_duration, "
+//						+ "  cd.certificate_level_id, "
+//						+ "  ncs.programme_title "
+//						+ "FROM "
+//						+ "  tbl_curriculum_development cd "
+//						+ "  INNER JOIN tbl_institute_registration_dtls i "
+//						+ "    ON cd.institute_id = i.institute_id "
+//						+ "  INNER JOIN tbl_user u "
+//						+ "    ON i.registration_no = u.user_id "
+//						+ "  LEFT JOIN tbl_ncs_app_dtls ncs "
+//						+ "    ON cd.programme_id = ncs.id "
+//						+ "WHERE cd.status_id = 59 "
+//						+ "  AND u.user_id = ? "
+//						+ "  AND cd.programme_type_id = ?",
+//						nativeQuery = true)
+//		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
+		
 		@Query(value = 
 				"SELECT "
 						+ "  cd.id, "
@@ -128,7 +162,11 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						+ "  cd.total_ojt_duration, "
 						+ "  cd.total_program_duration, "
 						+ "  cd.certificate_level_id, "
-						+ "  ncs.programme_title "
+						+ "  CASE "
+						+ "    WHEN ncs.programme_title IS NOT NULL "
+						+ "    THEN ncs.programme_title "
+						+ "    ELSE cd.programme_title "
+						+ "  END AS programme_title "
 						+ "FROM "
 						+ "  tbl_curriculum_development cd "
 						+ "  INNER JOIN tbl_institute_registration_dtls i "
@@ -140,9 +178,8 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						+ "WHERE cd.status_id = 59 "
 						+ "  AND u.user_id = ? "
 						+ "  AND cd.programme_type_id = ?",
-			    nativeQuery = true)
+						nativeQuery = true)
 		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
-		
 		
 		CurriculumDevelopment findByApplicationNo(String applicationNo);
 		

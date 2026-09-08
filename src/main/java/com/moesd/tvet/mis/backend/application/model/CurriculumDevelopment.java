@@ -34,9 +34,7 @@ public class CurriculumDevelopment {
 
 	private String description;
 	
-	//private Integer sectorId;
-	
-	//private Integer occupationId;
+	private String programmeTitle;
 	
 	private Long programmeId;
 	

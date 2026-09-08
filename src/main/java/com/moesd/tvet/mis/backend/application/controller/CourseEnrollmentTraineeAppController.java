@@ -45,8 +45,8 @@ public class CourseEnrollmentTraineeAppController {
 	}
 
 	@PostMapping("/selected-trainees")
-	public ResponseEntity<?> selectedTrainee(@RequestBody SelectedTraineedto request) {
-		return (courseEnrollmentTraineeAppService.selectedTrainee(request));
+	public ResponseEntity<?> submitSelectedTrainee(@RequestBody SelectedTraineedto request) {
+		return (courseEnrollmentTraineeAppService.submitSelectedTrainee(request));
 	}
 	
 	@PostMapping("/selected-reassessment-trainees")

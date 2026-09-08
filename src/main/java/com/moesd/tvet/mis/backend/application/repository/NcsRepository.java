@@ -1,13 +1,10 @@
 package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
 import com.moesd.tvet.mis.backend.application.model.NcsApp;
-
 import jakarta.persistence.Tuple;
 
 @Repository
@@ -72,4 +69,15 @@ public interface NcsRepository extends JpaRepository<NcsApp, Integer> {
     		+ "  tbl_ncs_app_dtls a "
     		+ "WHERE a.id = ?", nativeQuery = true)
     List<Tuple> getProgrammeTitleById(Integer programmeId);
+    
+    @Query(value = "SELECT "
+    		+ "  a.id, "
+    		+ "  a.certification_id, "
+    		+ "  a.programme_title, "
+    		+ "  a.sector_id, "
+    		+ "  a.occupation_id, "
+    		+ "  a.validity_date "
+    		+ "FROM "
+    		+ "  tbl_ncs_app_dtls a", nativeQuery = true)
+    List<Tuple> getAllNcsProgrammes();
 }

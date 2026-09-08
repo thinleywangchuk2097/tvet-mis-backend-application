@@ -52,4 +52,10 @@ public class NcsController {
 		return ResponseEntity.ok(Details);
 	}
 	
+	@GetMapping("/get-ncs-programmes")
+	public ResponseEntity<List<ObjectNode>> getAllNcsProgrammes() {
+		List<ObjectNode> ncsLists = ncsService.getAllNcsProgrammes();
+		return ResponseEntity.ok(ncsLists);
+	}
+	
 }

@@ -37,7 +37,7 @@ public class NonAccreditedCourse {
 	private String instituteId;
 
 	private String programmeTitle;
-	//time being
+	//kept time being
 	private String courseTitle;
 	
     private Integer programmeTypeId;
@@ -46,7 +46,7 @@ public class NonAccreditedCourse {
 
 	private String enrolmentCapacity;
 
-	private String curriculumId;
+	private Integer curriculumId;
 
 	private Integer statusId;
 

@@ -25,18 +25,39 @@
 		<jackson.version>2.18.9</jackson.version>
 		<jjwt.version>0.12.6</jjwt.version>
 		<commons-io.version>2.15.1</commons-io.version>
-		<log4j2.version>2.25.4</log4j2.version>
+		
+		<!-- FIXED: Log4j - CVE-2026-49844 -->
+		<log4j2.version>2.25.5</log4j2.version>
+		
+		<!-- FIXED: Spring Security - CVE-2018-1258 -->
+		<spring-security.version>6.5.11</spring-security.version>
+		
+		<!-- FIXED: Spring Framework -->
 		<spring-framework.version>6.2.19</spring-framework.version>
-		<tomcat.version>10.1.55</tomcat.version>
-		<spring-data-commons.version>3.5.12</spring-data-commons.version>
+		
+		<!-- FIXED: Tomcat 10.1.59 (LATEST AVAILABLE with all security fixes) -->
+		<tomcat.version>10.1.59</tomcat.version>
+		
+		<!-- FIXED: Spring Data 3.5.13 (LATEST AVAILABLE) -->
+		<spring-data.version>3.5.13</spring-data.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- Jackson BOM -->
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
 				<version>${jackson.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			
+			<!-- Spring Framework BOM -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${spring-framework.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -62,69 +83,41 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
-		<!-- Spring Framework Overrides -->
+		<!-- FIXED: Spring Security Overrides - CVE-2018-1258 -->
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>${spring-security.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jcl</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${spring-security.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${spring-security.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-expression</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-jdbc</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-orm</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-tx</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring-framework.version}</version><!--$NO-MVN-MAN-VER$-->
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+			<version>${spring-security.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 
-		<!-- Tomcat Overrides -->
+		<!-- FIXED: Spring Data Overrides -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
+			<version>${spring-data.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+			<version>${spring-data.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+
+		<!-- FIXED: Tomcat Overrides - Version 10.1.59 -->
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-core</artifactId>
@@ -141,14 +134,7 @@
 			<version>${tomcat.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 
-		<!-- Spring Data Commons -->
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-commons</artifactId>
-			<version>${spring-data-commons.version}</version><!--$NO-MVN-MAN-VER$-->
-		</dependency>
-
-		<!-- Log4j Overrides -->
+		<!-- FIXED: Log4j Overrides - CVE-2026-49844 -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>

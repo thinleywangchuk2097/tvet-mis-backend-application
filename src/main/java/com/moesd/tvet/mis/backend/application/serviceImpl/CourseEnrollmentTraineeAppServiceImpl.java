@@ -134,7 +134,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 
 	@Override
 	@Transactional
-	public ResponseEntity<?> selectedTrainee(SelectedTraineedto request) {
+	public ResponseEntity<?> submitSelectedTrainee(SelectedTraineedto request) {
 		try {
 			// Validate required fields
 			if (request.getServiceId() == null) {
@@ -153,7 +153,15 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			}
 
 			Integer locationId = 14;
-
+			
+			//new added
+			CourseEnrollmentApp course = courseEnrollmentAppRepository
+						.findByApplicationNo(request.getApplicationNo())
+						.orElseThrow(() -> new RuntimeException("Course not found"));
+			//this status is being used while trainee selection
+			course.setApplicationStatusId(request.getStatusId());
+			//ended new added line
+						
 			List<CourseEnrollmentTraineeApp> trainees = courseEnrollmentTraineeAppRepository
 					.findByApplicationNo(request.getApplicationNo());
 
@@ -247,8 +255,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					.orElseThrow(() -> new RuntimeException("Course not found"));
 			//this status is being used while trainee selection
 			course.setApplicationStatusId(request.getStatusId());
+			
 			if (request.getCaStartDate() != null && request.getCaEndDate() != null) {
-				
 				course.setCaStartDate(request.getCaStartDate());
 				course.setCaEndDate(request.getCaEndDate());
 				// save

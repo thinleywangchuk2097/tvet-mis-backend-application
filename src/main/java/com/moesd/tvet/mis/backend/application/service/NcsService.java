@@ -16,4 +16,6 @@ public interface NcsService {
 	List<ObjectNode> getAlreadyNcsDetailsExist(Integer sector_id, Integer occupation_id, Integer certification_id);
 	
 	List<ObjectNode> getProgrammeTitleById(Integer programmeId);
+	
+	List<ObjectNode> getAllNcsProgrammes();
 }

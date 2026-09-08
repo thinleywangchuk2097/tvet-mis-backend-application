@@ -128,4 +128,11 @@ public class NcsServiceImpl implements NcsService {
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
+
+	@Override
+	public List<ObjectNode> getAllNcsProgrammes() {
+		List<Tuple> resultList = ncsRepository.getAllNcsProgrammes();
+		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
+		return DtlsJson;
+	}
 }
