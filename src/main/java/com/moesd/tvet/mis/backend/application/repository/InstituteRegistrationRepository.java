@@ -3,15 +3,14 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationApp;
 
 import jakarta.persistence.Tuple;
 
 public interface InstituteRegistrationRepository extends JpaRepository<InstituteRegistrationApp, Long> {
 
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  b.status_id, "
 					+ "  a.status_id AS registration_status_id "
 					+ "FROM "
@@ -19,14 +18,13 @@ public interface InstituteRegistrationRepository extends JpaRepository<Institute
 					+ "  RIGHT JOIN tbl_institute_proposal b "
 					+ "    ON b.application_no = a.proposal_application_no "
 					+ "WHERE b.application_no = ? "
-					+ "  AND b.service_id = ?", nativeQuery = true)
+					+ "  AND b.service_id = ?")
 		List<Tuple> findByProposalApplicationNo(String application_no, String service_id);
 	
 	
 	Optional<InstituteRegistrationApp> findByApplicationNo(String applicationNo);
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  ir.id, "
 					+ "  ir.application_no, "
 					+ "  ir.renewal_registration_no, "
@@ -159,7 +157,7 @@ public interface InstituteRegistrationRepository extends JpaRepository<Institute
 					+ "  WHERE d.application_no = ir.application_no) AS documents "
 					+ "FROM "
 					+ "  tbl_institute_registration_app ir "
-					+ "WHERE ir.application_no = ?", nativeQuery = true)
+					+ "WHERE ir.application_no = ?")
 		List<Tuple> getInstituteRegistrationDetails(String application_no);
 	
 		

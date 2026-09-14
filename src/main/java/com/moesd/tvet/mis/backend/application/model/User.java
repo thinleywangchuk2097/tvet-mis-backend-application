@@ -1,5 +1,5 @@
 package com.moesd.tvet.mis.backend.application.model;
-
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -30,6 +30,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "tbl_user")
 public class User implements UserDetails {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Id

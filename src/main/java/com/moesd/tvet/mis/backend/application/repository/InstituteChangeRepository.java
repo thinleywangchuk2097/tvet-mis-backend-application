@@ -2,13 +2,12 @@ package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.InstituteChangeDetails;
 import jakarta.persistence.Tuple;
 
 public interface InstituteChangeRepository extends JpaRepository<InstituteChangeDetails, Integer>{
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  c.id, "
 					+ "  c.application_no, "
 					+ "  c.institute_id, "
@@ -67,6 +66,6 @@ public interface InstituteChangeRepository extends JpaRepository<InstituteChange
 					+ "FROM tbl_institute_change_dtls c "
 					+ "LEFT JOIN tbl_institute_registration_dtls ir "
 					+ "ON c.institute_id = ir.institute_id "
-					+ "WHERE c.application_no = ?", nativeQuery = true)
+					+ "WHERE c.application_no = ?")
 		List<Tuple> getInstituteChangeByApplicationNo(String application_no);
 }

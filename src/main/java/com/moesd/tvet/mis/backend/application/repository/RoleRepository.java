@@ -3,6 +3,7 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.moesd.tvet.mis.backend.application.model.Role;
@@ -18,10 +19,10 @@ public interface RoleRepository extends JpaRepository<Role, Integer>{
 	@Query("SELECT r FROM Role r LEFT JOIN FETCH r.privileges WHERE r.id = :id")
 	Optional<Role> findByIdWithPrivileges(@Param("id") Integer integer);
 	
-	@Query(value = "SELECT a.* FROM tbl_role a WHERE a.status_id=1", nativeQuery = true)
+	@NativeQuery("SELECT a.* FROM tbl_role a WHERE a.status_id=1")
 	List<Tuple> getRoles();
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  c.role_name, "
 			+ "  c.id, "
 			+ "  d.role_name AS current_role_name, "
@@ -34,6 +35,6 @@ public interface RoleRepository extends JpaRepository<Role, Integer>{
 			+ "    ON b.role_id = c.id "
 			+ "  LEFT JOIN tbl_role d "
 			+ "    ON a.current_role = d.id "
-			+ "WHERE a.user_id = ?", nativeQuery = true)
+			+ "WHERE a.user_id = ?")
 	List<Tuple> getUserAssociatedRoles(String roleId);
 }

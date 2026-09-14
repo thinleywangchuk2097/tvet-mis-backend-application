@@ -3,24 +3,21 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.OJTTraineeDetails;
 
 import jakarta.persistence.Tuple;
 
 public interface OJTTraineeDetailsRepository extends JpaRepository<OJTTraineeDetails, Long>{
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  a.* "
 					+ "FROM "
 					+ "  tbl_ojt_trainee_dtls a "
-					+ "WHERE a.institute_id = ?", nativeQuery = true)
+					+ "WHERE a.institute_id = ?")
 	List<Tuple> getTraineeByInstituteId(String institute_id);
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  t.id AS trainee_id, "
 					+ "  t.trainee_cid, "
 					+ "  t.trainee_name, "
@@ -53,7 +50,7 @@ public interface OJTTraineeDetailsRepository extends JpaRepository<OJTTraineeDet
 					+ "  INNER JOIN tbl_ojt_company_dtls c "
 					+ "    ON a.company_id = c.id "
 					+ "WHERE 1 = 1 "
-					+ "ORDER BY t.created_at DESC", nativeQuery = true)
+					+ "ORDER BY t.created_at DESC")
 	List<Tuple> getTraineeOJTReport();
 	
 }

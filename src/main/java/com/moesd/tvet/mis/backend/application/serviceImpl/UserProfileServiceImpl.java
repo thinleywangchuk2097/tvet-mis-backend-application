@@ -3,7 +3,6 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.SwitchRoleRequest;
 import com.moesd.tvet.mis.backend.application.dto.UserProfileRequest;
 import com.moesd.tvet.mis.backend.application.dto.UserProfileResponse;
@@ -101,7 +100,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 		// Decode base64 string to bytes
 		byte[] imageBytes = Base64.getDecoder().decode(base64Image);
 		// Create upload directory if not exists
-		Path uploadPath = Paths.get(uploadDir);
+		Path uploadPath = Path.of(uploadDir);
 		if (!Files.exists(uploadPath)) {
 			Files.createDirectories(uploadPath);
 		}
@@ -162,7 +161,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 			if (user.getProfilePath() == null) {
 				return ResponseEntity.notFound().build();
 			}
-			Path path = Paths.get(user.getProfilePath());
+			Path path = Path.of(user.getProfilePath());
 			byte[] imageBytes = Files.readAllBytes(path);
 
 			String contentType = Files.probeContentType(path);
@@ -239,7 +238,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 			}
 
 			try {
-				Path path = Paths.get(user.getProfilePath());
+				Path path = Path.of(user.getProfilePath());
 				Files.deleteIfExists(path);
 
 				user.setProfilePath(null);

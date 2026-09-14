@@ -1,6 +1,6 @@
 package com.moesd.tvet.mis.backend.application.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.moesd.tvet.mis.backend.application.model.BhutanNDIToken;
 
 import java.util.Map;

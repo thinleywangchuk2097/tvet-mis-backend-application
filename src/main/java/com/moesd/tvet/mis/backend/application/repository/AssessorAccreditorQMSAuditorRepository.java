@@ -3,14 +3,13 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.AssessorAccreditorQMSAuditor;
 import jakarta.persistence.Tuple;
 
 
 public interface AssessorAccreditorQMSAuditorRepository extends JpaRepository<AssessorAccreditorQMSAuditor, Long>{
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  a.id, "
 					+ "  a.application_no, "
 					+ "  a.reference_no, "
@@ -70,14 +69,13 @@ public interface AssessorAccreditorQMSAuditorRepository extends JpaRepository<As
 					+ "  tbl_assessor_accreditor_auditor_registration a "
 					+ "  LEFT JOIN tbl_task_dtls t "
 					+ "    ON a.application_no = t.application_no "
-					+ "WHERE a.application_no = ?", nativeQuery = true)
+					+ "WHERE a.application_no = ?")
 		List<Tuple> getApplicationDetailByApplicationNo(String application_no);
 	
 		Optional<AssessorAccreditorQMSAuditor> findByApplicationNo(String applicationNo);
 		
 		
-		@Query(value =  
-				"SELECT "
+		@NativeQuery("SELECT "
 						+ "  a.id, "
 						+ "  a.application_no, "
 						+ "  a.reference_no, "
@@ -138,8 +136,7 @@ public interface AssessorAccreditorQMSAuditorRepository extends JpaRepository<As
 						+ "    a.citizen_id = ? "
 						+ "    OR a.reference_no = ? "
 						+ "  ) "
-						+ "  AND a.service_id = ?", 
-			    nativeQuery = true)
+						+ "  AND a.service_id = ?")
 		
 		List<Tuple> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo, String serviceId);
 		

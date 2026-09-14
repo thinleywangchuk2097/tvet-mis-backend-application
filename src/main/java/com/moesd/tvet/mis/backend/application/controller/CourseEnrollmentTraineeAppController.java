@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.CourseEnrollmentTraineeAppdto;
 import com.moesd.tvet.mis.backend.application.dto.SelectedTraineedto;
 import com.moesd.tvet.mis.backend.application.service.CourseEnrollmentTraineeAppService;
@@ -45,8 +45,8 @@ public class CourseEnrollmentTraineeAppController {
 	}
 
 	@PostMapping("/selected-trainees")
-	public ResponseEntity<?> selectedTrainee(@RequestBody SelectedTraineedto request) {
-		return (courseEnrollmentTraineeAppService.selectedTrainee(request));
+	public ResponseEntity<?> submitSelectedTrainee(@RequestBody SelectedTraineedto request) {
+		return (courseEnrollmentTraineeAppService.submitSelectedTrainee(request));
 	}
 	
 	@PostMapping("/selected-reassessment-trainees")
@@ -59,10 +59,10 @@ public class CourseEnrollmentTraineeAppController {
 		return (courseEnrollmentTraineeAppService.updateTraineeApplication(request));
 	}
 
-	@GetMapping("/get-trainee-details/{user_id}/{course_id}")
+	@GetMapping("/get-trainee-details/{user_id}/{course_id}/{certification_level_id}")
 	public ResponseEntity<List<ObjectNode>> getFailedTraineeDetails(@PathVariable String user_id,
-			@PathVariable String course_id) {
-		List<ObjectNode> Details = courseEnrollmentTraineeAppService.getFailedTraineeDetails(user_id, course_id);
+			@PathVariable String course_id, @PathVariable Integer certification_level_id) {
+		List<ObjectNode> Details = courseEnrollmentTraineeAppService.getFailedTraineeDetails(user_id,course_id,certification_level_id);
 		return ResponseEntity.ok(Details);
 	}
 
@@ -77,5 +77,12 @@ public class CourseEnrollmentTraineeAppController {
 		List<ObjectNode> Details = courseEnrollmentTraineeAppService.fetchAssignedAssessors(application_no);
 		return ResponseEntity.ok(Details);
 	}
+	
+	@PostMapping("/remove-selected-trainee")
+	public ResponseEntity<?> removeTraineeFromSelectedProgramme(@RequestBody SelectedTraineedto request) {
+		return (courseEnrollmentTraineeAppService.removeTraineeFromSelectedProgramme(request));
+	}
+	
+	
 
 }

@@ -3,24 +3,21 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.OnCampusJobPlacementTrainee;
 
 import jakarta.persistence.Tuple;
 
 public interface OnCampusJobPlacementTraineeRepository extends JpaRepository<OnCampusJobPlacementTrainee,Long>{
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  a.* "
 					+ "FROM "
 					+ "  tbl_campus_job_placement_trainee_dtls a "
-					+ "WHERE a.institute_id = ?", nativeQuery = true)
+					+ "WHERE a.institute_id = ?")
 	List<Tuple> getTraineeByInstituteId(String institute_id);
 	
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  t.id AS trainee_id, "
 					+ "  t.trainee_cid, "
 					+ "  t.trainee_name, "
@@ -54,7 +51,7 @@ public interface OnCampusJobPlacementTraineeRepository extends JpaRepository<OnC
 					+ "  INNER JOIN tbl_campus_job_placement_session_dtls s "
 					+ "    ON f.session_id = s.id "
 					+ "WHERE 1 = 1 "
-					+ "ORDER BY t.created_at DESC", nativeQuery = true)
+					+ "ORDER BY t.created_at DESC")
 	List<Tuple> getTraineeOnPlacementReport();
 	
 	

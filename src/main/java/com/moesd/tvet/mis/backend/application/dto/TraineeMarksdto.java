@@ -14,4 +14,6 @@ public class TraineeMarksdto {
     private Integer theoryAssessment;
     private Integer practicalAssessment;
     private String remarks;
+    //new added
+    private Integer internalAssessment;
 }

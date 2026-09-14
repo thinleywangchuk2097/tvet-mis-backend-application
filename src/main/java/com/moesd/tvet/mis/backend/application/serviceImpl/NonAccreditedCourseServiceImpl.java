@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.NonAccreditedCoursedto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.NonAccreditedCourse;
@@ -75,13 +75,18 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(serviceId);
 
 			// 5. Build entity
-			NonAccreditedCourse course = NonAccreditedCourse.builder().applicationNo(applicationNo)
-					.instituteId(request.getInstituteId()).programmeTitle(request.getProgrammeTitle())
+			NonAccreditedCourse course = NonAccreditedCourse.builder()
+					.applicationNo(applicationNo)
+					.instituteId(request.getInstituteId())
+					.programmeTitle(request.getProgrammeTitle())
 					.programmeTypeId(request.getProgrammeTypeId())
 					.feesPerTrainee(request.getFeesPerTrainee())
-					.enrolmentCapacity(request.getEnrolmentCapacity()).serviceId(serviceId)
+					.enrolmentCapacity(request.getEnrolmentCapacity())
+					.serviceId(serviceId)
 					.curriculumId(request.getCurriculumId())
-					.statusId(request.getStatusId()).registrationDate(new Date()).createdBy(request.getCreatedBy())
+					.statusId(request.getStatusId())
+					.registrationDate(new Date())
+					.createdBy(request.getCreatedBy())
 					.createdAt(LocalDateTime.now()).build();
 			// Build NonAccreditedCourseQualityStandardResponse that were added while course apply
 			if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {

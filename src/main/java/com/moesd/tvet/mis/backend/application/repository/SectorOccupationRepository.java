@@ -3,16 +3,14 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.Sector;
 
 import jakarta.persistence.Tuple;
 
 public interface SectorOccupationRepository extends JpaRepository<Sector, Integer>{
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  JSON_ARRAYAGG( "
 					+ "    JSON_OBJECT( "
 					+ "      'sector_id', "
@@ -39,7 +37,7 @@ public interface SectorOccupationRepository extends JpaRepository<Sector, Intege
 					+ "  ) AS result "
 					+ "FROM "
 					+ "  tbl_sector_master s "
-					+ "WHERE s.is_active = 'Y'", nativeQuery = true)
+					+ "WHERE s.is_active = 'Y'")
 		List<Tuple> getSectorOccupationLists();
 
 }

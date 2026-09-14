@@ -2,7 +2,7 @@ package com.moesd.tvet.mis.backend.application.service;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.Ncsdto;
 
 public interface NcsService {
@@ -16,4 +16,6 @@ public interface NcsService {
 	List<ObjectNode> getAlreadyNcsDetailsExist(Integer sector_id, Integer occupation_id, Integer certification_id);
 	
 	List<ObjectNode> getProgrammeTitleById(Integer programmeId);
+	
+	List<ObjectNode> getAllNcsProgrammes();
 }

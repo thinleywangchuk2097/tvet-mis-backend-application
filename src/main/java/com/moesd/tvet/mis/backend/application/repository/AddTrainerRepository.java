@@ -3,13 +3,13 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.AddTrainer;
 import jakarta.persistence.Tuple;
 
 public interface AddTrainerRepository extends JpaRepository<AddTrainer, Long> {
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  t.id, "
 			+ "  t.citizen_id, "
 			+ "  t.specialization, "
@@ -50,7 +50,7 @@ public interface AddTrainerRepository extends JpaRepository<AddTrainer, Long> {
 			+ "  tbl_trainer_dtls t "
 			+ "WHERE t.institute_id = ? "
 			+ "  AND t.status_id = 1 "
-			+ "ORDER BY t.id DESC", nativeQuery = true)
+			+ "ORDER BY t.id DESC")
 	List<Tuple> getAllActiveTrainers(Integer institute_id);
 
 	Optional<AddTrainer> findByCitizenId(String citizenId);

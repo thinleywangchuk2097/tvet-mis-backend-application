@@ -4,15 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.InstituteProposal;
 
 import jakarta.persistence.Tuple;
 
 public interface InstituteProposalRepository extends JpaRepository<InstituteProposal, Integer>{
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  p.id, "
 					+ "  p.service_id, "
 					+ "  t.task_status_id, "
@@ -77,7 +75,7 @@ public interface InstituteProposalRepository extends JpaRepository<InstituteProp
 					+ "  tbl_institute_proposal p "
 					+ "  LEFT JOIN tbl_task_dtls t "
 					+ "    ON p.application_no = t.application_no "
-					+ "WHERE p.application_no = ?", nativeQuery = true)
+					+ "WHERE p.application_no = ?")
 		List<Tuple> getInstituteDetails(String application_no);
 	
 	  	Optional<InstituteProposal> findByApplicationNo(String applicationNo);

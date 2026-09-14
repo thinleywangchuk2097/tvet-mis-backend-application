@@ -3,28 +3,28 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.User;
 import jakarta.persistence.Tuple;
 
 public interface UserRepository extends JpaRepository<User, Long>{
-	@Query(value = "SELECT * FROM tbl_user a WHERE a.user_id = ?1 AND a.status_id = ?2", nativeQuery = true)
+	@NativeQuery("SELECT * FROM tbl_user a WHERE a.user_id = ?1 AND a.status_id = ?2")
 	Optional<User> findByUsername(String username, int status);
 	
 	Optional<User> findByUserId(String userId);
 	
-	@Query(value = "SELECT * FROM tbl_user a WHERE a.user_id = ?1 AND a.status_id = ?2", nativeQuery = true)
+	@NativeQuery("SELECT * FROM tbl_user a WHERE a.user_id = ?1 AND a.status_id = ?2")
 	List<Tuple> findNDIByUserId (String userId, int status);
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_user a "
 			+ "WHERE a.email_id = ? "
-			+ "  AND a.status_id = 1", nativeQuery = true)
+			+ "  AND a.status_id = 1")
 	Optional<User> findByEmailId(String emailId);
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.*, "
 			+ "  ( "
 			+ "    SELECT JSON_ARRAYAGG(role_id) "
@@ -34,10 +34,10 @@ public interface UserRepository extends JpaRepository<User, Long>{
 			+ "FROM "
 			+ "  tbl_user a "
 			+ "WHERE "
-			+ "  a.status_id = 1", nativeQuery = true)
+			+ "  a.status_id = 1")
 	List<Tuple> getAllUsers();
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.user_id, "
 			+ "  CONCAT( "
 			+ "    a.first_name, "
@@ -55,28 +55,28 @@ public interface UserRepository extends JpaRepository<User, Long>{
 			+ "  tbl_user a "
 			+ "  LEFT JOIN tbl_role b "
 			+ "    ON a.current_role = b.id "
-			+ "WHERE a.user_id = ?", nativeQuery = true)
+			+ "WHERE a.user_id = ?")
 	List<Tuple> getUserNameCurrentRoleName(String roleId);
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_user a "
-			+ "WHERE a.current_role = 23", nativeQuery = true)
+			+ "WHERE a.current_role = 23")
 	List<Tuple> getActiveRecUsers();
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_user a "
-			+ "WHERE a.current_role IN(29)", nativeQuery = true)
+			+ "WHERE a.current_role IN(29)")
 	List<Tuple> getActiveAccreditorUsers();
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_user a "
-			+ "WHERE a.current_role IN(30)", nativeQuery = true)
+			+ "WHERE a.current_role IN(30)")
 	List<Tuple> getActiveRegisteredAssessors();
 	
 	

@@ -97,6 +97,8 @@ public class CourseEnrollmentTraineeApp {
 	
 	private String stream;
 	
+	private Long parentFailedId;
+	
 	private Integer createdBy;
 
 	private Date createdAt;

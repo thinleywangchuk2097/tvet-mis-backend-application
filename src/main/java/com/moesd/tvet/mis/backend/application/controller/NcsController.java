@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.Ncsdto;
 import com.moesd.tvet.mis.backend.application.service.NcsService;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +50,12 @@ public class NcsController {
 	public ResponseEntity<List<ObjectNode>> getProgrammeTitleById(@PathVariable Integer programmeId) {
 		List<ObjectNode> Details = ncsService.getProgrammeTitleById(programmeId);
 		return ResponseEntity.ok(Details);
+	}
+	
+	@GetMapping("/get-ncs-programmes")
+	public ResponseEntity<List<ObjectNode>> getAllNcsProgrammes() {
+		List<ObjectNode> ncsLists = ncsService.getAllNcsProgrammes();
+		return ResponseEntity.ok(ncsLists);
 	}
 	
 }

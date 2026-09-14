@@ -3,12 +3,12 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.CourseEnrollmentApp;
 import jakarta.persistence.Tuple;
 
 public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrollmentApp, Long> {
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_programme_announcement_dtls a "
@@ -17,10 +17,10 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  LEFT JOIN tbl_user c "
 			+ "    ON b.registration_no = c.user_id "
 			+ "WHERE c.user_id = ? "
-			+ "  AND a.service_id = ?", nativeQuery = true)
+			+ "  AND a.service_id = ?")
 	List<Tuple> getCourseDetailsAnnouncementByUserId(String user_id, String service_id);
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.*, "
 			+ "  e.proposed_institute_name AS institute_name, "
 			+ "  b.entry_requirement, "
@@ -56,18 +56,18 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    GROUP BY course_enrol_app_no) t "
 			+ "    ON t.course_enrol_app_no = a.application_no "
 			+ "WHERE a.service_id IN (37, 38, 39) "
-			+ "  AND a.application_end_date >= CURRENT_DATE", nativeQuery = true)
+			+ "  AND a.application_end_date >= CURRENT_DATE")
 	List<Tuple> getAllCourseAnnouncement();
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_dropdown_child_master a "
-			+ "WHERE a.id IN(108, 109, 110, 111, 112, 35, 36)", nativeQuery = true)
+			+ "WHERE a.id IN(108, 109, 110, 111, 112, 35, 36)")
 	List<Tuple> getAllCertificateLevels();
 	
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.*, "
 			+ "  e.registration_no, "
 			+ "  e.proposed_institute_name AS institute_name, "
@@ -99,12 +99,13 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  LEFT JOIN tbl_institute_registration_dtls e "
 			+ "    ON e.institute_id = a.institute_id "
 			+ "WHERE a.application_no = ? "
-			+ "  AND a.service_id IN(37, 38, 39)", nativeQuery = true)
+			+ "  AND a.service_id IN(37, 38, 39)")
 	List<Tuple> getCourseAnnouncementByApplicationNo(String application_no);
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.*, "
-			+ "  cd.name AS certification_name, "
+			+ "  e.registration_no, "
+			+ "  dcd.name AS certification_name, "
 			+ "  CASE "
 			+ "    WHEN a.service_id = 41 "
 			+ "    THEN c.programme_title "
@@ -121,23 +122,25 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    ON c.id = cd.programme_id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls d "
 			+ "    ON d.id = cd.programme_id "
-			+ "  LEFT JOIN tbl_dropdown_child_master cd "
-			+ "    ON cd.id = a.certification_level_id "
+			+ "  LEFT JOIN tbl_dropdown_child_master dcd "
+			+ "    ON dcd.id = a.certification_level_id "
+			+ "  LEFT JOIN tbl_institute_registration_dtls e "
+			+ "    ON e.institute_id = a.institute_id "
 			+ "WHERE a.application_no = ? "
-			+ "  AND a.service_id IN (41, 42)", nativeQuery = true)
+			+ "  AND a.service_id IN(41, 42)")
 	List<Tuple> getReAssessmentAnnouncementByApplicationNo(String application_no);
 	
 	Optional<CourseEnrollmentApp> findByApplicationNo(String application_no);
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_service_master a "
-			+ "WHERE a.id IN (41, 42)", nativeQuery = true)
+			+ "WHERE a.id IN (41, 42)")
 	List<Tuple> getReAssessmentServiceName();
 	
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.id, "
 			+ "  a.cid_no, "
 			+ "  a.applicant_name, "
@@ -185,7 +188,7 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  WHERE d.application_no = a.application_no) AS documents "
 			+ "FROM "
 			+ "  tbl_programme_trainee_enrollment_dtls a "
-			+ "WHERE a.id = ?", nativeQuery = true)
+			+ "WHERE a.id = ?")
 	List<Tuple> getTraineeDetailsById(String traineeId);
 	
 }

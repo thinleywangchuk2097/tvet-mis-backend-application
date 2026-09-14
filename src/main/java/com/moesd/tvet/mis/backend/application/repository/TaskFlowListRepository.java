@@ -2,7 +2,7 @@ package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.TaskFlowList;
 import jakarta.persistence.Tuple;
 
@@ -10,7 +10,7 @@ public interface TaskFlowListRepository extends JpaRepository <TaskFlowList,Long
 	
 TaskFlowList findByApplicationNo(String applicationNo);
 	
-	@Query(value =   "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.application_no, "
 			+ "  a.application_name, "
 			+ "  DATE(a.action_date) AS action_date, "
@@ -29,10 +29,10 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "WHERE b.task_status_id = ? "
 			+ "  AND b.assigned_role_id = ? "
 			+ "  AND b.location_id = ? "
-			+ "  AND b.assigned_user_id IS NULL", nativeQuery = true)
+			+ "  AND b.assigned_user_id IS NULL")
 	List<Tuple>getGroupTaskListDtl(Integer taskStatusId, Integer currentRoleId,String locationId);
 	
-	@Query(value =   "SELECT "
+	@NativeQuery("SELECT "
 			+ "    a.application_no, "
 			+ "    a.application_name, "
 			+ "    DATE(a.action_date) AS action_date, "
@@ -47,7 +47,7 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "LEFT JOIN tbl_dropdown_child_master d "
 			+ "    ON d.id = a.status_id "
 			+ "WHERE FIND_IN_SET(?, b.assigned_user_id) > 0 "
-			+ "  AND b.assigned_role_id = ?", nativeQuery = true)
+			+ "  AND b.assigned_role_id = ?")
 	List<Tuple>getMyTaskListDtl(String userId, String current_roleId);// current_roleId used for switch role
 	
 	/* @Query(value =    "SELECT "
@@ -58,7 +58,7 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "  AND a.assigned_user_id IS NULL", nativeQuery = true)
 	TaskFlowList getInitialTask(String applicationNo); */
 	
-	@Query(value =    "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.application_no, "
 			+ "  a.application_name, "
 			+ "  DATE(a.action_date) AS action_date, "
@@ -75,12 +75,10 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "    ON d.id = a.status_id "
 			+ "WHERE b.assigned_user_id = ? "
 			+ "  AND b.assigned_role_id = ?"
-			+ "  AND b.assigned_role_id = ?"
-			, nativeQuery = true)
+			+ "  AND b.assigned_role_id = ?")
 	List<Tuple>getApplicationStatusDtl(String application_no, String applicant_name, String application_date);
 	
-	@Query(value =
-		    "SELECT * FROM ( " +
+	@NativeQuery("SELECT * FROM ( " +
 		    "SELECT " +
 		    "  'CURRENT' AS record_type, " +
 		    "  a.id, " +
@@ -111,7 +109,6 @@ TaskFlowList findByApplicationNo(String applicationNo);
 		    ") t " +
 		    "ORDER BY " +
 		    "CASE WHEN t.record_type = 'CURRENT' THEN 0 ELSE 1 END, " +
-		    "t.action_date",
-		    nativeQuery = true)
+		    "t.action_date")
 		List<Tuple> getApplicationStatusAuditCurrentTaskDtl(String applicationNo);
 }

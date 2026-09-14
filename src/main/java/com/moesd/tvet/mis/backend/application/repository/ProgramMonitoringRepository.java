@@ -4,14 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.ProgramMonitoring;
 import jakarta.persistence.Tuple;
 
 public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonitoring, Long>{
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  pm.id, "
 					+ "  pm.application_no, "
 					+ "  pm.dzongkhag_id, "
@@ -46,13 +45,12 @@ public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonito
 					+ "  WHERE pmc.monitoring_id = pm.id) AS checklists "
 					+ "FROM "
 					+ "  tbl_program_monitoring_dtls pm "
-					+ "WHERE pm.registration_no = ?", nativeQuery = true)
+					+ "WHERE pm.registration_no = ?")
 	List<Tuple> getProgramMonitoring(String user_id);
 	
 	Optional<ProgramMonitoring> findByApplicationNo(String applicationNo);
 	
-	@Query(value =  
-			 "SELECT "
+	@NativeQuery("SELECT "
 					 + "  pm.id, "
 					 + "  pm.application_no, "
 					 + "  pm.dzongkhag_id, "
@@ -104,19 +102,18 @@ public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonito
 					 + "  WHERE d.application_no = pm.application_no) AS documents "
 					 + "FROM "
 					 + "  tbl_program_monitoring_dtls pm "
-					 + "WHERE pm.application_no = ?", nativeQuery = true)
+					 + "WHERE pm.application_no = ?")
 			List<Tuple> getProgramMonitoringByApplicationNo(String applicationNo);
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.id, "
 			+ "  a.service_name "
 			+ "FROM "
 			+ "  tbl_service_master a "
-			+ "WHERE a.id IN(26, 13)", nativeQuery = true)
+			+ "WHERE a.id IN(26, 13)")
 	List<Tuple> getCourseService();
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  c.id, "
 					+ "  c.programme_title AS course_name "
 					+ "FROM "
@@ -126,16 +123,15 @@ public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonito
 					+ "  LEFT JOIN tbl_ncs_app_dtls c "
 					+ "    ON c.id = b.programme_id "
 					+ "WHERE a.institute_id = ? "
-					+ "  AND a.status_id = 57", nativeQuery = true)
+					+ "  AND a.status_id = 57")
 	List<Tuple> getAccreditedCourse(Integer institute_id);
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  a.id, "
 					+ "  a.programme_title AS course_name "
 					+ "FROM "
 					+ "  tbl_non_accredited_course_dtls a "
 					+ "WHERE a.institute_id = ? "
-					+ "  AND a.status_id = 57", nativeQuery = true)
+					+ "  AND a.status_id = 57")
 	List<Tuple> getNonAccreditedCourse(Integer institute_id);
 }

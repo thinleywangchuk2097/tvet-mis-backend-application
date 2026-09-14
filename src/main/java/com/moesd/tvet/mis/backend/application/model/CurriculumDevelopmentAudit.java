@@ -38,6 +38,8 @@ public class CurriculumDevelopmentAudit {
 	
 	private Long programmeId;
 	
+	private String programmeTitle;
+	
 	private String description;
 
 	private String totalTheoryDuration;

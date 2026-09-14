@@ -1,13 +1,14 @@
 package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.CourseEnrollmentTraineeApp;
 import jakarta.persistence.Tuple;
 
 public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<CourseEnrollmentTraineeApp, Long>{
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  tp.*, "
 			+ "  a.ca_start_date, "
 			+ "  a.ca_end_date, "
@@ -36,11 +37,11 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "  LEFT JOIN tbl_programme_trainee_enrollment_dtls tp "
 			+ "    ON a.application_no = tp.course_enrol_app_no "
 			+ "WHERE tp.course_enrol_app_no = ? "
-			+ "  AND a.service_id IN (37, 38, 39)", nativeQuery = true)
+			+ "  AND a.service_id IN (37, 38, 39)")
 	List<Tuple> getCourseAppliedTraineesByApplicationNo(String application_no);
 	
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  tp.*, "
 			+ "  a.ca_start_date, "
 			+ "  a.ca_end_date, "
@@ -68,19 +69,19 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "  LEFT JOIN tbl_programme_trainee_enrollment_dtls tp "
 			+ "    ON a.application_no = tp.course_enrol_app_no "
 			+ "WHERE tp.course_enrol_app_no = ? "
-			+ "  AND a.service_id IN (41, 42)", nativeQuery = true)
+			+ "  AND a.service_id IN (41, 42)")
 	List<Tuple> getCourseAppliedTraineesReAssessmentByApplicationNo(String application_no);
 	
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_programme_trainee_enrollment_dtls a "
-			+ "WHERE a.course_enrol_app_no = ?", nativeQuery = true)
+			+ "WHERE a.course_enrol_app_no = ?")
 	List<CourseEnrollmentTraineeApp> findByApplicationNo(String application_no);
 	
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  tp.*, "
 			+ "  a.application_start_date, "
 			+ "  a.application_end_date, "
@@ -115,11 +116,12 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "    ON f.user_id = e.registration_no "
 			+ "WHERE f.user_id = ? "
 			+ "  AND a.programme_id = ? "
+			+ "  AND a.certification_level_id = ? "
 			+ "  AND tp.result_status_id = 95 "
-			+ "  AND a.service_id IN (37, 38, 39)", nativeQuery = true)
-	List<Tuple> getFailedTraineeDetails(String user_id, String course_id);
+			+ "  AND a.service_id IN (37, 38, 39)")
+	List<Tuple> getFailedTraineeDetails(String user_id, String course_id, Integer certification_level_id);
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_programme_trainee_enrollment_dtls a "
@@ -130,13 +132,21 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "  LEFT JOIN tbl_user d "
 			+ "    ON d.user_id = c.registration_no "
 			+ "WHERE d.user_id = ? "
-			+ "  AND b.programme_id = ?", nativeQuery = true)
-	List<CourseEnrollmentTraineeApp> getFailedTraineeReassessment(String user_id, String course_id);
+			+ "  AND b.programme_id = ? "
+			+ "  AND b.certification_level_id = ?")
+	List<CourseEnrollmentTraineeApp> getFailedTraineeReassessment(String user_id, Long programme_id, Integer certification_level_id);
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_assessor_task_assignment a "
-			+ "WHERE a.application_no = ?", nativeQuery = true)
+			+ "WHERE a.application_no = ?")
 	List<Tuple> fetchAssignedAssessors(String application_no);
+	
+	@NativeQuery("SELECT "
+			+ "  a.* "
+			+ "FROM "
+			+ "  tbl_programme_trainee_enrollment_dtls a "
+			+ "WHERE a.id =?")
+	Optional<CourseEnrollmentTraineeApp> removeTraineeFromSelectedProgramme(Long traineeId);
 }
