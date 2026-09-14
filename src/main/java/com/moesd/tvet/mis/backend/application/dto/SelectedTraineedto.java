@@ -16,10 +16,13 @@ public class SelectedTraineedto {
 	private String applicationNo;
 	private Integer statusId;
 	private String courseId;
-	private Integer certificationlevelId;
+	private Long programmeId;
+	private Integer certificationLevelId;
 	private String courseName;
 	private Date caStartDate;
 	private Date caEndDate;
+	private Long traineeId;
+	private Integer updatedBy;
 	private List<TraineeStatusdto> traineeIds;
 	private List<TraineeMarksdto> traineeMarks;
 	private List<TraineeVivadto> traineeVivaAssessments;

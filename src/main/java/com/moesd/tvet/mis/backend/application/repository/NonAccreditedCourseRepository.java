@@ -3,14 +3,13 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.NonAccreditedCourse;
 import jakarta.persistence.Tuple;
 
 public interface NonAccreditedCourseRepository extends JpaRepository<NonAccreditedCourse,Long>{
 	
-	@Query(value = 
-			 "SELECT "
+	@NativeQuery("SELECT "
 					 + "  n.id, "
 					 + "  n.application_no, "
 					 + "  n.institute_id, "
@@ -77,13 +76,12 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 					 + "    ON k.institute_id = n.institute_id "
 					 + "  LEFT JOIN tbl_curriculum_development cd "
 					 + "    ON cd.id = n.curriculum_id "
-					 + "WHERE n.application_no = ?1", nativeQuery = true)
+					 + "WHERE n.application_no = ?1")
 		List<Tuple> getNonAccreditedCourseByApplicationNo(String application_no);
 	
 		Optional<NonAccreditedCourse> findByApplicationNo(String applicationNo);
 		
-		@Query(value =  
-				"SELECT "
+		@NativeQuery("SELECT "
 						+ "  a.*, "
 						+ "  d.name AS status_name, "
 						+ "  (SELECT "
@@ -124,11 +122,10 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 						+ "    ON c.user_id = b.registration_no "
 						+ "  LEFT JOIN tbl_dropdown_child_master d "
 						+ "    ON d.id = a.status_id "
-						+ "WHERE c.user_id = ?", nativeQuery = true)
+						+ "WHERE c.user_id = ?")
 		List<Tuple> getNonAccreditedCourseDetailsByUserId(String user_id);
 		
-		@Query(value =  
-				"SELECT "
+		@NativeQuery("SELECT "
 						+ "  a.id, "
 						+ "  a.enrolment_capacity, "
 						+ "  a.fees_per_trainee, "
@@ -143,18 +140,17 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 						+ "  LEFT JOIN tbl_user d "
 						+ "    ON c.registration_no = d.user_id "
 						+ "WHERE a.status_id = 57 "
-						+ "  AND d.user_id = ?", nativeQuery = true)
+						+ "  AND d.user_id = ?")
 		List<Tuple> getNonAccreditedApprovedCourseByUserId(String user_id);
 		
-		@Query(value =  
-				"SELECT "
+		@NativeQuery("SELECT "
 						+ "  a.curriculum_id "
 						+ "FROM "
 						+ "  tbl_non_accredited_course_dtls a "
 						+ "  LEFT JOIN tbl_institute_registration_dtls b "
 						+ "    ON a.institute_id = b.institute_id "
 						+ "WHERE a.curriculum_id = ? "
-						+ "  AND b.registration_no = ?", nativeQuery = true)
+						+ "  AND b.registration_no = ?")
 		List<Tuple> curriculumAlreadyExist(Long curriculumId, String registration_no);
 		
 		

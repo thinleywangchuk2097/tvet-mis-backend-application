@@ -2,14 +2,13 @@ package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.TracerQuestionGenerator;
 import jakarta.persistence.Tuple;
 
 public interface TracerQuestionGeneratorRepository extends JpaRepository<TracerQuestionGenerator, Long>{
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  tq.id, "
 					+ "  tq.application_no, "
 					+ "  tq.tracer_title, "
@@ -71,11 +70,10 @@ public interface TracerQuestionGeneratorRepository extends JpaRepository<TracerQ
 					+ " "
 					+ "FROM tbl_tracer_question_dtls tq "
 					+ "WHERE tq.application_no = ? "
-					+ "ORDER BY tq.question_order ASC", nativeQuery = true)
+					+ "ORDER BY tq.question_order ASC")
 		List<Tuple> getTracerDetailsByApplicationNo(String application_no);
 	
-		@Query(value =  
-				"SELECT "
+		@NativeQuery("SELECT "
 					+ "  a.application_no, "
 					+ "  a.created_at, "
 					+ "  a.tracer_title, "
@@ -88,7 +86,7 @@ public interface TracerQuestionGeneratorRepository extends JpaRepository<TracerQ
 					+ "    ON a.parent_tracer_type_id = b.id "
 					+ "  LEFT JOIN tbl_dropdown_child_master c "
 					+ "    ON c.id = a.sub_tracer_type_id "
-					+ "    GROUP BY a.application_no", nativeQuery = true)
+					+ "    GROUP BY a.application_no")
 		List<Tuple> getTracerAllApplications();
 	
 

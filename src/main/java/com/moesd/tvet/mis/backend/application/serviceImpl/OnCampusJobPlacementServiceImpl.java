@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.OnCampusJobPlacementFirmDto;
 import com.moesd.tvet.mis.backend.application.dto.OnCampusJobPlacementSessionDto;
 import com.moesd.tvet.mis.backend.application.dto.OnCampusJobPlacementTraineeDto;

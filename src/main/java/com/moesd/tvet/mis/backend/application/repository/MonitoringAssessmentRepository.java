@@ -3,28 +3,26 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.MonitoringAssessment;
 import jakarta.persistence.Tuple;
 
 public interface MonitoringAssessmentRepository extends JpaRepository<MonitoringAssessment, Long> {
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_service_master a "
-			+ "WHERE a.id IN (7, 36, 4)", nativeQuery = true)
+			+ "WHERE a.id IN (7, 36, 4)")
 	List<Tuple> getInstituteTypeDropdown();
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  a.* "
 					+ "FROM "
 					+ "  tbl_institute_registration_dtls a "
-					+ "WHERE a.service_id = ?", nativeQuery = true)
+					+ "WHERE a.service_id = ?")
 	List<Tuple> getInstituteDropdown(String service_id);
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  ma.id, "
 					+ "  ma.application_no, "
 					+ "  ma.dzongkhag_id, "
@@ -53,13 +51,12 @@ public interface MonitoringAssessmentRepository extends JpaRepository<Monitoring
 					+ "FROM "
 					+ "  tbl_monitoring_assessment_dtls ma "
 					+ "WHERE "
-					+ "  ma.registration_no = ?", nativeQuery = true)
+					+ "  ma.registration_no = ?")
 	List<Tuple> getMonitoringAssessment(String user_id);
 	
 	Optional<MonitoringAssessment> findByApplicationNo(String applicationNo);
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  ma.id, "
 					+ "  ma.application_no, "
 					+ "  ma.dzongkhag_id, "
@@ -109,16 +106,15 @@ public interface MonitoringAssessmentRepository extends JpaRepository<Monitoring
 					+ "  WHERE d.application_no = ma.application_no) AS documents "
 					+ "FROM "
 					+ "  tbl_monitoring_assessment_dtls ma "
-					+ "WHERE ma.application_no = ?", nativeQuery = true)
+					+ "WHERE ma.application_no = ?")
 	List<Tuple> getMonitoringAssessmentByApplicationNo(String applicationNo);
 	
 	
-	@Query(value =  
-	"SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.* "
 			+ "FROM "
 			+ "  tbl_monitoring_assessment_dtls a "
-			+ "WHERE a.registration_no = ?", nativeQuery = true)
+			+ "WHERE a.registration_no = ?")
 	List<Tuple> getInstitutesRenewalStatus(String registrationNo);
 	
 }

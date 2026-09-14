@@ -3,7 +3,7 @@ package com.moesd.tvet.mis.backend.application.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.TOTProgram;
 
 import jakarta.persistence.Tuple;
@@ -12,8 +12,7 @@ public interface TOTProgramRepository extends JpaRepository<TOTProgram, Long> {
 	
 	Optional<TOTProgram> findById(Long id);
 	
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "    p.id, "
 					+ "    p.program_name, "
 					+ "    p.program_code, "
@@ -38,14 +37,13 @@ public interface TOTProgramRepository extends JpaRepository<TOTProgram, Long> {
 					+ "        WHERE m.program_id = p.id "
 					+ "    ) AS modules "
 					+ "FROM tbl_tot_program_dtls p "
-					+ "WHERE p.status_id = 122", nativeQuery = true)
+					+ "WHERE p.status_id = 122")
 	List<Tuple> getToTPrograms();
 	
-	@Query(value =  
-			 "SELECT "
+	@NativeQuery("SELECT "
 					 + "  a.* "
 					 + "FROM "
-					 + "  tbl_tot_announcement_dtls a", nativeQuery = true)
+					 + "  tbl_tot_announcement_dtls a")
 	List<Tuple> getToTProgramsAnnouncement();
 	
 	

@@ -4,18 +4,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationDetails;
 
 import jakarta.persistence.Tuple;
 
 public interface InstituteRegistrationDetailsRepository extends JpaRepository<InstituteRegistrationDetails, Long> {
 	
-	@Query(value = "SELECT * FROM tbl_institute_registration_dtls " + "WHERE registration_no = ?", nativeQuery = true)
+	@NativeQuery("SELECT * FROM tbl_institute_registration_dtls " + "WHERE registration_no = ?")
 	List<Tuple> getInstituteDetails(String registration_no);
 	
-	@Query(value = "SELECT "
+	@NativeQuery("SELECT "
 			+ "  ir.application_no, "
 			+ "  ir.proposed_institute_name, "
 			+ "  ir.dzongkhag_id, "
@@ -145,10 +144,10 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 			+ "  WHERE d.application_no = ir.application_no) AS documents "
 			+ "FROM "
 			+ "  tbl_institute_registration_dtls ir "
-			+ "WHERE ir.registration_no = ?", nativeQuery = true)
+			+ "WHERE ir.registration_no = ?")
 	List<Tuple> getInstituteRenewalDetails(String registration_no);
 	
-	@Query(value =    "SELECT "
+	@NativeQuery("SELECT "
 			+ "  p.id, "
 			+ "  p.service_id, "
 			+ "  p.application_no, "
@@ -196,17 +195,17 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 			+ "  ON p.application_no = rp.proposal_application_no "
 			+ "  LEFT JOIN tbl_institute_registration_dtls ipr "
 			+ "  ON ipr.application_no = rp.application_no "
-			+ "WHERE ipr.registration_no = ?", nativeQuery = true)
+			+ "WHERE ipr.registration_no = ?")
 	List<Tuple> getInstituteChangeDetails(String registration_no);
 	
 	
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  a.*, "
 			+ "  a.proposed_institute_name AS institute_name "
 			+ "FROM "
 			+ "  tbl_institute_registration_dtls a "
-			+ "WHERE a.institute_id = ?", nativeQuery = true)
+			+ "WHERE a.institute_id = ?")
 	List<Tuple> getInstituteNameByInstituteId(String registration_no);
 	
 	Optional<InstituteRegistrationDetails> findByRegistrationNo(String registrationNo);

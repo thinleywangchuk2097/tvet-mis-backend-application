@@ -4,14 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.CurriculumDevelopment;
 import jakarta.persistence.Tuple;
 
 
 public interface CurriculumDevelopmentRepository extends JpaRepository<CurriculumDevelopment, Long> {
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  c.id, "
 					+ "  c.application_no, "
 					+ "  c.curriculum_title, "
@@ -65,11 +64,10 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 					+ "    ON c.application_no = t.application_no "
 					+ "  LEFT JOIN tbl_institute_registration_dtls k "
 					+ "    ON k.institute_id = c.institute_id "
-					+ "WHERE c.application_no = ?", nativeQuery = true)
+					+ "WHERE c.application_no = ?")
 		List<Tuple> getCurriculumDetails(String application_no);
 	
-		@Query(value =  
-				 "SELECT "
+		@NativeQuery("SELECT "
 						 + "  c.id, "
 						 + "  c.application_no, "
 						 + "  c.curriculum_title, "
@@ -122,37 +120,10 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						 + "    ON k.institute_id = c.institute_id "
 						 + "  LEFT JOIN tbl_user u "
 						 + "    ON k.registration_no = u.user_id "
-						 + "WHERE u.user_id = ?", nativeQuery = true)
+						 + "WHERE u.user_id = ?")
 		List<Tuple> getCurriculumDetailsByUserId(String user_id);
 		
-//		@Query(value = 
-//				"SELECT "
-//						+ "  cd.id, "
-//						+ "  cd.curriculum_title, "
-//						+ "  ncs.occupation_id, "
-//						+ "  ncs.sector_id, "
-//						+ "  cd.total_theory_duration, "
-//						+ "  cd.total_practical_duration, "
-//						+ "  cd.total_ojt_duration, "
-//						+ "  cd.total_program_duration, "
-//						+ "  cd.certificate_level_id, "
-//						+ "  ncs.programme_title "
-//						+ "FROM "
-//						+ "  tbl_curriculum_development cd "
-//						+ "  INNER JOIN tbl_institute_registration_dtls i "
-//						+ "    ON cd.institute_id = i.institute_id "
-//						+ "  INNER JOIN tbl_user u "
-//						+ "    ON i.registration_no = u.user_id "
-//						+ "  LEFT JOIN tbl_ncs_app_dtls ncs "
-//						+ "    ON cd.programme_id = ncs.id "
-//						+ "WHERE cd.status_id = 59 "
-//						+ "  AND u.user_id = ? "
-//						+ "  AND cd.programme_type_id = ?",
-//						nativeQuery = true)
-//		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
-		
-		@Query(value = 
-				"SELECT "
+		@NativeQuery("SELECT "
 						+ "  cd.id, "
 						+ "  cd.curriculum_title, "
 						+ "  ncs.occupation_id, "
@@ -177,8 +148,7 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						+ "    ON cd.programme_id = ncs.id "
 						+ "WHERE cd.status_id = 59 "
 						+ "  AND u.user_id = ? "
-						+ "  AND cd.programme_type_id = ?",
-						nativeQuery = true)
+						+ "  AND cd.programme_type_id = ?")
 		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
 		
 		CurriculumDevelopment findByApplicationNo(String applicationNo);

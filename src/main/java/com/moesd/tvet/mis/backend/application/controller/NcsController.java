@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.Ncsdto;
 import com.moesd.tvet.mis.backend.application.service.NcsService;
 import lombok.RequiredArgsConstructor;

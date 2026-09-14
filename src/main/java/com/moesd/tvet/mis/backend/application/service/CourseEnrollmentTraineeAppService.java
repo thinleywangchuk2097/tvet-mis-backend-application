@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.CourseEnrollmentTraineeAppdto;
 import com.moesd.tvet.mis.backend.application.dto.SelectedTraineedto;
 
@@ -22,11 +22,15 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	ResponseEntity<?> updateTraineeApplication(SelectedTraineedto request);
 
-	List<ObjectNode> getFailedTraineeDetails(String user_id, String course_id);
+	List<ObjectNode> getFailedTraineeDetails(String user_id, String course_id, Integer certification_level_id);
 	
 	ResponseEntity<?> selectUnselectTrainee(SelectedTraineedto request);
 	
 	List<ObjectNode> fetchAssignedAssessors(String application_no);
+	
+	ResponseEntity<?> removeTraineeFromSelectedProgramme(SelectedTraineedto request);
+	
+	
 	
 	
 }

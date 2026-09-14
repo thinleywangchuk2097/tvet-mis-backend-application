@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.CourseEnrollmentTraineeAppdto;
 import com.moesd.tvet.mis.backend.application.dto.SelectedTraineedto;
 import com.moesd.tvet.mis.backend.application.dto.TraineeInternaldto;
@@ -255,13 +255,6 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					.orElseThrow(() -> new RuntimeException("Course not found"));
 			//this status is being used while trainee selection
 			course.setApplicationStatusId(request.getStatusId());
-			
-			if (request.getCaStartDate() != null && request.getCaEndDate() != null) {
-				course.setCaStartDate(request.getCaStartDate());
-				course.setCaEndDate(request.getCaEndDate());
-				// save
-				courseEnrollmentAppRepository.save(course);
-			}
 
 			List<CourseEnrollmentTraineeApp> trainees = courseEnrollmentTraineeAppRepository
 					.findByApplicationNo(request.getApplicationNo());
@@ -281,8 +274,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 						trainee.setTheoryAssessment(String.valueOf(dto.getTheoryAssessment()));
 						trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
 						trainee.setRemarks(String.valueOf(dto.getRemarks()));
-						if (request.getCertificationlevelId() == 111 || request.getCertificationlevelId() == 112) {
-							if (dto.getTheoryAssessment() >= 40 && dto.getPracticalAssessment() >= 40) {
+						if (request.getCertificationLevelId() == 111 || request.getCertificationLevelId() == 112) {
+							if (dto.getTheoryAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
 							} else {
@@ -321,8 +314,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					if (dto.getVivaAssessment() != null && dto.getPracticalAssessment() != null) {
 						trainee.setVivaAssessment(String.valueOf(dto.getVivaAssessment()));
 						trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
-						if (request.getCertificationlevelId() == 111 || request.getCertificationlevelId() == 112) {
-							if (dto.getVivaAssessment() >= 40 && dto.getPracticalAssessment() >= 40) {
+						if (request.getCertificationLevelId() == 111 || request.getCertificationLevelId() == 112) {
+							if (dto.getVivaAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
 							} else {
@@ -338,10 +331,9 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 								trainee.setResultStatusId(resultId);
 							}
 						}
+						
 					}
-					// if (dto.getPracticalAssessment() != null) {
-					// trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
-					// }
+					
 				}
 				// save changes
 				courseEnrollmentTraineeAppRepository.saveAll(trainees);
@@ -382,8 +374,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	}
 
 	@Override
-	public List<ObjectNode> getFailedTraineeDetails(String user_id, String course_id) {
-		List<Tuple> resultList = courseEnrollmentTraineeAppRepository.getFailedTraineeDetails(user_id, course_id);
+	public List<ObjectNode> getFailedTraineeDetails(String user_id, String course_id, Integer certification_level_id) {
+		List<Tuple> resultList = courseEnrollmentTraineeAppRepository.getFailedTraineeDetails(user_id, course_id, certification_level_id);
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
@@ -440,18 +432,35 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 
 			// Fetch existing failed trainees
 			List<CourseEnrollmentTraineeApp> existingTrainees = courseEnrollmentTraineeAppRepository
-					.getFailedTraineeReassessment(request.getUserId(), request.getCourseId());
-
+					.getFailedTraineeReassessment(request.getUserId(), request.getProgrammeId(), request.getCertificationLevelId());
+			
+			// Update resultStatusId for each trainee newly added
+			if (existingTrainees != null && !existingTrainees.isEmpty()) {
+			    Integer newResultStatusId = 141; //Re Assessment statusId
+			    
+			    for (CourseEnrollmentTraineeApp trainee : existingTrainees) {
+			        trainee.setResultStatusId(newResultStatusId);
+			    }
+			    
+			    // Save all updated trainees
+			    courseEnrollmentTraineeAppRepository.saveAll(existingTrainees);
+			}
+			//newly ended here 
+			
 			CourseEnrollmentApp course = courseEnrollmentAppRepository.findByApplicationNo(request.getApplicationNo())
-					.orElseThrow(() -> new RuntimeException("Course not found"));
-
+					.orElseThrow(() -> new RuntimeException("Programme not found"));
+			
+			//new added 
+			course.setApplicationStatusId(request.getStatusId());
+			courseEnrollmentAppRepository.save(course);
+			//ends
+			
 			if (existingTrainees.isEmpty()) {
 				throw new RecordNotFoundException("No trainees found for applicationNo: " + request.getApplicationNo());
 			}
 
 			// Handle new reassessment trainees (creating new applications)
 			if (request.getTraineeIds() != null && !request.getTraineeIds().isEmpty()) {
-				log.info("Processing new reassessment trainees");
 				Integer taskStatusId = dropdownManagementRepository.findChildById(18)
 						.orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
 
@@ -471,6 +480,11 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							.applicationNo(applicationNo).applicantName(existingTrainee.getApplicantName())
 							.emailId(existingTrainee.getEmailId()).mobileNo(existingTrainee.getMobileNo())
 							.statusId(dto.getStatusId()).course(course)
+							.parentFailedId(dto.getTraineeId())
+							.internalAssessment(existingTrainee.getInternalAssessment())
+							.practicalAssessment(existingTrainee.getPracticalAssessment())
+							.vivaAssessment(existingTrainee.getVivaAssessment())
+							.theoryAssessment(existingTrainee.getTheoryAssessment())
 							.reAssessmentNo(existingTrainee.getReAssessmentNo() != null
 									? existingTrainee.getReAssessmentNo() + 1
 									: 1)
@@ -503,6 +517,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			// Handle internal assessment updates for existing trainees
 			if (request.getTraineeInternalAssessments() != null && !request.getTraineeInternalAssessments().isEmpty()) {
 				log.info("Updating internal assessments for existing trainees");
+				
 				Integer taskStatusId = dropdownManagementRepository.findChildById(18)
 						.orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
 
@@ -557,6 +572,29 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
 		return DtlsJson;
 	}
+
+	@Override
+	public ResponseEntity<?> removeTraineeFromSelectedProgramme(SelectedTraineedto request) {
+
+	    CourseEnrollmentTraineeApp trainee = courseEnrollmentTraineeAppRepository
+	            .removeTraineeFromSelectedProgramme(request.getTraineeId())
+	            .orElseThrow(() -> new RuntimeException("Course not found"));
+	    // This status is being used while trainee selection
+	    trainee.setStatusId(request.getStatusId());
+	    trainee.setUpdatedBy(request.getUpdatedBy());
+	    trainee.setRemarks(request.getRemarks());
+	    
+	    courseEnrollmentTraineeAppRepository.save(trainee);
+	    
+	    return ResponseEntity.ok(
+	           Map.of(
+	                 "message", "Trainee removed from selected programme successfully",
+	                 "traineeId", request.getTraineeId()
+	          )
+	    );
+	}
+
+	
 
 	
 

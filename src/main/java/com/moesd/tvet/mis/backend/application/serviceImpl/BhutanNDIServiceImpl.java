@@ -7,7 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.moesd.tvet.mis.backend.application.dto.AuthenticationRequest;
 import com.moesd.tvet.mis.backend.application.dto.UserRegisterRequest;
 import com.moesd.tvet.mis.backend.application.model.BhutanNDIToken;

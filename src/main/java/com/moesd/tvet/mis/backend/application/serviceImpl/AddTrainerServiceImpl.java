@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AddTrainerDto;
 import com.moesd.tvet.mis.backend.application.model.AddTrainer;
 import com.moesd.tvet.mis.backend.application.model.TrainerCourse;

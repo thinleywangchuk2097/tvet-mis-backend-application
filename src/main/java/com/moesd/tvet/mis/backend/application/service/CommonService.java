@@ -3,7 +3,7 @@ package com.moesd.tvet.mis.backend.application.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.model.Dzongkhag;
 import com.moesd.tvet.mis.backend.application.model.Gewog;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationQualityStandard;

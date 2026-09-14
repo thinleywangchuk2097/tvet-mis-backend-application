@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,8 +14,7 @@ import jakarta.persistence.Tuple;
 
 public interface StaffManagementRepository extends JpaRepository<StaffManagement, Long> {
 
-	@Query(value =  
-			"SELECT "
+	@NativeQuery("SELECT "
 					+ "  sm.id, "
 					+ "  sm.has_citizen_id, "
 					+ "  sm.citizen_id, "
@@ -79,7 +79,7 @@ public interface StaffManagementRepository extends JpaRepository<StaffManagement
 					+ "  tbl_staff_management_dtls sm "
 					+ "  LEFT JOIN tbl_institute_registration_dtls ir "
 					+ "    ON sm.institute_id = ir.institute_id "
-					+ "WHERE sm.institute_id = ? AND sm.status_id=1", nativeQuery = true)
+					+ "WHERE sm.institute_id = ? AND sm.status_id=1")
 	List<Tuple> getInstituteStaff(String instituteId);
 	
 	@Query("SELECT s FROM StaffManagement s WHERE s.id = :id AND s.statusId != 0")

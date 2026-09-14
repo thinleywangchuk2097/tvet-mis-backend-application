@@ -38,6 +38,8 @@ public class CourseEnrollmentTraineeAppdto {
 	private String schoolName;
 	private String stream;
 	
+	private Long parentFailedId;
+	
 	private List<TraineeAppDto>traineeMarks;
 
 	private Documentdto[] documents;

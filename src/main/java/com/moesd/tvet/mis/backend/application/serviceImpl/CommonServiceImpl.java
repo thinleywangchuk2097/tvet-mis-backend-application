@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.model.Dzongkhag;
 import com.moesd.tvet.mis.backend.application.model.Gewog;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationQualityStandard;

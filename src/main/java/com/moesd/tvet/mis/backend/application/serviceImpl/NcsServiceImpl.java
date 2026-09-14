@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.Ncsdto;
 import com.moesd.tvet.mis.backend.application.dto.NcsUnitDto;
 import com.moesd.tvet.mis.backend.application.model.NcsApp;
@@ -109,24 +109,24 @@ public class NcsServiceImpl implements NcsService {
 	@Override
 	public List<ObjectNode> getNcsDetails() {
 		List<Tuple> resultList = ncsRepository.getNcsDetails();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+		List<ObjectNode> ncsDtls = objectTojson._toJson(resultList);
+		return ncsDtls;
 
 	}
 
 	@Override
 	public List<ObjectNode> getAlreadyNcsDetailsExist(Integer sector_id, Integer occupation_id, Integer certification_id) {
 		List<Tuple> resultList = ncsRepository.getAlreadyNcsDetailsExist(sector_id,occupation_id,certification_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+		List<ObjectNode> dtlsData = objectTojson._toJson(resultList);
+		return dtlsData;
 
 	}
 
 	@Override
 	public List<ObjectNode> getProgrammeTitleById(Integer programmeId) {
 		List<Tuple> resultList = ncsRepository.getProgrammeTitleById(programmeId);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+		List<ObjectNode> dtlsTitle = objectTojson._toJson(resultList);
+		return dtlsTitle;
 	}
 
 	@Override

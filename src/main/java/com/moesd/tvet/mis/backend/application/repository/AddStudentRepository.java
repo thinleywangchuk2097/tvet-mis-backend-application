@@ -2,13 +2,13 @@ package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.AddStudent;
 import jakarta.persistence.Tuple;
 
 public interface AddStudentRepository extends JpaRepository<AddStudent, Long> {
 	
-	@Query(value =  "SELECT "
+	@NativeQuery("SELECT "
 			+ "  s.id, "
 			+ "  s.student_code, "
 			+ "  s.citizen_id, "
@@ -53,6 +53,6 @@ public interface AddStudentRepository extends JpaRepository<AddStudent, Long> {
 			+ "FROM "
 			+ "  tbl_student_dtls s "
 			+ "WHERE s.institute_id = ? AND s.status_id = 1 "
-			+ "ORDER BY s.id DESC", nativeQuery = true)
+			+ "ORDER BY s.id DESC")
 	List<Tuple> getAllActiveStudents(Integer institute_id);
 }

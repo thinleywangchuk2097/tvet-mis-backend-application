@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.BirmsPaymentRequestdto;
 import com.moesd.tvet.mis.backend.application.model.BirmsPayment;
 import com.moesd.tvet.mis.backend.application.service.BirmsPaymentService;
