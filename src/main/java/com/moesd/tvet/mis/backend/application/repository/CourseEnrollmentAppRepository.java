@@ -20,7 +20,7 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  AND a.service_id = ?")
 	List<Tuple> getCourseDetailsAnnouncementByUserId(String user_id, String service_id);
 	
-	@NativeQuery("SELECT "
+	@NativeQuery( "SELECT "
 			+ "  a.*, "
 			+ "  e.proposed_institute_name AS institute_name, "
 			+ "  b.entry_requirement, "
@@ -35,12 +35,12 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  COALESCE (t.total_applied, 0) AS total_applied "
 			+ "FROM "
 			+ "  tbl_programme_announcement_dtls a "
+			+ "  LEFT JOIN tbl_accredited_course_dtls ac "
+			+ "    ON ac.id = a.programme_id "
 			+ "  LEFT JOIN tbl_curriculum_development b "
-			+ "    ON a.programme_id = b.programme_id "
+			+ "    ON ac.curriculum_id = b.id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls c "
 			+ "    ON c.id = b.programme_id "
-			+ "  LEFT JOIN tbl_accredited_course_dtls ac "
-			+ "    ON ac.curriculum_id = b.id "
 			+ "  LEFT JOIN tbl_non_accredited_course_dtls nc "
 			+ "    ON a.programme_id = nc.id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls d "
@@ -55,7 +55,7 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "      tbl_programme_trainee_enrollment_dtls "
 			+ "    GROUP BY course_enrol_app_no) t "
 			+ "    ON t.course_enrol_app_no = a.application_no "
-			+ "WHERE a.service_id IN (37, 38, 39) "
+			+ "WHERE a.service_id IN(37, 38, 39) "
 			+ "  AND a.application_end_date >= CURRENT_DATE")
 	List<Tuple> getAllCourseAnnouncement();
 	

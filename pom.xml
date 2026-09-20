@@ -33,10 +33,32 @@
             Fixed in 2.21.6.
         -->
         <jackson2.version>2.21.6</jackson2.version>
+
+        <!--
+            Tomcat override to patch multiple CRITICAL CVEs identified by
+            OWASP Dependency-Check and Trivy scans:
+              - CVE-2026-65182 (Incorrect Authorization, CVSS 9.1)
+              - CVE-2026-65905 (Authentication Bypass, CVSS 9.8)
+              - CVE-2026-68525 (Incorrect Authorization, CVSS 9.1)
+              - CVE-2026-65637 (Improper Input Validation, CVSS 9.8)
+              - CVE-2026-65183 (TOCTOU Race Condition, CVSS 8.1)
+              - CVE-2026-66422 (Improper Authorization, CVSS 8.1)
+              - CVE-2026-68569 (Improper Authentication, CVSS 8.1)
+              - CVE-2026-65927 (Off-by-one Error, CVSS 7.5)
+              - CVE-2026-68763 (Resource Consumption, CVSS 7.5)
+              - CVE-2026-73180 (Insufficient Session Expiration, CVSS 6.8)
+              - CVE-2026-66299 (Resource Consumption, CVSS 5.3)
+
+            Spring Boot 4.1.1 pulls in Tomcat 11.0.24, which is vulnerable.
+            Fixed in 11.0.25.
+        -->
+        <tomcat.version>11.0.25</tomcat.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- ==================== Jackson 2 Override ==================== -->
             <!--
                 Jackson 2 override for JJWT's transitive dependency.
                 Fixes CVE-2026-83557 (path traversal via polymorphic typing).
@@ -56,6 +78,29 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>2.21</version>
             </dependency>
+
+            <!-- ==================== Tomcat Override ==================== -->
+            <!--
+                Forces all Tomcat embed modules to the patched version.
+                This overrides the version inherited from spring-boot-starter-parent
+                and from spring-boot-starter-webmvc.
+            -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

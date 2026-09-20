@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AccreditedCoursedto;
@@ -59,4 +60,49 @@ public class AccreditedCourseController {
 	    List<ObjectNode> Details = instituteAccreditedCourseService.curriculumExist(curriculumId, registration_no);
 	    return ResponseEntity.ok(Details);
 	}
+	
+	
+	@GetMapping("/get-list-selected-Trainee-bqf/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getListSelectedBQFTraineeForExcel(@PathVariable String application_no){
+	    List<ObjectNode> Details = instituteAccreditedCourseService.getListSelectedBQFTraineeForExcel(application_no);
+	    return ResponseEntity.ok(Details);
+	}
+	
+	@GetMapping("/get-passed-trainee-certificate-printing")
+	public ResponseEntity<List<ObjectNode>> getListPassTraineeForCertificatePrinting(
+	        @RequestParam(required = false) String applicationNo,
+	        @RequestParam(required = false) Integer instituteId,
+	        @RequestParam(required = false) Integer serviceId,
+	        @RequestParam(required = false) Integer certificationLevelId,
+	        @RequestParam(required = false) Integer programmeId
+	        
+	        ) 
+	{
+
+	    List<ObjectNode> result =
+	    		instituteAccreditedCourseService.getListPassTraineeForCertificatePrinting(
+	                    applicationNo,
+	                    instituteId,
+	                    serviceId,
+	                    certificationLevelId,
+	                    programmeId
+	                    
+	            );
+
+	    return ResponseEntity.ok(result);
+	}
+	
+	@GetMapping("/get-services-assessement-result")
+	public ResponseEntity<List<ObjectNode>> getServicesAssessementResult(){
+	    List<ObjectNode> data = instituteAccreditedCourseService.getServicesAssessementResult();
+	    return ResponseEntity.ok(data);
+	}
+	
+	@GetMapping("/get-programmes-certification/{institute_id}/{service_id}/{certification_level_id}")
+	public ResponseEntity<List<ObjectNode>> getProgrammesCertification(@PathVariable Integer institute_id, @PathVariable Integer service_id, @PathVariable Integer certification_level_id){
+	    List<ObjectNode> Details = instituteAccreditedCourseService.getProgrammesCertification(institute_id, service_id, certification_level_id);
+	    return ResponseEntity.ok(Details);
+	}
+	
+	
 }
