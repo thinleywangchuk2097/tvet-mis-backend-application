@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.EmployerDTO;
@@ -31,7 +30,6 @@ import com.moesd.tvet.mis.backend.application.service.TracerQuestionGeneratorSer
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.GenerateTracerUniqueId;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,20 +45,17 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 	private final GenerateTracerUniqueId generateTracerUniqueId;
 	private final TracerQuestionGeneratorRepository repository;
 	private final TracerSurveySendDetailsRepository tracerSurveySendDetailsRepository;
-    private final TracerSurveyResponseDetailsRepository tracerSurveyResponseDetailsRepository ;
-	@Override
-	public List<ObjectNode> getTracerQuestionDropdownType() {
-		List<Tuple> resultList = tracerQuestionTypeDropdownRepository.getTracerQuestionDropdownType();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
-	}
+    private final TracerSurveyResponseDetailsRepository tracerSurveyResponseDetailsRepository;
+    
+    @Override
+    public List<ObjectNode> getTracerQuestionDropdownType() {
+        return objectTojson._toJson(tracerQuestionTypeDropdownRepository.getTracerQuestionDropdownType());
+    }
 
-	@Override
-	public List<ObjectNode> getParentTracerTypes() {
-		List<Tuple> resultList = tracerQuestionTypeDropdownRepository.getParentTracerTypes();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
-	}
+    @Override
+    public List<ObjectNode> getParentTracerTypes() {
+        return objectTojson._toJson(tracerQuestionTypeDropdownRepository.getParentTracerTypes());
+    }
 
 	@Override
 	@Transactional
@@ -129,17 +124,13 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 	}
 
 	@Override
-	public List<ObjectNode> getTracerDetailsByApplicationNo(String application_no) {
-		List<Tuple> resultList = repository.getTracerDetailsByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getTracerDetailsByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(repository.getTracerDetailsByApplicationNo(applicationNo));
 	}
 
 	@Override
 	public List<ObjectNode> getTracerAllApplications() {
-		List<Tuple> resultList = repository.getTracerAllApplications();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(repository.getTracerAllApplications());
 	}
 
 	@Override

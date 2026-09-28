@@ -19,24 +19,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/institute-proposal")
 public class InstituteProposalController {
-	
+
 	private final InstituteProposalService instituteProposalService;
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitInstituteProposal(@RequestBody InstituteProposaldto request) {
-		return(instituteProposalService.submitInstituteProposal(request));
+		return (instituteProposalService.submitInstituteProposal(request));
 	}
-	
+
 	@GetMapping("/get-institute-details/{application_no}")
-	public ResponseEntity<List<ObjectNode>> getInstituteDetails(@PathVariable String application_no){
-	    List<ObjectNode> instituteDetails = instituteProposalService.getInstituteDetails(application_no);
-	    return ResponseEntity.ok(instituteDetails);
+	public ResponseEntity<List<ObjectNode>> getInstituteDetails(@PathVariable("application_no") String applicationNo) {
+		List<ObjectNode> instituteDetails = instituteProposalService.getInstituteDetails(applicationNo);
+		return ResponseEntity.ok(instituteDetails);
 	}
-	
+
 	@PostMapping("/verify-institute-proposal")
 	public ResponseEntity<?> verifyInstituteProposal(@RequestBody InstituteProposaldto request) {
-		return(instituteProposalService.verifyInstituteProposal(request));
+		return (instituteProposalService.verifyInstituteProposal(request));
 	}
-	
-	
+
 }

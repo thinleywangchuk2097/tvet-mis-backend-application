@@ -71,7 +71,7 @@ public interface TracerQuestionGeneratorRepository extends JpaRepository<TracerQ
 					+ "FROM tbl_tracer_question_dtls tq "
 					+ "WHERE tq.application_no = ? "
 					+ "ORDER BY tq.question_order ASC")
-		List<Tuple> getTracerDetailsByApplicationNo(String application_no);
+		List<Tuple> getTracerDetailsByApplicationNo(String applicationNo);
 	
 		@NativeQuery("SELECT "
 					+ "  a.application_no, "

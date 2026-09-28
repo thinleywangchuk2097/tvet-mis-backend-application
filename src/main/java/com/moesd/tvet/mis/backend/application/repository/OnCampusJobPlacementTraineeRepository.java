@@ -14,7 +14,7 @@ public interface OnCampusJobPlacementTraineeRepository extends JpaRepository<OnC
 					+ "FROM "
 					+ "  tbl_campus_job_placement_trainee_dtls a "
 					+ "WHERE a.institute_id = ?")
-	List<Tuple> getTraineeByInstituteId(String institute_id);
+	List<Tuple> getTraineeByInstituteId(String instituteId);
 	
 	
 	@NativeQuery("SELECT "

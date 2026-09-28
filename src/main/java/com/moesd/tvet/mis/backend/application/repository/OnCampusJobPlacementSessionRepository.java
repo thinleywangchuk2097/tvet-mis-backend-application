@@ -18,7 +18,7 @@ public interface OnCampusJobPlacementSessionRepository extends JpaRepository<OnC
 					+ "FROM "
 					+ "  tbl_campus_job_placement_session_dtls a "
 					+ "WHERE a.institute_id = ?")
-	List<Tuple> getPlacementSessionByInstituteId(String institute_id);
+	List<Tuple> getPlacementSessionByInstituteId(String instituteId);
 	
 	
 }

@@ -19,13 +19,13 @@ public interface BirmsPaymentService {
 
     ResponseEntity<?> makePaymentCancel(BirmsPaymentRequestdto dto);
 
-    Optional<BirmsPayment> getPaymentByApplicationNo(String application_no);
+    Optional<BirmsPayment> getPaymentByApplicationNo(String applicationNo);
 
     BirmsPayment updatePaymentCheckBounce(BirmsPaymentRequestdto dto);
 
     List<ObjectNode> getAllPaymentDetails();
 
-    List<ObjectNode> getByUserPenaltyApplicationDetails(String user_id);
+    List<ObjectNode> getByUserPenaltyApplicationDetails(String userId);
     
     List<ObjectNode> getCourseByInstituteId(String instituteId);
     

@@ -24,7 +24,6 @@ import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -133,11 +132,9 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 	}
 
 	@Override
-	public List<ObjectNode> getNonAccreditedCourseByApplicationNo(String application_no) {
-		List<Tuple> resultList = nonAccreditedCourseRepository
-				.getNonAccreditedCourseByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getNonAccreditedCourseByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(
+	            nonAccreditedCourseRepository.getNonAccreditedCourseByApplicationNo(applicationNo));
 	}
 
 	@Override
@@ -259,24 +256,20 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 	}
 
 	@Override
-	public List<ObjectNode> getNonAccreditedCourseDetailsByUserId(String user_id) {
-		List<Tuple> resultList = nonAccreditedCourseRepository.getNonAccreditedCourseDetailsByUserId(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getNonAccreditedCourseDetailsByUserId(String userId) {
+	    return objectTojson._toJson(nonAccreditedCourseRepository.getNonAccreditedCourseDetailsByUserId(userId));
 	}
 
 	@Override
-	public List<ObjectNode> getNonAccreditedApprovedCourseByUserId(String user_id) {
-		List<Tuple> resultList = nonAccreditedCourseRepository.getNonAccreditedApprovedCourseByUserId(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getNonAccreditedApprovedCourseByUserId(String userId) {
+	    return objectTojson._toJson(
+	            nonAccreditedCourseRepository.getNonAccreditedApprovedCourseByUserId(userId));
 	}
 
 	@Override
-	public List<ObjectNode> curriculumAlreadyExist(Long curriculumId, String registration_no) {
-		List<Tuple> resultList = nonAccreditedCourseRepository.curriculumAlreadyExist(curriculumId,registration_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> curriculumAlreadyExist(Long curriculumId, String registrationNo) {
+	    return objectTojson._toJson(
+	            nonAccreditedCourseRepository.curriculumAlreadyExist(curriculumId, registrationNo));
 	}
 
 }

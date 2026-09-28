@@ -25,40 +25,39 @@ public class MonitoringAssessmentController {
 		List<ObjectNode> instituteDetails = monitoringAssessmentService.getInstituteTypeDropdown();
 		return ResponseEntity.ok(instituteDetails);
 	}
-	
+
 	@GetMapping("/get-institutes-dropdown/{service_id}")
-	public ResponseEntity<List<ObjectNode>> getInstituteDropdown(@PathVariable String service_id){
-	    List<ObjectNode> instituteDetails = monitoringAssessmentService.getInstituteDropdown(service_id);
-	    return ResponseEntity.ok(instituteDetails);
+	public ResponseEntity<List<ObjectNode>> getInstituteDropdown(@PathVariable("service_id") String serviceId) {
+		List<ObjectNode> getInstituteDropdown = monitoringAssessmentService.getInstituteDropdown(serviceId);
+		return ResponseEntity.ok(getInstituteDropdown);
 	}
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitMonitoringAssessment(@RequestBody MonitoringAssessmentDto request) {
 		return (monitoringAssessmentService.submitMonitoringAssessment(request));
 	}
-	
+
 	@GetMapping("/get-monitoring-assessment/{user_id}")
-	public ResponseEntity<List<ObjectNode>> getMonitoringAssessment(@PathVariable String user_id){
-	    List<ObjectNode> Details = monitoringAssessmentService.getMonitoringAssessment(user_id);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getMonitoringAssessment(@PathVariable("user_id") String userId) {
+		List<ObjectNode> getMonitoringAssessmentDetails = monitoringAssessmentService.getMonitoringAssessment(userId);
+		return ResponseEntity.ok(getMonitoringAssessmentDetails);
 	}
-	
+
 	@PostMapping("/verify")
 	public ResponseEntity<?> verifyMonitoringAssessment(@RequestBody MonitoringAssessmentDto request) {
 		return (monitoringAssessmentService.verifyMonitoringAssessment(request));
 	}
-	
+
 	@GetMapping("/get-monitoring-assessment-details/{applicationNo}")
-	public ResponseEntity<List<ObjectNode>> getMonitoringAssessmentByApplicationNo(@PathVariable String applicationNo){
-	    List<ObjectNode> Details = monitoringAssessmentService.getMonitoringAssessmentByApplicationNo(applicationNo);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getMonitoringAssessmentByApplicationNo(@PathVariable String applicationNo) {
+		List<ObjectNode> getMonitoringDetails = monitoringAssessmentService.getMonitoringAssessmentByApplicationNo(applicationNo);
+		return ResponseEntity.ok(getMonitoringDetails);
 	}
-	
+
 	@GetMapping("/get-institutes-renewal-status/{registrationNo}")
-	public ResponseEntity<List<ObjectNode>> getInstitutesRenewalStatus(@PathVariable String registrationNo){
-	    List<ObjectNode> instituteDetails = monitoringAssessmentService.getInstitutesRenewalStatus(registrationNo);
-	    return ResponseEntity.ok(instituteDetails);
+	public ResponseEntity<List<ObjectNode>> getInstitutesRenewalStatus(@PathVariable String registrationNo) {
+		List<ObjectNode> instituteDetails = monitoringAssessmentService.getInstitutesRenewalStatus(registrationNo);
+		return ResponseEntity.ok(instituteDetails);
 	}
-	
-	
+
 }

@@ -17,17 +17,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/management/trainer")
 public class AddTrainerController {
-	
+
 	private final AddTrainerService addTrainerService;
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitTrainer(@RequestBody AddTrainerDto request) {
 		return (addTrainerService.submitTrainer(request));
 	}
 
 	@GetMapping("/get-all-trainer/{institute_id}")
-	public ResponseEntity<?> getAllTrainer(@PathVariable Integer institute_id) {
-		List<ObjectNode> trainer = addTrainerService.getAllTrainer(institute_id);
+	public ResponseEntity<?> getAllTrainer(@PathVariable("institute_id") Integer instituteId) {
+		List<ObjectNode> trainer = addTrainerService.getAllTrainer(instituteId);
 		return ResponseEntity.ok(trainer);
 	}
 
@@ -40,6 +40,5 @@ public class AddTrainerController {
 	public ResponseEntity<?> softDeleteTrainer(@PathVariable Long trainerId) {
 		return addTrainerService.softDeleteTrainer(trainerId);
 	}
-	
 
 }

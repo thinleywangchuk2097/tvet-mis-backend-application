@@ -19,38 +19,39 @@ import lombok.RequiredArgsConstructor;
 public class ProgramMonitoringController {
 
 	private final ProgramMonitoringService programMonitoringService;
-	
+
 	@GetMapping("/get-service")
 	public ResponseEntity<List<ObjectNode>> getCourseService() {
 		List<ObjectNode> seviceCourse = programMonitoringService.getCourseService();
 		return ResponseEntity.ok(seviceCourse);
 	}
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitProgramMonitoring(@RequestBody ProgramMonitoringDto request) {
 		return (programMonitoringService.submitProgramMonitoring(request));
 	}
-	
+
 	@GetMapping("/get-program-monitoring/{user_id}")
-	public ResponseEntity<List<ObjectNode>> getProgramMonitoring(@PathVariable String user_id){
-	    List<ObjectNode> Details = programMonitoringService.getProgramMonitoring(user_id);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getProgramMonitoring(@PathVariable("user_id") String userId) {
+		List<ObjectNode> Details = programMonitoringService.getProgramMonitoring(userId);
+		return ResponseEntity.ok(Details);
 	}
-	
+
 	@PostMapping("/verify")
 	public ResponseEntity<?> verifyProgramMonitoring(@RequestBody ProgramMonitoringDto request) {
 		return (programMonitoringService.verifyProgramMonitoring(request));
 	}
-	
+
 	@GetMapping("/get-program-monitoring-details/{applicationNo}")
-	public ResponseEntity<List<ObjectNode>> getProgramMonitoringByApplicationNo(@PathVariable String applicationNo){
-	    List<ObjectNode> Details = programMonitoringService.getProgramMonitoringByApplicationNo(applicationNo);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getProgramMonitoringByApplicationNo(@PathVariable String applicationNo) {
+		List<ObjectNode> Details = programMonitoringService.getProgramMonitoringByApplicationNo(applicationNo);
+		return ResponseEntity.ok(Details);
 	}
-	
+
 	@GetMapping("/get-courses/{institute_id}/{course_type_id}")
-	public ResponseEntity<List<ObjectNode>> getCourseByInstituteId(@PathVariable Integer institute_id, @PathVariable Integer course_type_id){
-	    List<ObjectNode> Details = programMonitoringService.getCourseByInstituteId(institute_id, course_type_id);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getCourseByInstituteId(@PathVariable("institute_id") Integer instituteId,
+			@PathVariable("course_type_id") Integer courseTypeId) {
+		List<ObjectNode> Details = programMonitoringService.getCourseByInstituteId(instituteId, courseTypeId);
+		return ResponseEntity.ok(Details);
 	}
 }

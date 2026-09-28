@@ -19,8 +19,6 @@ import com.moesd.tvet.mis.backend.application.repository.OJTTraineeDetailsReposi
 import com.moesd.tvet.mis.backend.application.service.OJTTraineeService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -65,11 +63,8 @@ public class OJTTraineeServiceImpl implements OJTTraineeService{
 	}
 	
 	@Override
-	public List<ObjectNode> getCompanyByInstituteId(String institute_id) {
-		List<Tuple> result = oJTCompanyRepository.getCompanyByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
-		
+	public List<ObjectNode> getCompanyByInstituteId(String instituteId) {
+	    return objectTojson._toJson(oJTCompanyRepository.getCompanyByInstituteId(instituteId));
 	}
 	
 	@Override
@@ -112,10 +107,8 @@ public class OJTTraineeServiceImpl implements OJTTraineeService{
 	}
 	
 	@Override
-	public List<ObjectNode> getAgreementByInstituteId(String institute_id) {
-		List<Tuple> result = oJTCompanyAgreementRepository.getAgreementByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
+	public List<ObjectNode> getAgreementByInstituteId(String instituteId) {
+	    return objectTojson._toJson(oJTCompanyAgreementRepository.getAgreementByInstituteId(instituteId));
 	}
 	
 	@Override
@@ -150,17 +143,13 @@ public class OJTTraineeServiceImpl implements OJTTraineeService{
 	}
 
 	@Override
-	public List<ObjectNode> getTraineeByInstituteId(String institute_id) {
-		List<Tuple> result = oJTTraineeDetailsRepository.getTraineeByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
+	public List<ObjectNode> getTraineeByInstituteId(String instituteId) {
+	    return objectTojson._toJson(oJTTraineeDetailsRepository.getTraineeByInstituteId(instituteId));
 	}
 
 	@Override
 	public List<ObjectNode> getTraineeOJTReport() {
-		List<Tuple> result = oJTTraineeDetailsRepository.getTraineeOJTReport();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
+	    return objectTojson._toJson(oJTTraineeDetailsRepository.getTraineeOJTReport());
 	}
 
 	

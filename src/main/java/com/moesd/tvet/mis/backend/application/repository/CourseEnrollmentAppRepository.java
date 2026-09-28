@@ -18,7 +18,7 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    ON b.registration_no = c.user_id "
 			+ "WHERE c.user_id = ? "
 			+ "  AND a.service_id = ?")
-	List<Tuple> getCourseDetailsAnnouncementByUserId(String user_id, String service_id);
+	List<Tuple> getCourseDetailsAnnouncementByUserId(String userId, String serviceId);
 	
 	@NativeQuery( "SELECT "
 			+ "  a.*, "
@@ -67,7 +67,7 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 	List<Tuple> getAllCertificateLevels();
 	
 	
-	@NativeQuery("SELECT "
+	@NativeQuery( "SELECT "
 			+ "  a.*, "
 			+ "  e.registration_no, "
 			+ "  e.proposed_institute_name AS institute_name, "
@@ -84,10 +84,10 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  END AS course_name "
 			+ "FROM "
 			+ "  tbl_programme_announcement_dtls a "
-			+ "  LEFT JOIN tbl_curriculum_development cd "
-			+ "  ON cd.programme_id = a.programme_id "
 			+ "  LEFT JOIN tbl_accredited_course_dtls b "
-			+ "    ON cd.id = b.curriculum_id "
+			+ "    ON b.id = a.programme_id "
+			+ "  LEFT JOIN tbl_curriculum_development cd "
+			+ "    ON b.curriculum_id = cd.id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls c "
 			+ "    ON c.id = cd.programme_id "
 			+ "  LEFT JOIN tbl_non_accredited_course_dtls nc "
@@ -99,8 +99,8 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "  LEFT JOIN tbl_institute_registration_dtls e "
 			+ "    ON e.institute_id = a.institute_id "
 			+ "WHERE a.application_no = ? "
-			+ "  AND a.service_id IN(37, 38, 39)")
-	List<Tuple> getCourseAnnouncementByApplicationNo(String application_no);
+			+ "  AND a.service_id IN (37, 38, 39)")
+	List<Tuple> getCourseAnnouncementByApplicationNo(String applicationNo);
 	
 	@NativeQuery("SELECT "
 			+ "  a.*, "
@@ -128,7 +128,7 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 			+ "    ON e.institute_id = a.institute_id "
 			+ "WHERE a.application_no = ? "
 			+ "  AND a.service_id IN(41, 42)")
-	List<Tuple> getReAssessmentAnnouncementByApplicationNo(String application_no);
+	List<Tuple> getReAssessmentAnnouncementByApplicationNo(String applicationNo);
 	
 	Optional<CourseEnrollmentApp> findByApplicationNo(String application_no);
 	
@@ -142,7 +142,10 @@ public interface CourseEnrollmentAppRepository extends JpaRepository<CourseEnrol
 	
 	@NativeQuery("SELECT "
 			+ "  a.id, "
-			+ "  a.cid_no, "
+			+ "  COALESCE( "
+			+ "    NULLIF(a.cid_no, ''), "
+			+ "    a.reference_no "
+			+ "  ) AS cid_no, "
 			+ "  a.applicant_name, "
 			+ "  a.gender_id, "
 			+ "  a.academic_qualification_id, "

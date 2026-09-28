@@ -15,7 +15,6 @@ import com.moesd.tvet.mis.backend.application.model.Sector;
 import com.moesd.tvet.mis.backend.application.repository.SectorOccupationRepository;
 import com.moesd.tvet.mis.backend.application.service.SectorOccupationService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,10 +67,7 @@ public class SectorOccupationServiceImpl implements SectorOccupationService{
 
 	@Override
 	public List<ObjectNode> getSectorOccupationLists() {
-		List<Tuple> resultList = sectorOccupationRepository
-				.getSectorOccupationLists();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(sectorOccupationRepository.getSectorOccupationLists());
 	}
 	
 	@Override

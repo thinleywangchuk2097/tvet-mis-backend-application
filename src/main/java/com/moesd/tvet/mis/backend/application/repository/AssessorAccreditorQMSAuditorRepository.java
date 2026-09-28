@@ -70,7 +70,7 @@ public interface AssessorAccreditorQMSAuditorRepository extends JpaRepository<As
 					+ "  LEFT JOIN tbl_task_dtls t "
 					+ "    ON a.application_no = t.application_no "
 					+ "WHERE a.application_no = ?")
-		List<Tuple> getApplicationDetailByApplicationNo(String application_no);
+		List<Tuple> getApplicationDetailByApplicationNo(String applicationNo);
 	
 		Optional<AssessorAccreditorQMSAuditor> findByApplicationNo(String applicationNo);
 		

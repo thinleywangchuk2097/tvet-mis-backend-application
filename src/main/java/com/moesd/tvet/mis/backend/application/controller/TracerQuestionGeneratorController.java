@@ -33,15 +33,14 @@ public class TracerQuestionGeneratorController {
 					.body("Failed to fetch tracer question dropdown");
 		}
 	}
-	
+
 	@GetMapping("/get-parent-tracer-types")
 	public ResponseEntity<?> getParentTracerTypes() {
 		try {
 			List<ObjectNode> data = tracerQuestionGeneratorService.getParentTracerTypes();
 			return ResponseEntity.ok(data);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to fetch parent tracer types");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch parent tracer types");
 		}
 	}
 
@@ -49,47 +48,44 @@ public class TracerQuestionGeneratorController {
 	public ResponseEntity<?> saveTracerQuestions(@RequestBody TracerQuestionGeneratorRequest request) {
 		try {
 			tracerQuestionGeneratorService.saveTracerQuestions(request);
-			
+
 			ObjectNode response = JsonNodeFactory.instance.objectNode();
 			response.put("message", "Tracer questions saved successfully");
 			response.put("success", true);
-			
+
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to save tracer questions");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save tracer questions");
 		}
 	}
-	
+
 	@GetMapping("/get-tracer/{application_no}")
-	public ResponseEntity<?> getTracerDetailsByApplicationNo(@PathVariable String application_no) {
+	public ResponseEntity<?> getTracerDetailsByApplicationNo(@PathVariable("application_no") String applicationNo) {
 		try {
-			List<ObjectNode> tracerDetails = tracerQuestionGeneratorService.getTracerDetailsByApplicationNo(application_no);
+			List<ObjectNode> tracerDetails = tracerQuestionGeneratorService
+					.getTracerDetailsByApplicationNo(applicationNo);
 			return ResponseEntity.ok(tracerDetails);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to fetch tracer details");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch tracer details");
 		}
 	}
-	
+
 	@GetMapping("/get-all-tracers")
 	public ResponseEntity<?> getTracerAllApplications() {
 		try {
 			List<ObjectNode> tracerDetails = tracerQuestionGeneratorService.getTracerAllApplications();
 			return ResponseEntity.ok(tracerDetails);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to fetch all tracers");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch all tracers");
 		}
 	}
-	
+
 	@PostMapping("/send-trainee-survey")
 	public ResponseEntity<?> sendTraineeTracerSurvey(@RequestBody TracerSendRequestDTO request) {
 		try {
 			return tracerQuestionGeneratorService.sendTraineeTracerSurvey(request);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to send trainee survey");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send trainee survey");
 		}
 	}
 
@@ -98,8 +94,7 @@ public class TracerQuestionGeneratorController {
 		try {
 			return tracerQuestionGeneratorService.sendEmployerTracerSurvey(request);
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to send employer survey");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send employer survey");
 		}
 	}
 }

@@ -76,7 +76,7 @@ public interface InstituteProposalRepository extends JpaRepository<InstituteProp
 					+ "  LEFT JOIN tbl_task_dtls t "
 					+ "    ON p.application_no = t.application_no "
 					+ "WHERE p.application_no = ?")
-		List<Tuple> getInstituteDetails(String application_no);
+		List<Tuple> getInstituteDetails(String applicationNo);
 	
 	  	Optional<InstituteProposal> findByApplicationNo(String applicationNo);
 

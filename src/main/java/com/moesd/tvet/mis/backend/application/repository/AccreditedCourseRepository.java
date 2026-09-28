@@ -74,7 +74,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 					+ "  LEFT JOIN tbl_institute_registration_dtls ir "
 					+ "    ON ac.institute_id = ir.institute_id "
 					+ "WHERE ac.application_no = ?")
-		List<Tuple> findByInstituteAccreditedCourseApplicationNo(String application_no);
+		List<Tuple> findByInstituteAccreditedCourseApplicationNo(String applicationNo);
 	
 		@NativeQuery("SELECT "
 						+ "  ac.id, "
@@ -138,7 +138,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 						+ "  LEFT JOIN tbl_user ur "
 						+ "    ON ur.user_id = ir.registration_no "
 						+ "WHERE ur.user_id = ?")
-		List<Tuple> getAccreditedCourseDetailsByUserId(String user_id);
+		List<Tuple> getAccreditedCourseDetailsByUserId(String userId);
 		
 		Optional<AccreditedCourse> findByApplicationNo(String applicationNo);
 		
@@ -160,7 +160,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 						+ "    ON d.registration_no = e.user_id "
 						+ "WHERE a.status_id IN(57, 126) "
 						+ "  AND e.user_id = ?")
-		List<Tuple> getAccreditedApprovedCourseByUserId(String user_id);
+		List<Tuple> getAccreditedApprovedCourseByUserId(String userId);
 		
 		@NativeQuery("SELECT "
 						+ "  a.id, "
@@ -173,7 +173,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 						+ "    ON ncs.id = b.programme_id "
 						+ "WHERE a.institute_id = ? "
 						+ "  AND a.status_id = 57")
-		List<Tuple> getAccreditedCourseByInstituteId(String institute_id);
+		List<Tuple> getAccreditedCourseByInstituteId(String instituteId);
 		
 		@NativeQuery("SELECT "
 						+ "  a.curriculum_id "
@@ -183,7 +183,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 						+ "    ON a.institute_id = b.institute_id "
 						+ "WHERE a.curriculum_id = ? "
 						+ "  AND b.registration_no = ?")
-		List<Tuple> curriculumExist(Long curriculumId, String registration_no);
+		List<Tuple> curriculumExist(Long curriculumId, String registrationNo);
 		
 		
 		@NativeQuery( "SELECT "
@@ -235,7 +235,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 				+ "    ON dcm3.id = pt.status_id "
 				+ "WHERE a.application_no = ? "
 				+ "  AND pt.status_id = 90")
-		List<Tuple> getListSelectedBQFTraineeForExcel(String application_no);
+		List<Tuple> getListSelectedBQFTraineeForExcel(String applicationNo);
 		
 		
 		@NativeQuery("SELECT "
@@ -407,7 +407,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 				+ "WHERE a.institute_id = ? "
 				+ "  AND a.service_id = ? "
 				+ "  AND a.certification_level_id = ?")
-		List<Tuple> getBQFProgrammeForCertification(Integer institute_id,Integer service_id,Integer certification_level_id);
+		List<Tuple> getBQFProgrammeForCertification(Integer instituteId,Integer serviceId,Integer certificationLevelId);
 		
 		@NativeQuery("SELECT "
 				+ "  b.id, "
@@ -419,6 +419,6 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 				+ "WHERE a.institute_id = ? "
 				+ "  AND a.service_id = ? "
 				+ "  AND a.certification_level_id = ?")
-		List<Tuple> getRPLProgrammeForCertification(Integer institute_id,Integer service_id,Integer certification_level_id);
+		List<Tuple> getRPLProgrammeForCertification(Integer instituteId,Integer serviceId,Integer certificationLevelId);
 		
 }

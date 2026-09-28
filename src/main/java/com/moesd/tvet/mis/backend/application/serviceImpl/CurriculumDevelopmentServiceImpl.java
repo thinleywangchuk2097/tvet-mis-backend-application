@@ -23,7 +23,6 @@ import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -198,10 +197,8 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 	}
 
 	@Override
-	public List<ObjectNode> getCurriculumDetails(String application_no) {
-		List<Tuple> resultList = curriculumDevelopmentRepository.getCurriculumDetails(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getCurriculumDetails(String applicationNo) {
+	    return objectTojson._toJson(curriculumDevelopmentRepository.getCurriculumDetails(applicationNo));
 	}
 
 	@Override
@@ -292,17 +289,14 @@ public class CurriculumDevelopmentServiceImpl implements CurriculumDevelopmentSe
 	}
 
 	@Override
-	public List<ObjectNode> getCurriculumDetailsByUserId(String user_id) {
-		List<Tuple> resultList = curriculumDevelopmentRepository.getCurriculumDetailsByUserId(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getCurriculumDetailsByUserId(String userId) {
+	    return objectTojson._toJson(curriculumDevelopmentRepository.getCurriculumDetailsByUserId(userId));
 	}
-
+	
 	@Override
-	public List<ObjectNode> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type) {
-		List<Tuple> resultList = curriculumDevelopmentRepository.getApprovedCurriculumDataByUserId(user_id, curriculum_type);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getApprovedCurriculumDataByUserId(String userId, String curriculumType) {
+	    return objectTojson._toJson(
+	            curriculumDevelopmentRepository.getApprovedCurriculumDataByUserId(userId, curriculumType));
 	}
 
 	@Override

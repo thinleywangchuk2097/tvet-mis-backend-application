@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,8 +18,6 @@ import com.moesd.tvet.mis.backend.application.repository.AddStudentRepository;
 import com.moesd.tvet.mis.backend.application.repository.StudentSubjectRepository;
 import com.moesd.tvet.mis.backend.application.service.AddStudentService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -106,10 +103,8 @@ public class AddStudentServiceImpl implements AddStudentService{
 	}
 
 	@Override
-	public List<ObjectNode> getAllActiveStudents(Integer institute_id) {
-		List<Tuple> resultList = addStudentRepository.getAllActiveStudents(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAllActiveStudents(Integer instituteId) {
+	    return objectTojson._toJson(addStudentRepository.getAllActiveStudents(instituteId));
 	}
 
 	@Override

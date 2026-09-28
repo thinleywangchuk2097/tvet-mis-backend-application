@@ -12,9 +12,9 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	ResponseEntity<?> submitTrainee(CourseEnrollmentTraineeAppdto request);
 	
-	List<ObjectNode> getCourseAppliedTraineesByApplicationNo(String application_no);
+	List<ObjectNode> getCourseAppliedTraineesByApplicationNo(String applicationNo);
 	
-	List<ObjectNode> getCourseAppliedTraineesReAssessmentByApplicationNo(String application_no);
+	List<ObjectNode> getCourseAppliedTraineesReAssessmentByApplicationNo(String applicationNo);
 	
 	ResponseEntity<?> submitSelectedTrainee(SelectedTraineedto request);
 	
@@ -22,11 +22,11 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	ResponseEntity<?> updateTraineeApplication(SelectedTraineedto request);
 
-	List<ObjectNode> getFailedTraineeDetails(String user_id, String course_id, Integer certification_level_id);
+	List<ObjectNode> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId);
 	
 	ResponseEntity<?> selectUnselectTrainee(SelectedTraineedto request);
 	
-	List<ObjectNode> fetchAssignedAssessors(String application_no);
+	List<ObjectNode> fetchAssignedAssessors(String applicationNo);
 	
 	ResponseEntity<?> removeTraineeFromSelectedProgramme(SelectedTraineedto request);
 	

@@ -17,28 +17,32 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/register")
 public class AssessorAccreditorQMSAuditorController {
-	
+
 	private final AssessorAccreditorQMSAuditorService assessorAccreditorQMSAuditorService;
-	
+
 	@PostMapping("/submit")
-	public ResponseEntity<?> registerAssessorAccreditorQMSAuditor(@RequestBody AssessorAccreditorQMSAuditordto request) {
+	public ResponseEntity<?> registerAssessorAccreditorQMSAuditor(
+			@RequestBody AssessorAccreditorQMSAuditordto request) {
 		return (assessorAccreditorQMSAuditorService.registerAssessorAccreditorQMSAuditor(request));
 	}
-	
+
 	@GetMapping("/get-application-details/{application_no}")
-	public ResponseEntity<List<ObjectNode>> getApplicationDetails(@PathVariable String application_no){
-	    List<ObjectNode> instituteDetails = assessorAccreditorQMSAuditorService.getApplicationDetails(application_no);
-	    return ResponseEntity.ok(instituteDetails);
+	public ResponseEntity<List<ObjectNode>> getApplicationDetails(
+			@PathVariable("application_no") String applicationNo) {
+		List<ObjectNode> instituteDetails = assessorAccreditorQMSAuditorService.getApplicationDetails(applicationNo);
+		return ResponseEntity.ok(instituteDetails);
 	}
-	
+
 	@PostMapping("/verify-assessor-accreditor-qmsauditor")
 	public ResponseEntity<?> verifyAssessorAccreditorQMSAuditor(@RequestBody AssessorAccreditorQMSAuditordto request) {
-		return(assessorAccreditorQMSAuditorService.verifyAssessorAccreditorQMSAuditor(request));
+		return (assessorAccreditorQMSAuditorService.verifyAssessorAccreditorQMSAuditor(request));
 	}
-	
+
 	@GetMapping("/get-applicant-details/{citizenId}/{referenceNo}/{serviceId}")
-	public ResponseEntity<List<ObjectNode>> getApplicationByCitizenIdOrReferenceNo(@PathVariable String citizenId, @PathVariable String referenceNo, @PathVariable String serviceId){
-	    List<ObjectNode> instituteDetails = assessorAccreditorQMSAuditorService.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId);
-	    return ResponseEntity.ok(instituteDetails);
+	public ResponseEntity<List<ObjectNode>> getApplicationByCitizenIdOrReferenceNo(@PathVariable String citizenId,
+			@PathVariable String referenceNo, @PathVariable String serviceId) {
+		List<ObjectNode> instituteDetails = assessorAccreditorQMSAuditorService
+				.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId);
+		return ResponseEntity.ok(instituteDetails);
 	}
 }

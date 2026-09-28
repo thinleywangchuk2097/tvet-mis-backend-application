@@ -80,8 +80,8 @@ public class BirmsPaymentController {
 	}
 	
 	@GetMapping("/get-payment-details/{application_no}")
-	public Optional<BirmsPayment> getPaymentByApplicationNo(@PathVariable String application_no) {
-		return birmsPaymentService.getPaymentByApplicationNo(application_no);
+	public Optional<BirmsPayment> getPaymentByApplicationNo(@PathVariable("application_no") String applicationNo) {
+		return birmsPaymentService.getPaymentByApplicationNo(applicationNo);
 	}
 	
 	@GetMapping("/get-all-payment-details")
@@ -90,8 +90,8 @@ public class BirmsPaymentController {
 	}
 
 	@GetMapping("/get-payment-by-user/{user_id}")
-	public ResponseEntity<List<ObjectNode>> getByUserPenaltyApplicationDetails(@PathVariable String user_id) {
-		return ResponseEntity.ok(birmsPaymentService.getByUserPenaltyApplicationDetails(user_id));
+	public ResponseEntity<List<ObjectNode>> getByUserPenaltyApplicationDetails(@PathVariable("user_id") String userId) {
+		return ResponseEntity.ok(birmsPaymentService.getByUserPenaltyApplicationDetails(userId));
 	}
 	
 	@GetMapping("/get-course-details/{instituteId}")

@@ -26,8 +26,8 @@ public class AddStudentController {
 	}
 
 	@GetMapping("/get-all-students/{student_id}")
-	public ResponseEntity<?> getAllActiveStudents(@PathVariable Integer student_id) {
-		List<ObjectNode> activeSubjects = addStudentService.getAllActiveStudents(student_id);
+	public ResponseEntity<?> getAllActiveStudents(@PathVariable("student_id") Integer instituteId) {
+		List<ObjectNode> activeSubjects = addStudentService.getAllActiveStudents(instituteId);
 		return ResponseEntity.ok(activeSubjects);
 	}
 

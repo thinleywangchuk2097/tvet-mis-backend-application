@@ -67,5 +67,5 @@ public interface InstituteChangeRepository extends JpaRepository<InstituteChange
 					+ "LEFT JOIN tbl_institute_registration_dtls ir "
 					+ "ON c.institute_id = ir.institute_id "
 					+ "WHERE c.application_no = ?")
-		List<Tuple> getInstituteChangeByApplicationNo(String application_no);
+		List<Tuple> getInstituteChangeByApplicationNo(String applicationNo);
 }

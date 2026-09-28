@@ -20,7 +20,7 @@ public interface TracerQuestionGeneratorService {
 
 	List<TracerQuestionGenerator> saveTracerQuestions(TracerQuestionGeneratorRequest request);
 
-	List<ObjectNode> getTracerDetailsByApplicationNo(String application_no);
+	List<ObjectNode> getTracerDetailsByApplicationNo(String applicationNo);
 
 	List<ObjectNode> getTracerAllApplications();
 

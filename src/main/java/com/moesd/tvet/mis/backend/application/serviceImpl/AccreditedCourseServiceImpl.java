@@ -126,24 +126,20 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedCourseByApplicationNo(String application_no) {
-		List<Tuple> resultList = accreditedCourseRepository
-				.findByInstituteAccreditedCourseApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedCourseByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(accreditedCourseRepository.findByInstituteAccreditedCourseApplicationNo(applicationNo));
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedCourseDetailsByUserId(String user_id) {
-		List<Tuple> resultList = accreditedCourseRepository.getAccreditedCourseDetailsByUserId(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedCourseDetailsByUserId(String userId) {
+	    return objectTojson._toJson(accreditedCourseRepository.getAccreditedCourseDetailsByUserId(userId));
 	}
 
 	@Override
 	@Transactional
 	public ResponseEntity<?> verifyAccreditedCourse(AccreditedCoursedto request) {
 		try {
+			System.out.println("request" + request);			
 			// Validate required fields for editing
 			if (request.getApplicationNo() == null || request.getApplicationNo().isEmpty())
 				throw new RecordNotFoundException("applicationNo is required");
@@ -159,9 +155,8 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
-			Integer statusId = request.getStatusId();// workflow statusId
+			Integer statusId = request.getStatusId();
 			String actorId = String.valueOf(request.getUpdatedBy());
-			// Integer locationId = 14;
 			// Get task status
 			Integer taskStatusId;
 			if (statusId == 57 || statusId == 126) {
@@ -226,16 +221,12 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			// Save the updated registration
 			AccreditedCourse savedRegistration = accreditedCourseRepository.save(existingAccreditedCourse);
 
-			// starts
-
-			// save accreditors
+			// save Accreditors
 			if (request.getAssignedAccreditors() != null && !request.getAssignedAccreditors().isEmpty()) {
-
 				List<AccreditorTaskAssignment> assignments = request.getAssignedAccreditors().stream()
 						.map(accreditor -> AccreditorTaskAssignment.builder().userId(accreditor.getUserId())
 								.ApplicationNo(request.getApplicationNo()).serviceId(serviceId).build())
 						.toList();
-
 				accreditorTaskAssignmentRepository.saveAll(assignments);
 			}
 			// save REC members and its assignment to task
@@ -294,32 +285,23 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedApprovedCourseByUserId(String user_id) {
-		List<Tuple> resultList = accreditedCourseRepository.getAccreditedApprovedCourseByUserId(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedApprovedCourseByUserId(String userId) {
+	    return objectTojson._toJson(accreditedCourseRepository.getAccreditedApprovedCourseByUserId(userId));
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedCourseByInstituteId(String institute_id) {
-		List<Tuple> resultList = accreditedCourseRepository.getAccreditedCourseByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedCourseByInstituteId(String instituteId) {
+	    return objectTojson._toJson(accreditedCourseRepository.getAccreditedCourseByInstituteId(instituteId));
 	}
 
 	@Override
-	public List<ObjectNode> curriculumExist(Long curriculumId, String registration_no) {
-		List<Tuple> resultList = accreditedCourseRepository.curriculumExist(curriculumId, registration_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> curriculumExist(Long curriculumId, String registrationNo) {
+	    return objectTojson._toJson(accreditedCourseRepository.curriculumExist(curriculumId, registrationNo));
 	}
 
 	@Override
-	public List<ObjectNode> getListSelectedBQFTraineeForExcel(String application_no) {
-		List<Tuple> selectedBQFTrainee = accreditedCourseRepository.getListSelectedBQFTraineeForExcel(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(selectedBQFTrainee);
-		return DtlsJson;
-
+	public List<ObjectNode> getListSelectedBQFTraineeForExcel(String applicationNo) {
+	    return objectTojson._toJson(accreditedCourseRepository.getListSelectedBQFTraineeForExcel(applicationNo));
 	}
 
 	@Override
@@ -334,23 +316,21 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 
 	@Override
 	public List<ObjectNode> getServicesAssessementResult() {
-		List<Tuple> sevices = accreditedCourseRepository.getServicesAssessementResult();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(sevices);
-		return DtlsJson;
+	    return objectTojson._toJson(accreditedCourseRepository.getServicesAssessementResult());
 	}
 
 	@Override
-	public List<ObjectNode> getProgrammesCertification(Integer institute_id, Integer service_id,
-			Integer certification_level_id) {
+	public List<ObjectNode> getProgrammesCertification(Integer instituteId, Integer serviceId,
+			Integer certificationLevelId) {
 
 		List<Tuple> listOfProgrammes;
 
-		if (service_id == 39 || service_id == 41) {
-			listOfProgrammes = accreditedCourseRepository.getRPLProgrammeForCertification(institute_id, service_id,
-					certification_level_id);
+		if (serviceId == 39 || serviceId == 41) {
+			listOfProgrammes = accreditedCourseRepository.getRPLProgrammeForCertification(instituteId, serviceId,
+					certificationLevelId);
 		} else {
-			listOfProgrammes = accreditedCourseRepository.getBQFProgrammeForCertification(institute_id, service_id,
-					certification_level_id);
+			listOfProgrammes = accreditedCourseRepository.getBQFProgrammeForCertification(instituteId, serviceId,
+					certificationLevelId);
 		}
 
 		List<ObjectNode> dtlsJson = objectTojson._toJson(listOfProgrammes);

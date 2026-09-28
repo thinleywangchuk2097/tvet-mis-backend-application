@@ -46,7 +46,7 @@ public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonito
 					+ "FROM "
 					+ "  tbl_program_monitoring_dtls pm "
 					+ "WHERE pm.registration_no = ?")
-	List<Tuple> getProgramMonitoring(String user_id);
+	List<Tuple> getProgramMonitoring(String userId);
 	
 	Optional<ProgramMonitoring> findByApplicationNo(String applicationNo);
 	
@@ -124,7 +124,7 @@ public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonito
 					+ "    ON c.id = b.programme_id "
 					+ "WHERE a.institute_id = ? "
 					+ "  AND a.status_id = 57")
-	List<Tuple> getAccreditedCourse(Integer institute_id);
+	List<Tuple> getAccreditedCourse(Integer instituteId);
 	
 	@NativeQuery("SELECT "
 					+ "  a.id, "
@@ -133,5 +133,5 @@ public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonito
 					+ "  tbl_non_accredited_course_dtls a "
 					+ "WHERE a.institute_id = ? "
 					+ "  AND a.status_id = 57")
-	List<Tuple> getNonAccreditedCourse(Integer institute_id);
+	List<Tuple> getNonAccreditedCourse(Integer instituteId);
 }

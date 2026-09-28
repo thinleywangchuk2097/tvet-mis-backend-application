@@ -13,7 +13,7 @@ public interface NcsService {
 
 	List<ObjectNode> getNcsDetails();
 
-	List<ObjectNode> getAlreadyNcsDetailsExist(Integer sector_id, Integer occupation_id, Integer certification_id);
+	List<ObjectNode> getAlreadyNcsDetailsExist(Integer sectorId, Integer occupationId, Integer certificationId);
 	
 	List<ObjectNode> getProgrammeTitleById(Integer programmeId);
 	

@@ -14,7 +14,6 @@ import com.moesd.tvet.mis.backend.application.repository.TaskFlowListRepository;
 import com.moesd.tvet.mis.backend.application.service.TaskFlowListService;
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 
 @Service 
@@ -30,24 +29,20 @@ public class TaskFlowListServiceImpl implements TaskFlowListService{
 	private ObjectMapper objectMapper;
     
 	@Override
-	public List<ObjectNode> getGroupTaskListDtl(Integer taskStatusId, Integer currentRoleId,String locationId) {
-		List<Tuple> resultList = taskFlowListRepository.getGroupTaskListDtl(taskStatusId,currentRoleId,locationId);
-		List<ObjectNode> TaskDtlsJson = objectTojson._toJson(resultList);
-		return TaskDtlsJson;
+	public List<ObjectNode> getGroupTaskListDtl(Integer taskStatusId, Integer currentRoleId, String locationId) {
+	    return objectTojson._toJson(
+	            taskFlowListRepository.getGroupTaskListDtl(taskStatusId, currentRoleId, locationId));
 	}
 
 	@Override
 	public List<ObjectNode> getMyTaskListDtl(String userId, String current_roleId) {
-		List<Tuple> resultList = taskFlowListRepository.getMyTaskListDtl(userId, current_roleId);
-		List<ObjectNode> TaskDtlsJson = objectTojson._toJson(resultList);
-		return TaskDtlsJson;
+	    return objectTojson._toJson(taskFlowListRepository.getMyTaskListDtl(userId, current_roleId));
 	}
 	
 	@Override
 	public List<ObjectNode> getApplicationStatusAuditCurrentTaskDtl(String applicationNo) {
-		List<Tuple> resultList = taskFlowListRepository.getApplicationStatusAuditCurrentTaskDtl(applicationNo);
-		List<ObjectNode> TaskDtlsJson = objectTojson._toJson(resultList);
-		return TaskDtlsJson;
+	    return objectTojson._toJson(
+	            taskFlowListRepository.getApplicationStatusAuditCurrentTaskDtl(applicationNo));
 	}
 
 	@Override
@@ -102,11 +97,10 @@ public class TaskFlowListServiceImpl implements TaskFlowListService{
 	}
 
 	@Override
-	public List<ObjectNode> getApplicationStatusDtl(String application_no, String applicant_name,
-			String application_date) {
-		List<Tuple> resultList = taskFlowListRepository.getApplicationStatusDtl(application_no, applicant_name,application_date);
-		List<ObjectNode> TaskDtlsJson = objectTojson._toJson(resultList);
-		return TaskDtlsJson;
+	public List<ObjectNode> getApplicationStatusDtl(String applicationNo, String applicantName,
+	        String applicationDate) {
+	    return objectTojson._toJson(
+	            taskFlowListRepository.getApplicationStatusDtl(applicationNo, applicantName, applicationDate));
 	}
 
 }

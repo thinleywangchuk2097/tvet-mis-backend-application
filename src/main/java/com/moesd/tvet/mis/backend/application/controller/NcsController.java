@@ -40,22 +40,23 @@ public class NcsController {
 	}
 
 	@GetMapping("/get-ncs-already-exist/{sector_id}/{occupation_id}/{certification_id}")
-	public ResponseEntity<List<ObjectNode>> getAlreadyNcsDetailsExist(@PathVariable Integer sector_id,
-			@PathVariable Integer occupation_id, @PathVariable Integer certification_id) {
-		List<ObjectNode> Details = ncsService.getAlreadyNcsDetailsExist(sector_id, occupation_id, certification_id);
-		return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getAlreadyNcsDetailsExist(@PathVariable("sector_id") Integer sectorId,
+			@PathVariable("occupation_id") Integer occupationId,
+			@PathVariable("certification_id") Integer certificationId) {
+		List<ObjectNode> getAlreadyNcsDetails = ncsService.getAlreadyNcsDetailsExist(sectorId, occupationId, certificationId);
+		return ResponseEntity.ok(getAlreadyNcsDetails);
 	}
-	
+
 	@GetMapping("/get-programme-title/{programmeId}")
 	public ResponseEntity<List<ObjectNode>> getProgrammeTitleById(@PathVariable Integer programmeId) {
-		List<ObjectNode> Details = ncsService.getProgrammeTitleById(programmeId);
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> getProgrammeTitleDetails = ncsService.getProgrammeTitleById(programmeId);
+		return ResponseEntity.ok(getProgrammeTitleDetails);
 	}
-	
+
 	@GetMapping("/get-ncs-programmes")
 	public ResponseEntity<List<ObjectNode>> getAllNcsProgrammes() {
 		List<ObjectNode> ncsLists = ncsService.getAllNcsProgrammes();
 		return ResponseEntity.ok(ncsLists);
 	}
-	
+
 }

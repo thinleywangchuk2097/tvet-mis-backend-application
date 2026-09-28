@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccreditedCoursedto {
-
 	private String applicationNo;
 	private Integer instituteId;
 	private String feesPerTrainee;

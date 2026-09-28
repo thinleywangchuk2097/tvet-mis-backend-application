@@ -65,7 +65,7 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 					+ "  LEFT JOIN tbl_institute_registration_dtls k "
 					+ "    ON k.institute_id = c.institute_id "
 					+ "WHERE c.application_no = ?")
-		List<Tuple> getCurriculumDetails(String application_no);
+		List<Tuple> getCurriculumDetails(String applicationNo);
 	
 		@NativeQuery("SELECT "
 						 + "  c.id, "
@@ -121,7 +121,7 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						 + "  LEFT JOIN tbl_user u "
 						 + "    ON k.registration_no = u.user_id "
 						 + "WHERE u.user_id = ?")
-		List<Tuple> getCurriculumDetailsByUserId(String user_id);
+		List<Tuple> getCurriculumDetailsByUserId(String userId);
 		
 		@NativeQuery("SELECT "
 						+ "  cd.id, "
@@ -149,7 +149,7 @@ public interface CurriculumDevelopmentRepository extends JpaRepository<Curriculu
 						+ "WHERE cd.status_id = 59 "
 						+ "  AND u.user_id = ? "
 						+ "  AND cd.programme_type_id = ?")
-		List<Tuple> getApprovedCurriculumDataByUserId(String user_id, String curriculum_type);
+		List<Tuple> getApprovedCurriculumDataByUserId(String userId, String curriculumType);
 		
 		CurriculumDevelopment findByApplicationNo(String applicationNo);
 		

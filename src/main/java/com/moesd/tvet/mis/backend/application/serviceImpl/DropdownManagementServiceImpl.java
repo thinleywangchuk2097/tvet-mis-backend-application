@@ -38,10 +38,8 @@ public class DropdownManagementServiceImpl implements DropdownManagementService 
 			// 2. Process children if they exist
 			if (request.getDropdownChild() != null && !request.getDropdownChild().isEmpty()) {
 				List<DropdownChild> children = request.getDropdownChild().stream()
-						.map(childDto -> DropdownChild.builder().name(childDto.getDesignation()).parent(parent) // Set
-																												// the
-																												// parent
-																												// reference
+						.map(childDto -> DropdownChild.builder().name(childDto.getDesignation()).parent(parent)
+
 								.build())
 						.collect(Collectors.toList());
 
@@ -64,48 +62,46 @@ public class DropdownManagementServiceImpl implements DropdownManagementService 
 	@Transactional
 	@Override
 	public ResponseEntity<?> updateDropdown(DropdownManagementdto request) {
-	    DropdownParent parent = dropdownManagementRepository.findById(request.getId())
-	            .orElseThrow(() -> new RuntimeException("Dropdown not found"));
+		DropdownParent parent = dropdownManagementRepository.findById(request.getId())
+				.orElseThrow(() -> new RuntimeException("Dropdown not found"));
 
-	    // Update parent fields
-	    parent.setDropdownName(request.getDropdownName());
-	    parent.setDescription(request.getDescription());
-	    parent.setUpdatedAt(LocalDateTime.now());
+		// Update parent fields
+		parent.setDropdownName(request.getDropdownName());
+		parent.setDescription(request.getDescription());
+		parent.setUpdatedAt(LocalDateTime.now());
 
-	    List<DropdownChild> existingChildren = parent.getDropdownChild();
-	    Map<Integer, DropdownChild> existingMap = existingChildren.stream()
-	            .collect(Collectors.toMap(DropdownChild::getId, c -> c));
+		List<DropdownChild> existingChildren = parent.getDropdownChild();
+		Map<Integer, DropdownChild> existingMap = existingChildren.stream()
+				.collect(Collectors.toMap(DropdownChild::getId, c -> c));
 
-	    List<DropdownChild> updatedChildren = new ArrayList<>();
+		List<DropdownChild> updatedChildren = new ArrayList<>();
 
-	    for (DropdownChilddto dto : request.getDropdownChild()) {
-	        if (dto.getId() != null && existingMap.containsKey(dto.getId())) {
-	            // 1️Update existing child
-	            DropdownChild child = existingMap.get(dto.getId());
-	            child.setName(dto.getDesignation());
-	            updatedChildren.add(child);
-	        } else {
-	            // 2️ New child
-	            DropdownChild newChild = new DropdownChild();
-	            newChild.setName(dto.getDesignation());
-	            newChild.setParent(parent);
-	            updatedChildren.add(newChild);
-	        }
-	    }
+		for (DropdownChilddto dto : request.getDropdownChild()) {
+			if (dto.getId() != null && existingMap.containsKey(dto.getId())) {
+				// 1️Update existing child
+				DropdownChild child = existingMap.get(dto.getId());
+				child.setName(dto.getDesignation());
+				updatedChildren.add(child);
+			} else {
+				// 2️ New child
+				DropdownChild newChild = new DropdownChild();
+				newChild.setName(dto.getDesignation());
+				newChild.setParent(parent);
+				updatedChildren.add(newChild);
+			}
+		}
 
-	    // 3️ If a child exists in DB but is not sent in the update request → delete it
-	    existingChildren.removeIf(c -> updatedChildren.stream()
-	            .noneMatch(u -> c.getId() != null && c.getId().equals(u.getId())));
+		// 3️ If a child exists in DB but is not sent in the update request → delete it
+		existingChildren.removeIf(
+				c -> updatedChildren.stream().noneMatch(u -> c.getId() != null && c.getId().equals(u.getId())));
 
-	    // Add new children (with null IDs)
-	    existingChildren.addAll(updatedChildren.stream()
-	            .filter(c -> c.getId() == null)
-	            .toList());
+		// Add new children (with null IDs)
+		existingChildren.addAll(updatedChildren.stream().filter(c -> c.getId() == null).toList());
 
-	    // Save parent with updated children
-	    DropdownParent saved = dropdownManagementRepository.save(parent);
+		// Save parent with updated children
+		DropdownParent saved = dropdownManagementRepository.save(parent);
 
-	    return ResponseEntity.ok(saved);
+		return ResponseEntity.ok(saved);
 	}
 
 	@Transactional

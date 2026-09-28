@@ -11,15 +11,15 @@ public interface OnCampusJobPlacementService {
 	
 	ResponseEntity<?> submitPlacementSession(OnCampusJobPlacementSessionDto request);
 
-	List<ObjectNode> getPlacementSessionByInstituteId(String institute_id);
+	List<ObjectNode> getPlacementSessionByInstituteId(String instituteId);
 
 	ResponseEntity<?> submitFirm(OnCampusJobPlacementFirmDto request);
 
-	List<ObjectNode> getFirmByInstituteId(String institute_id);
+	List<ObjectNode> getFirmByInstituteId(String instituteId);
 
 	ResponseEntity<?> submitPlacementTrainee(OnCampusJobPlacementTraineeDto request);
 
-	List<ObjectNode> getTraineeByInstituteId(String institute_id);
+	List<ObjectNode> getTraineeByInstituteId(String instituteId);
 	
 	List<ObjectNode> getTraineeOnPlacementReport();
 	

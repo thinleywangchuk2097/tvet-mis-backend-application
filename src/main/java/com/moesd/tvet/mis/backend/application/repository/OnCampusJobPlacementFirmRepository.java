@@ -15,7 +15,7 @@ public interface OnCampusJobPlacementFirmRepository extends JpaRepository<OnCamp
 					+ "FROM "
 					+ "  tbl_campus_job_placement_firm_dtls a "
 					+ "WHERE a.institute_id = ?")
-	List<Tuple> getFirmByInstituteId(String institute_id);
+	List<Tuple> getFirmByInstituteId(String instituteId);
 	
 	Optional<OnCampusJobPlacementFirm> findById(Long id);
 	

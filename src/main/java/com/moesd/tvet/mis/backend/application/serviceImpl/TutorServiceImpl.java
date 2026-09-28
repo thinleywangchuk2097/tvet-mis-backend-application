@@ -5,19 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.TutorDto;
 import com.moesd.tvet.mis.backend.application.model.Tutor;
 import com.moesd.tvet.mis.backend.application.repository.TutorRepository;
 import com.moesd.tvet.mis.backend.application.service.TutorService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -84,12 +80,10 @@ public class TutorServiceImpl implements TutorService{
 	}
 
 	@Override
-	public List<ObjectNode> getAllActiveTutors(Integer institute_id) {
-		List<Tuple> resultList = tutorRepository.getAllActiveTutors(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAllActiveTutors(String instituteId) {
+	    return objectTojson._toJson(tutorRepository.getAllActiveTutors(instituteId));
 	}
-
+	
 	@Override
 	public ResponseEntity<?> updateTutor(TutorDto request) {
 		try {
@@ -212,9 +206,8 @@ public class TutorServiceImpl implements TutorService{
 	}
 
 	@Override
-	public List<ObjectNode> getTutorBySubjectId(Integer institute_id, Integer subject_id) {
-		List<Tuple> resultList = tutorRepository.getTutorBySubjectId(institute_id, subject_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getTutorBySubjectId(Integer instituteId, Integer subjectId) {
+	    return objectTojson._toJson(tutorRepository.getTutorBySubjectId(instituteId, subjectId));
 	}
+	
 }

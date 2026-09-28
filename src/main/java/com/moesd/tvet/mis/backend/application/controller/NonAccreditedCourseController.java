@@ -17,40 +17,46 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/management/non-accredited-course")
 public class NonAccreditedCourseController {
-	
+
 	private final NonAccreditedCourseService instituteNonAccreditedCourseService;
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitNonAccreditedCourse(@RequestBody NonAccreditedCoursedto request) {
-		return(instituteNonAccreditedCourseService.submitNonAccreditedCourse(request));
+		return (instituteNonAccreditedCourseService.submitNonAccreditedCourse(request));
 	}
-	
+
 	@GetMapping("/get-course-details/{application_no}")
-	public ResponseEntity<List<ObjectNode>> getNonAccreditedCourseByApplicationNo(@PathVariable String application_no){
-	    List<ObjectNode> data = instituteNonAccreditedCourseService.getNonAccreditedCourseByApplicationNo(application_no);
-	    return ResponseEntity.ok(data);
+	public ResponseEntity<List<ObjectNode>> getNonAccreditedCourseByApplicationNo(
+			@PathVariable("application_no") String applicationNo) {
+		List<ObjectNode> data = instituteNonAccreditedCourseService
+				.getNonAccreditedCourseByApplicationNo(applicationNo);
+		return ResponseEntity.ok(data);
 	}
-	
+
 	@PostMapping("/verify-non-accredited-course")
 	public ResponseEntity<?> verifyNonAccreditedCourse(@RequestBody NonAccreditedCoursedto request) {
-		return(instituteNonAccreditedCourseService.verifyNonAccreditedCourse(request));
+		return (instituteNonAccreditedCourseService.verifyNonAccreditedCourse(request));
 	}
-	
+
 	@GetMapping("/get-application-details/{user_id}")
-	public ResponseEntity<List<ObjectNode>> getNonAccreditedCourseDetailsByUserId(@PathVariable String user_id){
-	    List<ObjectNode> Details = instituteNonAccreditedCourseService.getNonAccreditedCourseDetailsByUserId(user_id);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getNonAccreditedCourseDetailsByUserId(
+			@PathVariable("user_id") String userId) {
+		List<ObjectNode> getNonAccreditedCourseDetails = instituteNonAccreditedCourseService.getNonAccreditedCourseDetailsByUserId(userId);
+		return ResponseEntity.ok(getNonAccreditedCourseDetails);
 	}
-	
+
 	@GetMapping("/get-non-accredited-approved-course-details/{user_id}")
-	public ResponseEntity<List<ObjectNode>> getNonAccreditedApprovedCourseByUserId(@PathVariable String user_id){
-	    List<ObjectNode> Details = instituteNonAccreditedCourseService.getNonAccreditedApprovedCourseByUserId(user_id);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getNonAccreditedApprovedCourseByUserId(
+			@PathVariable("user_id") String userId) {
+		List<ObjectNode> getNonAccreditedApprovedCourseDetails = instituteNonAccreditedCourseService.getNonAccreditedApprovedCourseByUserId(userId);
+		return ResponseEntity.ok(getNonAccreditedApprovedCourseDetails);
 	}
-	
+
 	@GetMapping("/curriculum-already-exist/{curriculumId}/{registration_no}")
-	public ResponseEntity<List<ObjectNode>> curriculumAlreadyExist(@PathVariable Long curriculumId, @PathVariable String registration_no){
-	    List<ObjectNode> Details = instituteNonAccreditedCourseService.curriculumAlreadyExist(curriculumId,registration_no);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> curriculumAlreadyExist(@PathVariable Long curriculumId,
+			@PathVariable("registration_no") String registrationNo) {
+		List<ObjectNode> curriculumAlreadyExistDetails = instituteNonAccreditedCourseService.curriculumAlreadyExist(curriculumId,
+				registrationNo);
+		return ResponseEntity.ok(curriculumAlreadyExistDetails);
 	}
 }

@@ -137,7 +137,7 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 		try {
 			JsonNode dataNode = payload.path("data");
 
-			String type = dataNode.path("type").asText();
+			String type = dataNode.path("type").asString();
 
 			if ("present-proof/rejected".equals(type)) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -147,10 +147,10 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 			JsonNode requestedPresentation = dataNode.path("requested_presentation");
 			JsonNode revealedAttrs = requestedPresentation.path("revealed_attrs");
 
-			String idNumber = revealedAttrs.path("ID Number").get(0).path("value").asText();
-			String fullName = revealedAttrs.path("Full Name").get(0).path("value").asText();
-			String gender = revealedAttrs.path("Gender").get(0).path("value").asText();
-			String dateOfBirth = revealedAttrs.path("Date of Birth").get(0).path("value").asText();
+			String idNumber = revealedAttrs.path("ID Number").get(0).path("value").asString();
+			String fullName = revealedAttrs.path("Full Name").get(0).path("value").asString();
+			String gender = revealedAttrs.path("Gender").get(0).path("value").asString();
+			String dateOfBirth = revealedAttrs.path("Date of Birth").get(0).path("value").asString();
 
 			// Optional: split name
 			String[] nameParts = fullName.split("\\s+");
@@ -185,7 +185,7 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 
 			// Extract the "data" node
 			JsonNode dataNode = payload.path("data");
-			String type = dataNode.path("type").asText();
+			String type = dataNode.path("type").asString();
 			if ("present-proof/rejected".equals(type)) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 						.body("The user has declined the request to share proof.");
@@ -195,10 +195,10 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 
 			// Extract revealed attributes
 			JsonNode revealedAttrs = requestedPresentation.path("revealed_attrs");
-			String idNumber = revealedAttrs.path("ID Number").get(0).path("value").asText();
-			String fullName = revealedAttrs.path("Full Name").get(0).path("value").asText();
+			String idNumber = revealedAttrs.path("ID Number").get(0).path("value").asString();
+			String fullName = revealedAttrs.path("Full Name").get(0).path("value").asString();
 			// String gender = revealedAttrs.path("Gender").get(0).path("value").asText();
-			String dateOfBirth = revealedAttrs.path("Date of Birth").get(0).path("value").asText();
+			String dateOfBirth = revealedAttrs.path("Date of Birth").get(0).path("value").asString();
 
 			// Split fullName into first, middle, and last name
 			String[] nameParts = fullName.split("\\s+");

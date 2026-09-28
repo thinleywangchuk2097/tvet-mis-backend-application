@@ -19,6 +19,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>{
 			+ "  tbl_subject_dtls a "
 			+ "WHERE a.status_id = 1 "
 			+ "  AND a.institute_id = ?")
-	List<Tuple> getAllActiveSubjects(Integer institute_id);
+	List<Tuple> getAllActiveSubjects(String instituteId);
 	
 }

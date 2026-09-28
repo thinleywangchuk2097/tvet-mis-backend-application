@@ -18,39 +18,41 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/management/curriculum")
 public class CurriculumDevelopmentController {
-	
+
 	private final CurriculumDevelopmentService curriculumDevelopmentService;
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitCurriculum(@RequestBody CurriculumDevelopmentdto request) {
-		return(curriculumDevelopmentService.submitCurriculum(request));
+		return (curriculumDevelopmentService.submitCurriculum(request));
 	}
-	
+
 	@GetMapping("/get-curriculum-details/{application_no}")
-	public ResponseEntity<List<ObjectNode>> getCurriculumDetails(@PathVariable String application_no){
-	    List<ObjectNode> curriculumDetails = curriculumDevelopmentService.getCurriculumDetails(application_no);
-	    return ResponseEntity.ok(curriculumDetails);
+	public ResponseEntity<List<ObjectNode>> getCurriculumDetails(@PathVariable("application_no") String applicationNo) {
+		List<ObjectNode> curriculumDetails = curriculumDevelopmentService.getCurriculumDetails(applicationNo);
+		return ResponseEntity.ok(curriculumDetails);
 	}
-	
+
 	@GetMapping("/get-curriculum-application-details/{user_id}")
-	public ResponseEntity<List<ObjectNode>> getCurriculumDetailsByUserId(@PathVariable String user_id){
-	    List<ObjectNode> Details = curriculumDevelopmentService.getCurriculumDetailsByUserId(user_id);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getCurriculumDetailsByUserId(@PathVariable("user_id") String userId) {
+		List<ObjectNode> getCurriculumByUserIdDetails = curriculumDevelopmentService.getCurriculumDetailsByUserId(userId);
+		return ResponseEntity.ok(getCurriculumByUserIdDetails);
 	}
-	
+
 	@GetMapping("/get-approved-curriculums/{user_id}/{curriculum_type}")
-	public ResponseEntity<List<ObjectNode>> getApprovedCurriculumDataByUserId(@PathVariable String user_id, @PathVariable String curriculum_type){
-	    List<ObjectNode> Details = curriculumDevelopmentService.getApprovedCurriculumDataByUserId(user_id, curriculum_type);
-	    return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getApprovedCurriculumDataByUserId(@PathVariable("user_id") String userId,
+			@PathVariable("curriculum_type") String curriculumType) {
+		List<ObjectNode> getApprovedCurriculumDataDetails = curriculumDevelopmentService.getApprovedCurriculumDataByUserId(userId,
+				curriculumType);
+		return ResponseEntity.ok(getApprovedCurriculumDataDetails);
 	}
-	
+
 	@GetMapping("/get-curriculums-by-id/{id}")
 	public ResponseEntity<CurriculumDevelopment> getCurriculumById(@PathVariable Long id) {
-	    return ResponseEntity.ok(curriculumDevelopmentService.getCurriculumById(id));
+		return ResponseEntity.ok(curriculumDevelopmentService.getCurriculumById(id));
 	}
-	
+
 	@PostMapping("/verify-curriculum")
 	public ResponseEntity<?> verifyCurriculumDevelopment(@RequestBody CurriculumDevelopmentdto request) {
-		return(curriculumDevelopmentService.verifyCurriculumDevelopment(request));
+		return (curriculumDevelopmentService.verifyCurriculumDevelopment(request));
 	}
 }

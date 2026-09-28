@@ -15,6 +15,6 @@ public interface TuitionAnnouncementRepository extends JpaRepository<TuitionAnno
 			+ "FROM "
 			+ "  tbl_tuition_announcement_dtls a "
 			+ "WHERE a.institute_id = ?")
-	List<Tuple> getAllTuitionAnnouncements(Integer institute_id);
+	List<Tuple> getAllTuitionAnnouncements(String instituteId);
 
 }

@@ -13,15 +13,15 @@ public interface OJTTraineeService {
 
 	ResponseEntity<?> submitOJTCompany(OJTCompanyDto request);
 	
-	List<ObjectNode> getCompanyByInstituteId(String institute_id);
+	List<ObjectNode> getCompanyByInstituteId(String instituteId);
 	
 	ResponseEntity<?> submitOJTAgrement(OJTAgrementDto request);
 	
-	List<ObjectNode> getAgreementByInstituteId(String institute_id);
+	List<ObjectNode> getAgreementByInstituteId(String instituteId);
 
 	ResponseEntity<?> submitOJTTrainee(OJTTraineeDto request);
 	
-	List<ObjectNode> getTraineeByInstituteId(String institute_id);
+	List<ObjectNode> getTraineeByInstituteId(String instituteId);
 	
 	List<ObjectNode> getTraineeOJTReport();
 	

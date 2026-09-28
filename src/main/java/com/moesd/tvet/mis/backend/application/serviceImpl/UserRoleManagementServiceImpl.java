@@ -34,11 +34,9 @@ import com.moesd.tvet.mis.backend.application.repository.UserRepository;
 import com.moesd.tvet.mis.backend.application.repository.UserRoleRepository;
 import com.moesd.tvet.mis.backend.application.service.UserRoleManagementService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -107,12 +105,10 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
         }
     }
 
-	@Override
-	public List<ObjectNode> getAllPrivilegeRole() {
-		List<Tuple> result = rolePrivilegeRepository.getAllPrivilegeRole();
-		List<ObjectNode> json = objectTojson._toJson(result);
-		return json;
-	}
+    @Override
+    public List<ObjectNode> getAllPrivilegeRole() {
+        return objectTojson._toJson(rolePrivilegeRepository.getAllPrivilegeRole());
+    }
 
 	@Override
 	@Transactional
@@ -231,9 +227,7 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
 
 	@Override
 	public List<ObjectNode> getRoles() {
-		List<Tuple> result = roleRepository.getRoles();
-		List<ObjectNode> json = objectTojson._toJson(result);
-		return json;
+	    return objectTojson._toJson(roleRepository.getRoles());
 	}
 
 	@Override
@@ -464,30 +458,22 @@ public class UserRoleManagementServiceImpl implements UserRoleManagementService{
 
 	@Override
 	public List<ObjectNode> getAllUsers() {
-		List<Tuple> result = userRepository.getAllUsers();
-		List<ObjectNode> json = objectTojson._toJson(result);
-		return json;
+	    return objectTojson._toJson(userRepository.getAllUsers());
 	}
 
 	@Override
 	public List<ObjectNode> getActiveRecUsers() {
-		List<Tuple> result = userRepository.getActiveRecUsers();
-		List<ObjectNode> json = objectTojson._toJson(result);
-		return json;
+	    return objectTojson._toJson(userRepository.getActiveRecUsers());
 	}
 
 	@Override
 	public List<ObjectNode> getActiveAccreditorUsers() {
-		List<Tuple> result = userRepository.getActiveAccreditorUsers();
-		List<ObjectNode> json = objectTojson._toJson(result);
-		return json;
+	    return objectTojson._toJson(userRepository.getActiveAccreditorUsers());
 	}
 
 	@Override
 	public List<ObjectNode> getRegisteredAssessors() {
-		List<Tuple> result = userRepository.getActiveRegisteredAssessors();
-		List<ObjectNode> json = objectTojson._toJson(result);
-		return json;
+	    return objectTojson._toJson(userRepository.getActiveRegisteredAssessors());
 	}
 
 }

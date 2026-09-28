@@ -28,7 +28,6 @@ import com.moesd.tvet.mis.backend.application.service.TotService;
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -126,9 +125,7 @@ public class TotServiceImpl implements TotService {
 
 	@Override
 	public List<ObjectNode> getToTPrograms() {
-		List<Tuple> resultList = totProgramRepository.getToTPrograms();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(totProgramRepository.getToTPrograms());
 	}
 
 	@Override
@@ -204,9 +201,7 @@ public class TotServiceImpl implements TotService {
 
 	@Override
 	public List<ObjectNode> getToTProgramsAnnouncement() {
-		List<Tuple> resultList = totProgramRepository.getToTProgramsAnnouncement();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(totProgramRepository.getToTProgramsAnnouncement());
 	}
 
 	@Override

@@ -54,5 +54,5 @@ public interface AddStudentRepository extends JpaRepository<AddStudent, Long> {
 			+ "  tbl_student_dtls s "
 			+ "WHERE s.institute_id = ? AND s.status_id = 1 "
 			+ "ORDER BY s.id DESC")
-	List<Tuple> getAllActiveStudents(Integer institute_id);
+	List<Tuple> getAllActiveStudents(Integer instituteId);
 }

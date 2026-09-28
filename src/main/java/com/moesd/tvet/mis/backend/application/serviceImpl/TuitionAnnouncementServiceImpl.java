@@ -5,19 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.TuitionAnnouncementDto;
 import com.moesd.tvet.mis.backend.application.model.TuitionAnnouncement;
 import com.moesd.tvet.mis.backend.application.repository.TuitionAnnouncementRepository;
 import com.moesd.tvet.mis.backend.application.service.TuitionAnnouncementService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,10 +83,8 @@ public class TuitionAnnouncementServiceImpl implements TuitionAnnouncementServic
 	}
 
 	@Override
-	public List<ObjectNode> getAllTuitionAnnouncement(Integer institute_id) {
-		List<Tuple> resultList = tuitionAnnouncementRepository.getAllTuitionAnnouncements(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAllTuitionAnnouncement(String instituteId) {
+	    return objectTojson._toJson(tuitionAnnouncementRepository.getAllTuitionAnnouncements(instituteId));
 	}
 
 	@Override

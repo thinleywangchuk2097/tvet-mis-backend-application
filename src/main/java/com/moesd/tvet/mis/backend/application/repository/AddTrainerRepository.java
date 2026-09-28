@@ -51,7 +51,7 @@ public interface AddTrainerRepository extends JpaRepository<AddTrainer, Long> {
 			+ "WHERE t.institute_id = ? "
 			+ "  AND t.status_id = 1 "
 			+ "ORDER BY t.id DESC")
-	List<Tuple> getAllActiveTrainers(Integer institute_id);
+	List<Tuple> getAllActiveTrainers(Integer instituteId);
 
 	Optional<AddTrainer> findByCitizenId(String citizenId);
 

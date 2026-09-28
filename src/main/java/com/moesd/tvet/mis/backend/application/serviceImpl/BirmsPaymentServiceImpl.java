@@ -119,7 +119,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode json = mapper.readTree(response.getBody());
 
-			return json.path("content").path("tokenDto").path("accessToken").asText();
+			return json.path("content").path("tokenDto").path("accessToken").asString();
 
 		} catch (Exception e) {
 			return null;
@@ -168,7 +168,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 					ObjectMapper objectMapper = new ObjectMapper();
 					JsonNode responseBody = objectMapper.readTree(response.getBody());
 					JsonNode content = responseBody.path("content");
-					String paymentAdviceNo = content.path("paymentAdviceNo").asText();
+					String paymentAdviceNo = content.path("paymentAdviceNo").asString();
 					// Check if record already exists
 					Optional<BirmsPayment> existingRecord = birmsPaymentRepository
 							.findByPaymentAdviceNo(paymentAdviceNo);
@@ -177,26 +177,26 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 					}
 					BirmsPayment birmsPaymentDetails = new BirmsPayment();
 
-					birmsPaymentDetails.setPlatform(content.path("platform").asText());
-					birmsPaymentDetails.setTaxPayerNo(content.path("taxPayerNo").asText());
-					birmsPaymentDetails.setRefNo(content.path("refNo").asText());
+					birmsPaymentDetails.setPlatform(content.path("platform").asString());
+					birmsPaymentDetails.setTaxPayerNo(content.path("taxPayerNo").asString());
+					birmsPaymentDetails.setRefNo(content.path("refNo").asString());
 					birmsPaymentDetails.setApplicationNo(req.getRefNo());
-					birmsPaymentDetails.setAgencyCode(content.path("agencyCode").asText());
+					birmsPaymentDetails.setAgencyCode(content.path("agencyCode").asString());
 					birmsPaymentDetails.setPayerEmail(req.getTaxPayerEmail());
-					birmsPaymentDetails.setTaxPayerName(content.path("taxPayerName").asText());
-					birmsPaymentDetails.setMobileNo(content.path("mobileNo").asText());
+					birmsPaymentDetails.setTaxPayerName(content.path("taxPayerName").asString());
+					birmsPaymentDetails.setMobileNo(content.path("mobileNo").asString());
 					// birmsPaymentDetails.setPaymentStatus(content.path("paymentStatus").asText());
 					birmsPaymentDetails.setPaymentStatus("pending");
-					birmsPaymentDetails.setRedirectUrl(content.path("redirectUrl").asText());
+					birmsPaymentDetails.setRedirectUrl(content.path("redirectUrl").asString());
 					birmsPaymentDetails.setServiceCode(req.getServiceCode());
 					birmsPaymentDetails.setInstituteId(req.getInstituteId());
 					birmsPaymentDetails.setDescription(description);
-					birmsPaymentDetails.setTaxPayerDocumentNo(content.path("taxPayerDocumentNo").asText());
-					birmsPaymentDetails.setPaymentRequestDate(content.path("paymentRequestDate").asText());
+					birmsPaymentDetails.setTaxPayerDocumentNo(content.path("taxPayerDocumentNo").asString());
+					birmsPaymentDetails.setPaymentRequestDate(content.path("paymentRequestDate").asString());
 					// birmsPaymentDetails.setPaymentDueDate(content.path("paymentDueDate").asText());
 					birmsPaymentDetails.setPaymentDueDate(req.getPaymentDueDate());
-					birmsPaymentDetails.setTotalPayableAmount(content.path("totalPayableAmount").asText());
-					birmsPaymentDetails.setPaymentAdviceNo(content.path("paymentAdviceNo").asText());
+					birmsPaymentDetails.setTotalPayableAmount(content.path("totalPayableAmount").asString());
+					birmsPaymentDetails.setPaymentAdviceNo(content.path("paymentAdviceNo").asString());
 					birmsPaymentDetails.setCreatedAt(new Date());
 
 					birmsPaymentRepository.save(birmsPaymentDetails);
@@ -376,27 +376,27 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 	}
 
 	@Override
-	public Optional<BirmsPayment> getPaymentByApplicationNo(String application_no) {
-		return birmsPaymentRepository.findByApplicationNo(application_no);
+	public Optional<BirmsPayment> getPaymentByApplicationNo(String applicationNo) {
+		return birmsPaymentRepository.findByApplicationNo(applicationNo);
 	}
 
 	@Override
 	public List<ObjectNode> getAllPaymentDetails() {
 		List<Tuple> resultList = birmsPaymentRepository.getAllPaymentDetails();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+		List<ObjectNode> dtlsJson = objectTojson._toJson(resultList);
+		return dtlsJson;
 	}
 
 	@Override
-	public List<ObjectNode> getByUserPenaltyApplicationDetails(String user_id) {
+	public List<ObjectNode> getByUserPenaltyApplicationDetails(String userId) {
 		return new ArrayList<>();
 	}
 
 	@Override
 	public List<ObjectNode> getCourseByInstituteId(String instituteId) {
 		List<Tuple> resultList = birmsPaymentRepository.getCourseByInstituteId(instituteId);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+		List<ObjectNode> dtlsJson = objectTojson._toJson(resultList);
+		return dtlsJson;
 	}
 
 	@Override

@@ -29,9 +29,10 @@ public class OnCampusJobPlacementController {
 	}
 
 	@GetMapping("/get-session/{institute_id}")
-	public ResponseEntity<List<ObjectNode>> getPlacementSessionByInstituteId(@PathVariable String institute_id) {
-		List<ObjectNode> Details = onCampusJobPlacementService.getPlacementSessionByInstituteId(institute_id);
-		return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getPlacementSessionByInstituteId(
+			@PathVariable("institute_id") String instituteId) {
+		List<ObjectNode> getPlacementSessionDetails = onCampusJobPlacementService.getPlacementSessionByInstituteId(instituteId);
+		return ResponseEntity.ok(getPlacementSessionDetails);
 	}
 
 	@PostMapping("/submit-firm")
@@ -40,9 +41,9 @@ public class OnCampusJobPlacementController {
 	}
 
 	@GetMapping("/get-firm/{institute_id}")
-	public ResponseEntity<List<ObjectNode>> getFirmByInstituteId(@PathVariable String institute_id) {
-		List<ObjectNode> Details = onCampusJobPlacementService.getFirmByInstituteId(institute_id);
-		return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getFirmByInstituteId(@PathVariable("institute_id") String instituteId) {
+		List<ObjectNode> getFirmByInstituteDetails = onCampusJobPlacementService.getFirmByInstituteId(instituteId);
+		return ResponseEntity.ok(getFirmByInstituteDetails);
 	}
 
 	@PostMapping("/submit-trainee")
@@ -51,14 +52,14 @@ public class OnCampusJobPlacementController {
 	}
 
 	@GetMapping("/get-trainee/{institute_id}")
-	public ResponseEntity<List<ObjectNode>> getTraineeByInstituteId(@PathVariable String institute_id) {
-		List<ObjectNode> Details = onCampusJobPlacementService.getTraineeByInstituteId(institute_id);
-		return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getTraineeByInstituteId(@PathVariable("institute_id") String instituteId) {
+		List<ObjectNode> getTraineeDetails = onCampusJobPlacementService.getTraineeByInstituteId(instituteId);
+		return ResponseEntity.ok(getTraineeDetails);
 	}
-	
+
 	@GetMapping("/get-trainee-report")
 	public ResponseEntity<List<ObjectNode>> getTraineeOnPlacementReport() {
-		List<ObjectNode> Details = onCampusJobPlacementService.getTraineeOnPlacementReport();
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> getTraineeOnPlacementDetails = onCampusJobPlacementService.getTraineeOnPlacementReport();
+		return ResponseEntity.ok(getTraineeOnPlacementDetails);
 	}
 }

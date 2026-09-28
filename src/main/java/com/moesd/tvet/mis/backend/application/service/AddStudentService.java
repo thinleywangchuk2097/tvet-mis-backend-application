@@ -10,7 +10,7 @@ public interface AddStudentService {
 	
 	ResponseEntity<?> submitStudent(StudentAddDto request);
 
-	List<ObjectNode> getAllActiveStudents(Integer institute_id);
+	List<ObjectNode> getAllActiveStudents(Integer instituteId);
 
 	ResponseEntity<?> updateStudent(StudentAddDto request);
 

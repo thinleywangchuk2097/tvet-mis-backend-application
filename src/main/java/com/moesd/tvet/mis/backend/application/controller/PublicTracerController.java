@@ -22,9 +22,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/tracer")
 public class PublicTracerController {
-	
-    private final TracerQuestionGeneratorService tracerQuestionGeneratorService;
-    
+
+	private final TracerQuestionGeneratorService tracerQuestionGeneratorService;
+
 	@GetMapping("/survey/{uniqueId}")
 	public ResponseEntity<?> getSurveyByUniqueId(@PathVariable String uniqueId) {
 		try {
@@ -36,49 +36,42 @@ public class PublicTracerController {
 
 			return ResponseEntity.ok(Map.of("success", true, "data", survey, "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to fetch survey");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch survey");
 		}
 	}
-	
+
 	@GetMapping("/get-tracer/{application_no}")
-	public ResponseEntity<?> getTracerDetailsByApplicationNo(@PathVariable String application_no){
+	public ResponseEntity<?> getTracerDetailsByApplicationNo(@PathVariable("application_no") String applicationNo) {
 		try {
-			List<ObjectNode> tracerDetails = tracerQuestionGeneratorService.getTracerDetailsByApplicationNo(application_no);
+			List<ObjectNode> tracerDetails = tracerQuestionGeneratorService
+					.getTracerDetailsByApplicationNo(applicationNo);
 			return ResponseEntity.ok(Map.of("success", true, "data", tracerDetails));
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to fetch tracer details");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch tracer details");
 		}
 	}
-	
+
 	@GetMapping("/get-tracer-question-dropdown")
 	public ResponseEntity<?> getTracerQuestionDropdownType() {
 		try {
 			List<ObjectNode> data = tracerQuestionGeneratorService.getTracerQuestionDropdownType();
 			return ResponseEntity.ok(Map.of("success", true, "data", data));
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to fetch dropdown data");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch dropdown data");
 		}
 	}
-	
+
 	@PostMapping("/submit-survey-response")
 	public ResponseEntity<?> submitSurveyResponse(@RequestBody SurveyResponseRequestDTO request) {
 		try {
-			List<TracerSurveyResponseDetails> savedResponses = tracerQuestionGeneratorService.saveSurveyResponses(
-					request.getApplicationNo(), 
-					request.getResponses());
-			
-			return ResponseEntity.ok(Map.of(
-					"success", true, 
-					"message", "Survey responses submitted successfully",
-					"data", savedResponses,
-					"timestamp", LocalDateTime.now()));
-			
+			List<TracerSurveyResponseDetails> savedResponses = tracerQuestionGeneratorService
+					.saveSurveyResponses(request.getApplicationNo(), request.getResponses());
+
+			return ResponseEntity.ok(Map.of("success", true, "message", "Survey responses submitted successfully",
+					"data", savedResponses, "timestamp", LocalDateTime.now()));
+
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Failed to submit survey responses");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit survey responses");
 		}
 	}
 }
