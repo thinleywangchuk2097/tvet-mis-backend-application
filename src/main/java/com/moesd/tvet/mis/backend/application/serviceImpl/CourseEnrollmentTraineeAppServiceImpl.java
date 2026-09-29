@@ -51,7 +51,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	private final WorkTaskFlowService workTaskFlowService;
 	private final DropdownManagementRepository dropdownManagementRepository;
     private final AssessorTaskAssignmentRepository assessorTaskAssignmentRepository;
-    
+    private static final String PROGRAMME_NOT_FOUND = "Programme not found";
     
 	@Override
 	@Transactional
@@ -72,7 +72,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			// Generate application number
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(request.getServiceId());
 			CourseEnrollmentApp course = courseEnrollmentAppRepository.findByApplicationNo(request.getApplicationNo())
-					.orElseThrow(() -> new RuntimeException("Course not found"));
+					.orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 
 			// Build entity
 			CourseEnrollmentTraineeApp trainee = CourseEnrollmentTraineeApp.builder().applicationNo(applicationNo)
@@ -153,7 +153,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			//new added
 			CourseEnrollmentApp course = courseEnrollmentAppRepository
 						.findByApplicationNo(request.getApplicationNo())
-						.orElseThrow(() -> new RuntimeException("Course not found"));
+						.orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 			//this status is being used while trainee selection
 			course.setApplicationStatusId(request.getStatusId());
 			//ended new added line
@@ -247,7 +247,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			// Validate required fields
 			CourseEnrollmentApp course = courseEnrollmentAppRepository
 					.findByApplicationNo(request.getApplicationNo())
-					.orElseThrow(() -> new RuntimeException("Programme not found"));
+					.orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 			//this status is being used while trainee selection
 			course.setApplicationStatusId(request.getStatusId());
 			//set CA date
@@ -293,9 +293,6 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 						}
 
 					}
-					// if (dto.getPracticalAssessment() != null) {
-					// trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
-					// }
 				}
 				// Save all updates
 				courseEnrollmentTraineeAppRepository.saveAll(trainees);
@@ -472,7 +469,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	private void updateCourseStatus(SelectedTraineedto request) {
 	    CourseEnrollmentApp course = courseEnrollmentAppRepository
 	            .findByApplicationNo(request.getApplicationNo())
-	            .orElseThrow(() -> new RuntimeException("Programme not found"));
+	            .orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 	    course.setApplicationStatusId(request.getStatusId());
 	    courseEnrollmentAppRepository.save(course);
 	}
@@ -494,7 +491,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 
 	    CourseEnrollmentApp course = courseEnrollmentAppRepository
 	            .findByApplicationNo(request.getApplicationNo())
-	            .orElseThrow(() -> new RuntimeException("Programme not found"));
+	            .orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 
 	    List<CourseEnrollmentTraineeApp> newTrainees = request.getTraineeIds().stream()
 	            .map(dto -> buildReassessmentTrainee(dto, existingTrainees, course))
@@ -597,7 +594,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 
 	    CourseEnrollmentTraineeApp trainee = courseEnrollmentTraineeAppRepository
 	            .removeTraineeFromSelectedProgramme(request.getTraineeId())
-	            .orElseThrow(() -> new RuntimeException("Course not found"));
+	            .orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 	    // This status is being used while trainee selection
 	    trainee.setStatusId(request.getStatusId());
 	    trainee.setUpdatedBy(request.getUpdatedBy());

@@ -30,8 +30,8 @@ public class ResourceManagementController {
 
 	@GetMapping("/get-staff/{instituteId}")
 	public ResponseEntity<List<ObjectNode>> getInstituteStaff(@PathVariable String instituteId) {
-		List<ObjectNode> Details = resourceManagementService.getInstituteStaff(instituteId);
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> instituteStaffDetails = resourceManagementService.getInstituteStaff(instituteId);
+		return ResponseEntity.ok(instituteStaffDetails);
 	}
 
 	@PostMapping("/edit-staff")

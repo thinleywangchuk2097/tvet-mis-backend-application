@@ -33,8 +33,8 @@ public class ProgramMonitoringController {
 
 	@GetMapping("/get-program-monitoring/{user_id}")
 	public ResponseEntity<List<ObjectNode>> getProgramMonitoring(@PathVariable("user_id") String userId) {
-		List<ObjectNode> Details = programMonitoringService.getProgramMonitoring(userId);
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> detailList = programMonitoringService.getProgramMonitoring(userId);
+		return ResponseEntity.ok(detailList);
 	}
 
 	@PostMapping("/verify")
@@ -44,14 +44,14 @@ public class ProgramMonitoringController {
 
 	@GetMapping("/get-program-monitoring-details/{applicationNo}")
 	public ResponseEntity<List<ObjectNode>> getProgramMonitoringByApplicationNo(@PathVariable String applicationNo) {
-		List<ObjectNode> Details = programMonitoringService.getProgramMonitoringByApplicationNo(applicationNo);
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> monitoringDetails = programMonitoringService.getProgramMonitoringByApplicationNo(applicationNo);
+		return ResponseEntity.ok(monitoringDetails);
 	}
 
 	@GetMapping("/get-courses/{institute_id}/{course_type_id}")
 	public ResponseEntity<List<ObjectNode>> getCourseByInstituteId(@PathVariable("institute_id") Integer instituteId,
 			@PathVariable("course_type_id") Integer courseTypeId) {
-		List<ObjectNode> Details = programMonitoringService.getCourseByInstituteId(instituteId, courseTypeId);
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> courseDetailsByInstituteId = programMonitoringService.getCourseByInstituteId(instituteId, courseTypeId);
+		return ResponseEntity.ok(courseDetailsByInstituteId);
 	}
 }

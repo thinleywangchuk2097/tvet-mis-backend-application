@@ -25,7 +25,6 @@ import com.moesd.tvet.mis.backend.application.model.BirmsPayment;
 import com.moesd.tvet.mis.backend.application.repository.BirmsPaymentRepository;
 import com.moesd.tvet.mis.backend.application.service.BirmsPaymentService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -382,9 +381,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 
 	@Override
 	public List<ObjectNode> getAllPaymentDetails() {
-		List<Tuple> resultList = birmsPaymentRepository.getAllPaymentDetails();
-		List<ObjectNode> dtlsJson = objectTojson._toJson(resultList);
-		return dtlsJson;
+		return objectTojson._toJson(birmsPaymentRepository.getAllPaymentDetails());
 	}
 
 	@Override
@@ -394,9 +391,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 
 	@Override
 	public List<ObjectNode> getCourseByInstituteId(String instituteId) {
-		List<Tuple> resultList = birmsPaymentRepository.getCourseByInstituteId(instituteId);
-		List<ObjectNode> dtlsJson = objectTojson._toJson(resultList);
-		return dtlsJson;
+		return objectTojson._toJson(birmsPaymentRepository.getCourseByInstituteId(instituteId));
 	}
 
 	@Override

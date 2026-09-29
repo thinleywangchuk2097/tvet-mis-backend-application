@@ -139,7 +139,6 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	@Transactional
 	public ResponseEntity<?> verifyAccreditedCourse(AccreditedCoursedto request) {
 		try {
-			System.out.println("request" + request);			
 			// Validate required fields for editing
 			if (request.getApplicationNo() == null || request.getApplicationNo().isEmpty())
 				throw new RecordNotFoundException("applicationNo is required");
@@ -211,8 +210,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 							existingStandard.setRemarks(qualityDto.getRemarks());
 
 						} else {
-							System.out
-									.println("Quality standard with standardId " + standardId + " not found, skipping");
+							log.warn("Quality standard with standardId {} not found, skipping", standardId);
 						}
 					}
 
@@ -221,7 +219,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			// Save the updated registration
 			AccreditedCourse savedRegistration = accreditedCourseRepository.save(existingAccreditedCourse);
 
-			// save Accreditors
+			// Save accreditor
 			if (request.getAssignedAccreditors() != null && !request.getAssignedAccreditors().isEmpty()) {
 				List<AccreditorTaskAssignment> assignments = request.getAssignedAccreditors().stream()
 						.map(accreditor -> AccreditorTaskAssignment.builder().userId(accreditor.getUserId())
@@ -332,10 +330,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			listOfProgrammes = accreditedCourseRepository.getBQFProgrammeForCertification(instituteId, serviceId,
 					certificationLevelId);
 		}
-
-		List<ObjectNode> dtlsJson = objectTojson._toJson(listOfProgrammes);
-
-		return dtlsJson;
+		return objectTojson._toJson(listOfProgrammes);
 	}
 
 }

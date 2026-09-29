@@ -29,8 +29,8 @@ public class TotController {
 	
 	@GetMapping("/get-tot-programs")
 	public ResponseEntity<List<ObjectNode>> getToTPrograms() {
-		List<ObjectNode> Details = totService.getToTPrograms();
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> totProgramsDetails = totService.getToTPrograms();
+		return ResponseEntity.ok(totProgramsDetails);
 	}
 	
 	@PostMapping("/delete-tot-program/{id}")
@@ -46,8 +46,8 @@ public class TotController {
 	
 	@GetMapping("/get-tot-announcements")
 	public ResponseEntity<List<ObjectNode>> getToTProgramsAnnouncement() {
-		List<ObjectNode> Details = totService.getToTProgramsAnnouncement();
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> totProgramsAnnouncementDetails = totService.getToTProgramsAnnouncement();
+		return ResponseEntity.ok(totProgramsAnnouncementDetails);
 	}
 	
 	@PostMapping("/delete-tot-announcement/{id}")
