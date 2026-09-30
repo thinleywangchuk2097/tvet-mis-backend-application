@@ -142,7 +142,21 @@
             and is overridden to 2.21.6 above to patch CVE-2026-83557.
             Both coexist safely because they use different Java packages.
         -->
-
+		<!-- Jackson 3 override — Spring Boot 4.1.1 ships 3.1.5, which has new
+		CVEs -->
+		
+		<!-- CVE-2026-68497, CVE-2026-19032, CVE-2026-83557 fixed in 3.1.6 -->
+		<dependency>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>3.1.6</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>3.1.6</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		
 		<!-- ==================== JWT ==================== -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -256,17 +270,30 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.4.2</version><!--$NO-MVN-MAN-VER$-->
 			</plugin>
-			
-            <!-- dependency-check-suppressions -->
+
+			<!-- OWASP Dependency-Check -->
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>10.0.3</version>
+				<version>12.1.8</version>
 				<configuration>
 					<suppressionFiles>
-						<suppressionFile>dependency-check-suppressions.xml</suppressionFile>
+						<suppressionFile>
+							${project.basedir}/dependency-check-suppressions.xml</suppressionFile>
 					</suppressionFiles>
+					<failBuildOnCVSS>9</failBuildOnCVSS>
+					<formats>
+						<format>HTML</format>
+						<format>XML</format>
+					</formats>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>

@@ -25,7 +25,8 @@ import lombok.RequiredArgsConstructor;
 public class InstituteRegistrationController {
 
 	private final InstituteRegistrationService instituteRegistrationService;
-
+	private static final String MESSAGE_KEY = "Your application is already submitted for Registration";
+	
 	@PostMapping("/submit")
 	public ResponseEntity<?> registerInstitute(@RequestBody InstituteRegistrationdto request) {
 		return (instituteRegistrationService.registerInstitute(request));
@@ -63,14 +64,14 @@ public class InstituteRegistrationController {
 
 	private StatusResult resolveStatus(Integer proposalStatusId, Integer registrationStatusId, String applicationNo) {
 		if (proposalStatusId == null) {
-			return new StatusResult("Your application is already submitted for Registration: " + applicationNo, true);
+			return new StatusResult(MESSAGE_KEY + applicationNo, true);
 		}
 
 		return switch (proposalStatusId) {
 		case 55 -> new StatusResult("Proposal not yet approved: " + applicationNo, false);
 		case 58 -> new StatusResult("Proposal rejected: " + applicationNo, false);
 		case 57 -> resolveRegistrationStatus(registrationStatusId, applicationNo);
-		default -> new StatusResult("Your application is already submitted for Registration: " + applicationNo, true);
+		default -> new StatusResult(MESSAGE_KEY + applicationNo, true);
 		};
 	}
 
@@ -83,7 +84,7 @@ public class InstituteRegistrationController {
 		case 55, 56, 59, 62 -> new StatusResult("Registration in process for application: " + applicationNo, true);
 		case 57 -> new StatusResult("Institute already registered for application: " + applicationNo, true);
 		case 58 -> new StatusResult("Registration is rejected, Resubmit Again " + applicationNo, false);
-		default -> new StatusResult("Your application is already submitted for Registration: " + applicationNo, true);
+		default -> new StatusResult(MESSAGE_KEY + applicationNo, true);
 		};
 	}
 

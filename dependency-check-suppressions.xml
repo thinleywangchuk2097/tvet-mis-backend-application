@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.4.xsd">
+
+    <!-- ============================================================ -->
+    <!-- CVE-2018-1258 : Spring Security false positive                -->
+    <!-- Only affects Spring Framework 5.0.5.RELEASE.                  -->
+    <!-- This project uses Spring Framework 7.0.9 (verified via        -->
+    <!-- mvn dependency:tree), so the CVE does not apply.              -->
+    <!-- ============================================================ -->
+
     <suppress>
         <notes><![CDATA[
-        CVE-2018-1258 is a false positive for Spring Security 7.1.1.
-        The CVE affects Spring Framework 5.0.5.RELEASE used with any
-        Spring Security version. This project uses Spring Framework 7.0.9,
-        verified via mvn dependency:tree. Do not upgrade Spring Security.
+        CVE-2018-1258 is a false positive for spring-security-core.
+        The CVE affects Spring Framework 5.0.5.RELEASE combined with
+        any Spring Security version. This project uses Spring
+        Framework 7.0.9, which is not affected.
         ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-core@.*$</packageUrl>
         <cve>CVE-2018-1258</cve>
     </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+        CVE-2018-1258 is a false positive for spring-security-web.
+        The CVE affects Spring Framework 5.0.5.RELEASE combined with
+        any Spring Security version. This project uses Spring
+        Framework 7.0.9, which is not affected.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-web@.*$</packageUrl>
+        <cve>CVE-2018-1258</cve>
+    </suppress>
+
 </suppressions>
