@@ -20,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
-	
+
 	@Value("${allowed.origin}")
 	private String allowOrigin;
-	
+
 	private final UserRepository userRepo;
 
 	@Bean
@@ -52,13 +52,30 @@ public class ApplicationConfiguration {
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList(allowOrigin));
+
+		// Support multiple origins via comma-separated list in application.properties
+		// e.g. allowed.origin=https://app.example.com,https://admin.example.com
+		configuration.setAllowedOrigins(Arrays.asList(allowOrigin.split(",")));
+
+		// Allowed HTTP methods
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
-		configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
+
+		// Allowed request headers
+		configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization",
+				"X-Requested-With", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+
+		// Headers that the frontend is allowed to read from the response
+		configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
+
+		// Cache preflight response for 1 hour (reduces OPTIONS requests)
+		configuration.setMaxAge(3600L);
+
+		// No cookies / session cookies are used - JWT only
 		configuration.setAllowCredentials(false);
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
-	
+
 }
