@@ -25,31 +25,53 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults()).authorizeHttpRequests(auth -> auth
-				// Allow all CORS preflight (OPTIONS) requests
-				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+		return http
+				// CSRF disabled — stateless JWT authentication
+				.csrf(csrf -> csrf.disable())
 
-				// Allow Spring Boot's default error endpoint so CORS headers apply on errors
-				.requestMatchers("/error").permitAll()
+				// Uses the CorsConfigurationSource bean from ApplicationConfiguration
+				.cors(Customizer.withDefaults())
 
-				// Public endpoints
-				.requestMatchers("/api/v1/auth/**", "/api/v1/public/**", "/api/v1/common/**").permitAll()
+				.authorizeHttpRequests(auth -> auth
+						// Only allow preflight (OPTIONS) on real API paths
+						.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
 
-				// User management - restricted authorities
-				.requestMatchers("/api/v1/user/management/**")
-				.hasAnyAuthority("1", "2", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17",
-						"28", "30", "29", "21", "23")
+						// Spring Boot error forwarding endpoint
+						.requestMatchers("/error").permitAll()
 
-				// Password endpoints - admin only
-				.requestMatchers("/api/v1/user/password/**").hasAuthority("1")
+						// Public API endpoints
+						.requestMatchers("/api/v1/auth/**",
+								"/api/v1/public/**", 
+								"/api/v1/common/**")
+						.permitAll()
 
-				// Everything else requires authentication
-				.anyRequest().authenticated())
+						// User management — restricted to listed authorities
+						.requestMatchers("/api/v1/user/management/**")
+						.hasAnyAuthority("1", "2", "5", "6", "7",
+								"8", "9", "10", "11",
+								"12", "13", "14", "15", "16",
+								"17", "28", "30", "29", "21", "23")
+
+						// Password endpoints — admin only
+						.requestMatchers("/api/v1/user/password/**").hasAuthority("1")
+
+						// Everything else requires authentication
+						.anyRequest().authenticated())
+
+				// Stateless session — no HTTP session, no cookies
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
 				.authenticationProvider(authenticationProvider)
+
+				// JWT filter runs before username/password auth
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+				// Return 401 on authentication failure
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-				})).build();
+				}))
+
+				.build();
 	}
+
 }

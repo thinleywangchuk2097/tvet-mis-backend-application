@@ -48,7 +48,6 @@ public class TracerQuestionGeneratorController {
 	public ResponseEntity<?> saveTracerQuestions(@RequestBody TracerQuestionGeneratorRequest request) {
 		try {
 			tracerQuestionGeneratorService.saveTracerQuestions(request);
-
 			ObjectNode response = JsonNodeFactory.instance.objectNode();
 			response.put("message", "Tracer questions saved successfully");
 			response.put("success", true);

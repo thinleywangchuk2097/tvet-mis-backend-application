@@ -28,11 +28,36 @@
 		<commons-io.version>2.20.0</commons-io.version>
 
 		<!--
-            Jackson 2 override to patch CVE-2026-83557.
-            JJWT 0.12.6 pulls in Jackson 2.21.5, which is vulnerable.
-            Fixed in 2.21.6.
+            Jackson 2 override.
+            JJWT 0.12.6 pulls in Jackson 2.21.x, which is vulnerable.
+
+            Patched CVEs (from Trivy report):
+              - CVE-2026-83557 (earlier patch)
+              - CVE-2026-89407 (HIGH)
+              - CVE-2026-89425 (HIGH)
+              - CVE-2026-91776 (HIGH)
+              - CVE-2026-91777 (HIGH)
+
+            Fixed in 2.21.7 / 2.22.3 / 2.18.11.
+            Using 2.21.7 to stay on the same major/minor line.
         -->
-		<jackson2.version>2.21.6</jackson2.version>
+		<jackson2.version>2.21.7</jackson2.version>
+
+		<!--
+            Jackson 3 override.
+            Spring Boot 4.1.1 ships Jackson 3.1.5, which has new CVEs.
+
+            Patched CVEs:
+              - CVE-2026-68497, CVE-2026-19032, CVE-2026-83557 (initial patch)
+              - CVE-2026-89407 (HIGH)
+              - CVE-2026-89425 (HIGH)
+              - CVE-2026-91776 (HIGH)
+              - CVE-2026-91777 (HIGH)
+
+            Fixed in 3.1.7 / 3.2.3.
+            Using 3.1.7 to stay on the same major/minor line.
+        -->
+		<jackson3.version>3.1.7</jackson3.version>
 
 		<!--
             Tomcat override to patch multiple CRITICAL CVEs identified by
@@ -61,7 +86,7 @@
 			<!-- ==================== Jackson 2 Override ==================== -->
 			<!--
                 Jackson 2 override for JJWT's transitive dependency.
-                Fixes CVE-2026-83557 (path traversal via polymorphic typing).
+                Fixes all known HIGH-severity CVEs in Jackson 2.x.
             -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -139,24 +164,20 @@
 		<!--
             Jackson 3 (tools.jackson) is provided by Spring Boot 4.
             Jackson 2 (com.fasterxml.jackson) is brought in by jjwt-jackson
-            and is overridden to 2.21.6 above to patch CVE-2026-83557.
+            and is overridden to ${jackson2.version} above.
             Both coexist safely because they use different Java packages.
         -->
-		<!-- Jackson 3 override — Spring Boot 4.1.1 ships 3.1.5, which has new
-		CVEs -->
-		
-		<!-- CVE-2026-68497, CVE-2026-19032, CVE-2026-83557 fixed in 3.1.6 -->
 		<dependency>
 			<groupId>tools.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>3.1.6</version><!--$NO-MVN-MAN-VER$-->
+			<version>${jackson3.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 		<dependency>
 			<groupId>tools.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>3.1.6</version><!--$NO-MVN-MAN-VER$-->
+			<version>${jackson3.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
-		
+
 		<!-- ==================== JWT ==================== -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.configuration;
 
 import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,30 +52,45 @@ public class ApplicationConfiguration {
 
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
+		// Fail fast if the configured origins are missing, blank, or contain a wildcard
+		if (allowOrigin == null || allowOrigin.isBlank() || allowOrigin.contains("*")) {
+			throw new IllegalStateException(
+					"allowed.origin must contain one or more explicit origins "
+							+ "(comma-separated). Wildcards are forbidden.");
+		}
+
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		// Support multiple origins via comma-separated list in application.properties
-		// e.g. allowed.origin=https://app.example.com,https://admin.example.com
-		configuration.setAllowedOrigins(Arrays.asList(allowOrigin.split(",")));
+		// Explicit allow-list loaded from configuration
+		// e.g. allowed.origin=https://hub.neyduetewa.gov.bt,https://tvet-mis.gov.bt
+		configuration.setAllowedOrigins(
+				Arrays.stream(allowOrigin.split(","))
+						.map(String::trim)
+						.filter(s -> !s.isEmpty())
+						.toList());
 
-		// Allowed HTTP methods
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
+		// Only the HTTP methods the API actually exposes
+		configuration.setAllowedMethods(
+				List.of("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
 
-		// Allowed request headers
-		configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization",
-				"X-Requested-With", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+		// Only request headers clients actually send
+		// (Access-Control-Request-* are managed by the browser and must NOT be listed here)
+		configuration.setAllowedHeaders(
+				List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
 
-		// Headers that the frontend is allowed to read from the response
-		configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
+		// Headers the browser is allowed to read from the response
+		configuration.setExposedHeaders(
+				List.of("Authorization", "Content-Disposition"));
 
-		// Cache preflight response for 1 hour (reduces OPTIONS requests)
+		// Cache the preflight response for 1 hour
 		configuration.setMaxAge(3600L);
 
-		// No cookies / session cookies are used - JWT only
+		// JWT-only authentication — no session cookies
 		configuration.setAllowCredentials(false);
 
+		// Apply CORS ONLY to actual API endpoints (not "/", "/robots.txt", "/error", etc.)
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
+		source.registerCorsConfiguration("/api/**", configuration);
 		return source;
 	}
 
