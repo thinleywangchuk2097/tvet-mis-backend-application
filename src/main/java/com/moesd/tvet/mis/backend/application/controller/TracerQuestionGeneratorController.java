@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.controller;
 
 import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,11 +10,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.node.ObjectNode;
+
 import com.moesd.tvet.mis.backend.application.dto.TracerQuestionGeneratorRequest;
 import com.moesd.tvet.mis.backend.application.dto.TracerSendRequestDTO;
+import com.moesd.tvet.mis.backend.application.model.TracerQuestionGenerator;
 import com.moesd.tvet.mis.backend.application.service.TracerQuestionGeneratorService;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -47,10 +52,17 @@ public class TracerQuestionGeneratorController {
 	@PostMapping("/save-tracer-questions")
 	public ResponseEntity<?> saveTracerQuestions(@RequestBody TracerQuestionGeneratorRequest request) {
 		try {
-			tracerQuestionGeneratorService.saveTracerQuestions(request);
+			List<TracerQuestionGenerator> saved = tracerQuestionGeneratorService.saveTracerQuestions(request);
+
+			// Use applicationNo from the first saved question (they all share it)
+			String applicationNo = (saved != null && !saved.isEmpty()) ? saved.get(0).getApplicationNo() : null;
+
 			ObjectNode response = JsonNodeFactory.instance.objectNode();
 			response.put("message", "Tracer questions saved successfully");
 			response.put("success", true);
+			if (applicationNo != null) {
+				response.put("applicationNo", applicationNo);
+			}
 
 			return ResponseEntity.ok(response);
 		} catch (Exception e) {
