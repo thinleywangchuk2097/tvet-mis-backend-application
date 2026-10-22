@@ -77,7 +77,7 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 					 + "  LEFT JOIN tbl_curriculum_development cd "
 					 + "    ON cd.id = n.curriculum_id "
 					 + "WHERE n.application_no = ?1")
-		List<Tuple> getNonAccreditedCourseByApplicationNo(String application_no);
+		List<Tuple> getNonAccreditedCourseByApplicationNo(String applicationNo);
 	
 		Optional<NonAccreditedCourse> findByApplicationNo(String applicationNo);
 		
@@ -123,14 +123,15 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 						+ "  LEFT JOIN tbl_dropdown_child_master d "
 						+ "    ON d.id = a.status_id "
 						+ "WHERE c.user_id = ?")
-		List<Tuple> getNonAccreditedCourseDetailsByUserId(String user_id);
+		List<Tuple> getNonAccreditedCourseDetailsByUserId(String userId);
 		
 		@NativeQuery("SELECT "
 						+ "  a.id, "
 						+ "  a.enrolment_capacity, "
 						+ "  a.fees_per_trainee, "
 						+ "  e.certificate_level_id, "
-						+ "  a.programme_title AS course_name "
+						+ "  a.programme_title AS course_name, "
+						+ "  a.programme_type_id "
 						+ "FROM "
 						+ "  tbl_non_accredited_course_dtls a "
 						+ "  LEFT JOIN tbl_institute_registration_dtls c "
@@ -141,7 +142,7 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 						+ "    ON c.registration_no = d.user_id "
 						+ "WHERE a.status_id = 57 "
 						+ "  AND d.user_id = ?")
-		List<Tuple> getNonAccreditedApprovedCourseByUserId(String user_id);
+		List<Tuple> getNonAccreditedApprovedCourseByUserId(String userId);
 		
 		@NativeQuery("SELECT "
 						+ "  a.curriculum_id "
@@ -151,7 +152,7 @@ public interface NonAccreditedCourseRepository extends JpaRepository<NonAccredit
 						+ "    ON a.institute_id = b.institute_id "
 						+ "WHERE a.curriculum_id = ? "
 						+ "  AND b.registration_no = ?")
-		List<Tuple> curriculumAlreadyExist(Long curriculumId, String registration_no);
+		List<Tuple> curriculumAlreadyExist(Long curriculumId, String registrationNo);
 		
 		
 	

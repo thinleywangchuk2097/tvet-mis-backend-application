@@ -50,10 +50,10 @@ public class PublicPageRepository {
 				+ "  END AS course_name "
 				+ "FROM "
 				+ "  tbl_programme_announcement_dtls a "
-				+ "  LEFT JOIN tbl_curriculum_development cd "
-				+ "  ON cd.programme_id = a.programme_id "
 				+ "  LEFT JOIN tbl_accredited_course_dtls b "
-				+ "    ON cd.id = b.curriculum_id "
+				+ "    ON a.programme_id = b.id "
+				+ "  LEFT JOIN tbl_curriculum_development cd "
+				+ "    ON b.curriculum_id = cd.id "
 				+ "  LEFT JOIN tbl_ncs_app_dtls c "
 				+ "    ON c.id = cd.programme_id "
 				+ "  LEFT JOIN tbl_non_accredited_course_dtls nc "
@@ -67,7 +67,8 @@ public class PublicPageRepository {
 				+ "  LEFT JOIN tbl_dzongkhag_master g "
 				+ "    ON g.id = a.training_location_id "
 				+ "WHERE a.service_id IN (37, 38, 39) "
-				+ "  AND a.course_end_date >= CURRENT_DATE";
+				+ "  AND a.course_end_date >= CURRENT_DATE "
+				+ "  AND a.application_end_date < CURRENT_DATE";
 		return jdbcTemplate.queryForList(sql);	
 	}
 	
@@ -111,12 +112,12 @@ public class PublicPageRepository {
 				+ "  a.course_end_date "
 				+ "FROM "
 				+ "  tbl_programme_announcement_dtls a "
-				+ "  LEFT JOIN tbl_curriculum_development cd "
-				+ "    ON cd.programme_id = a.programme_id "
 				+ "  LEFT JOIN tbl_accredited_course_dtls b "
+				+ "    ON a.programme_id = b.id "
+				+ "  LEFT JOIN tbl_curriculum_development cd "
 				+ "    ON cd.id = b.curriculum_id "
 				+ "  LEFT JOIN tbl_ncs_app_dtls c "
-				+ "    ON c.id = a.programme_id "
+				+ "    ON c.id = cd.programme_id "
 				+ "  LEFT JOIN tbl_non_accredited_course_dtls nc "
 				+ "    ON a.programme_id = nc.id "
 				+ "  LEFT JOIN tbl_ncs_app_dtls d "

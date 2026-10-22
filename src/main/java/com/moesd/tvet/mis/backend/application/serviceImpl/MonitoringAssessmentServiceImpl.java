@@ -22,8 +22,6 @@ import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,16 +43,12 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	 
 	@Override
 	public List<ObjectNode> getInstituteTypeDropdown() {
-		List<Tuple> resultList = monitoringAssessmentRepository.getInstituteTypeDropdown();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(monitoringAssessmentRepository.getInstituteTypeDropdown());
 	}
 
 	@Override
-	public List<ObjectNode> getInstituteDropdown(String service_id) {
-		List<Tuple> resultList = monitoringAssessmentRepository.getInstituteDropdown(service_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getInstituteDropdown(String serviceId) {
+	    return objectTojson._toJson(monitoringAssessmentRepository.getInstituteDropdown(serviceId));
 	}
 
 	@Override
@@ -128,10 +122,8 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 	}
 
 	@Override
-	public List<ObjectNode> getMonitoringAssessment(String user_id) {
-		List<Tuple> resultList = monitoringAssessmentRepository.getMonitoringAssessment(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getMonitoringAssessment(String userId) {
+	    return objectTojson._toJson(monitoringAssessmentRepository.getMonitoringAssessment(userId));
 	}
 
 	@Override
@@ -260,16 +252,12 @@ public class MonitoringAssessmentServiceImpl implements MonitoringAssessmentServ
 
 	@Override
 	public List<ObjectNode> getMonitoringAssessmentByApplicationNo(String applicationNo) {
-		List<Tuple> resultList = monitoringAssessmentRepository.getMonitoringAssessmentByApplicationNo(applicationNo);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(
+	            monitoringAssessmentRepository.getMonitoringAssessmentByApplicationNo(applicationNo));
 	}
 
 	@Override
 	public List<ObjectNode> getInstitutesRenewalStatus(String registrationNo) {
-		List<Tuple> resultList = monitoringAssessmentRepository.getInstitutesRenewalStatus(registrationNo);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(monitoringAssessmentRepository.getInstitutesRenewalStatus(registrationNo));
 	}
-
 }

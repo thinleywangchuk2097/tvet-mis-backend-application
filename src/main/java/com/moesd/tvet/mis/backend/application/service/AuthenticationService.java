@@ -10,7 +10,7 @@ public interface AuthenticationService {
 	
 	ResponseEntity<?> register(UserRegisterRequest request);
 	
-	ResponseEntity<?> authenticate(AuthenticationRequest request);
+	ResponseEntity<?> authenticate(AuthenticationRequest request, HttpServletRequest httpRequest);
 	
 	ResponseEntity<?> authByBhutanNDI(AuthenticationRequest request);
 	

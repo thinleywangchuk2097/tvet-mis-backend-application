@@ -1,218 +1,332 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
-        <relativePath/>
-    </parent>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.1</version>
+		<relativePath />
+	</parent>
 
-    <groupId>com.moesd</groupId>
-    <artifactId>tvet-mis-backend-application</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+	<groupId>com.moesd</groupId>
+	<artifactId>tvet-mis-backend-application</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 
-    <name>tvet-mis-backend-application</name>
-    <description>TVET-MIS project for Spring Boot</description>
+	<name>tvet-mis-backend-application</name>
+	<description>TVET-MIS project for Spring Boot</description>
 
-    <properties>
-        <java.version>21</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<properties>
+		<java.version>21</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <jjwt.version>0.12.6</jjwt.version>
-        <commons-io.version>2.20.0</commons-io.version>
+		<jjwt.version>0.12.6</jjwt.version>
+		<commons-io.version>2.20.0</commons-io.version>
 
-        <!--
-            Jackson 2 override to patch CVE-2026-83557.
-            JJWT 0.12.6 pulls in Jackson 2.21.5, which is vulnerable.
-            Fixed in 2.21.6.
+		<!--
+            Jackson 2 override.
+            JJWT 0.12.6 pulls in Jackson 2.21.x, which is vulnerable.
+
+            Patched CVEs (from Trivy report):
+              - CVE-2026-83557 (earlier patch)
+              - CVE-2026-89407 (HIGH)
+              - CVE-2026-89425 (HIGH)
+              - CVE-2026-91776 (HIGH)
+              - CVE-2026-91777 (HIGH)
+
+            Fixed in 2.21.7 / 2.22.3 / 2.18.11.
+            Using 2.21.7 to stay on the same major/minor line.
         -->
-        <jackson2.version>2.21.6</jackson2.version>
-    </properties>
+		<jackson2.version>2.21.7</jackson2.version>
 
-    <dependencyManagement>
-        <dependencies>
-            <!--
+		<!--
+            Jackson 3 override.
+            Spring Boot 4.1.1 ships Jackson 3.1.5, which has new CVEs.
+
+            Patched CVEs:
+              - CVE-2026-68497, CVE-2026-19032, CVE-2026-83557 (initial patch)
+              - CVE-2026-89407 (HIGH)
+              - CVE-2026-89425 (HIGH)
+              - CVE-2026-91776 (HIGH)
+              - CVE-2026-91777 (HIGH)
+
+            Fixed in 3.1.7 / 3.2.3.
+            Using 3.1.7 to stay on the same major/minor line.
+        -->
+		<jackson3.version>3.1.7</jackson3.version>
+
+		<!--
+            Tomcat override to patch multiple CRITICAL CVEs identified by
+            OWASP Dependency-Check and Trivy scans:
+              - CVE-2026-65182 (Incorrect Authorization, CVSS 9.1)
+              - CVE-2026-65905 (Authentication Bypass, CVSS 9.8)
+              - CVE-2026-68525 (Incorrect Authorization, CVSS 9.1)
+              - CVE-2026-65637 (Improper Input Validation, CVSS 9.8)
+              - CVE-2026-65183 (TOCTOU Race Condition, CVSS 8.1)
+              - CVE-2026-66422 (Improper Authorization, CVSS 8.1)
+              - CVE-2026-68569 (Improper Authentication, CVSS 8.1)
+              - CVE-2026-65927 (Off-by-one Error, CVSS 7.5)
+              - CVE-2026-68763 (Resource Consumption, CVSS 7.5)
+              - CVE-2026-73180 (Insufficient Session Expiration, CVSS 6.8)
+              - CVE-2026-66299 (Resource Consumption, CVSS 5.3)
+
+            Spring Boot 4.1.1 pulls in Tomcat 11.0.24, which is vulnerable.
+            Fixed in 11.0.25.
+        -->
+		<tomcat.version>11.0.25</tomcat.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+
+			<!-- ==================== Jackson 2 Override ==================== -->
+			<!--
                 Jackson 2 override for JJWT's transitive dependency.
-                Fixes CVE-2026-83557 (path traversal via polymorphic typing).
+                Fixes all known HIGH-severity CVEs in Jackson 2.x.
             -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>2.21</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson2.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.21</version>
+			</dependency>
 
-    <dependencies>
+			<!-- ==================== Tomcat Override ==================== -->
+			<!--
+                Forces all Tomcat embed modules to the patched version.
+                This overrides the version inherited from spring-boot-starter-parent
+                and from spring-boot-starter-webmvc.
+            -->
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-core</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-websocket</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
-        <!-- Spring Boot Web MVC -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc</artifactId>
-        </dependency>
+	<dependencies>
 
-        <!-- Spring Data JPA -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
+		<!-- Spring Boot Web MVC -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
 
-        <!-- Spring Security -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+		<!-- Spring Data JPA -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
 
-        <!-- Spring Mail -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-        </dependency>
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
-        <!-- Spring REST Client -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-restclient</artifactId>
-        </dependency>
+		<!-- Spring Mail -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
-        <!--
+		<!-- Spring REST Client -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-restclient</artifactId>
+		</dependency>
+		<!-- Bhuatan NDI NATS -->
+		<dependency>
+			<groupId>io.nats</groupId>
+			<artifactId>jnats</artifactId>
+			<version>2.20.5</version>
+		</dependency>
+		<!--
             Jackson 3 (tools.jackson) is provided by Spring Boot 4.
             Jackson 2 (com.fasterxml.jackson) is brought in by jjwt-jackson
-            and is overridden to 2.21.6 above to patch CVE-2026-83557.
+            and is overridden to ${jackson2.version} above.
             Both coexist safely because they use different Java packages.
         -->
+		<dependency>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson3.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		<dependency>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson3.version}</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
 
-        <!-- ==================== JWT ==================== -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>${jjwt.version}</version>
-        </dependency>
+		<!-- ==================== JWT ==================== -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
 
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 
-        <!--
+		<!--
             jjwt-jackson is REQUIRED at runtime.
             JJWT uses ServiceLoader to find a Serializer implementation.
             Without this JAR, you get UnavailableImplementationException.
         -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>${jjwt.version}</version>
-            <scope>runtime</scope>
-        </dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 
-        <!-- Apache Commons IO -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-        </dependency>
+		<!-- Apache Commons IO -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+		</dependency>
 
-        <!-- Spring Boot DevTools -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
+		<!-- Spring Boot DevTools -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
 
-        <!-- MySQL -->
-        <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+		<!-- MySQL -->
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
 
-        <!-- Testing -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<!-- Testing -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Bucket4j — rate limiting for the login endpoint -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>8.17.0</version>
+		</dependency>
+	</dependencies>
 
-    </dependencies>
+	<build>
+		<plugins>
 
-    <build>
-        <plugins>
+			<!-- Maven Compiler -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 
-            <!-- Maven Compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
+			<!-- Spring Boot Maven Plugin -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 
-            <!-- Spring Boot Maven Plugin -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
+			<!-- Maven JAR Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.4.2</version><!--$NO-MVN-MAN-VER$-->
+			</plugin>
 
-            <!-- Maven JAR Plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version><!--$NO-MVN-MAN-VER$-->
-            </plugin>
+			<!-- OWASP Dependency-Check -->
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>12.1.8</version>
+				<configuration>
+					<suppressionFiles>
+						<suppressionFile>
+							${project.basedir}/dependency-check-suppressions.xml</suppressionFile>
+					</suppressionFiles>
+					<failBuildOnCVSS>9</failBuildOnCVSS>
+					<formats>
+						<format>HTML</format>
+						<format>XML</format>
+					</formats>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
-        </plugins>
-    </build>
+		</plugins>
+	</build>
 
 </project>

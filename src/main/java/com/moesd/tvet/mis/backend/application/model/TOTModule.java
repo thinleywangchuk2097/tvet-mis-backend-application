@@ -1,5 +1,7 @@
 package com.moesd.tvet.mis.backend.application.model;
 
+import java.util.List;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,11 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
 
 @Data
 @Entity
@@ -41,6 +45,8 @@ public class TOTModule {
 
 	@Column(name = "module_order")
 	private Integer moduleOrder;
+	
+	private String weightage;
 
 	// Many-to-One relationship
 	@ManyToOne
@@ -49,5 +55,11 @@ public class TOTModule {
 	)
 	
 	private TOTProgram totProgram;
+	
+	@Builder.Default
+	@OneToMany(mappedBy = "totModule", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<TOTCourseContent> totCourseContent = new ArrayList<>();
+	
+
 
 }

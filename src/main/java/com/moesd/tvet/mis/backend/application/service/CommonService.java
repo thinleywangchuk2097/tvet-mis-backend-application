@@ -38,11 +38,11 @@ public interface CommonService {
 	
 	List<ObjectNode> getAllCertificateLevels();
 	
-	List<ObjectNode> getCourseAnnouncementByApplicationNo(String application_no);
+	List<ObjectNode> getCourseAnnouncementByApplicationNo(String applicationNo);
 	
 	List<ObjectNode> getInstituteNameByInstituteId(String instituteId);
 	
-	List<ObjectNode> getReAssessmentAnnouncementByApplicationNo(String application_no);
+	List<ObjectNode> getReAssessmentAnnouncementByApplicationNo(String applicationNo);
 	
 	
 	

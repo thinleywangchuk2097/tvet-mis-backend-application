@@ -16,7 +16,6 @@ import com.moesd.tvet.mis.backend.application.model.StaffTrainingHistory;
 import com.moesd.tvet.mis.backend.application.repository.StaffManagementRepository;
 import com.moesd.tvet.mis.backend.application.service.ResourceManagementService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -334,8 +333,6 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 
     @Override
     public List<ObjectNode> getInstituteStaff(String instituteId) {
-        List<Tuple> resultList = staffManagementRepository.getInstituteStaff(instituteId);
-        List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-        return DtlsJson;
+        return objectTojson._toJson(staffManagementRepository.getInstituteStaff(instituteId));
     }
 }

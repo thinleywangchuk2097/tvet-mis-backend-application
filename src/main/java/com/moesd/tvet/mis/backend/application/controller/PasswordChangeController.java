@@ -22,7 +22,6 @@ public class PasswordChangeController {
 	@PostMapping("/changePassword")
 	 public ResponseEntity<ChangePasswordResponse>changeUserPassword(@AuthenticationPrincipal UserDetails userDetails,
 			  @RequestBody ChangePasswordRequest request) {
-	        System.out.println(request);
 	        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
 	            return ResponseEntity.badRequest()
 	                    .body(new ChangePasswordResponse(false, "The new password and confirmation password do not match. Please ensure both entries are identical and try again."));

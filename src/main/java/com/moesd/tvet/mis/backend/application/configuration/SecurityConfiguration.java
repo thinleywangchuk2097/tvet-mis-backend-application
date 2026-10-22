@@ -2,6 +2,7 @@ package com.moesd.tvet.mis.backend.application.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -24,23 +25,49 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http.csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults())
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("/api/v1/auth/**", "/api/v1/public/**",
-								"/api/v1/common/**")
-								.permitAll()
-								.requestMatchers("/api/v1/user/management/**")
-								.hasAnyAuthority("1", "2", "5", "6", "7", "8", "9",
-										"10", "11","12", "13", "14", "15",
-										"16", "17", "28", "30", "29", "21","23")
-								.requestMatchers("/api/v1/user/password/**")
-								.hasAuthority("1").anyRequest()
-								.authenticated())
+		return http
+				// CSRF disabled — stateless JWT authentication
+				.csrf(csrf -> csrf.disable())
+
+				// Uses the CorsConfigurationSource bean from ApplicationConfiguration
+				.cors(Customizer.withDefaults())
+
+				.authorizeHttpRequests(auth -> auth
+						// Only allow preflight (OPTIONS) on real API paths
+						.requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+
+						// Spring Boot error forwarding endpoint
+						.requestMatchers("/error").permitAll()
+
+						// Public API endpoints
+						.requestMatchers("/api/v1/auth/**", "/api/v1/public/**", "/api/v1/common/**").permitAll()
+
+						// User management — restricted to listed authorities
+						.requestMatchers("/api/v1/user/management/**")
+						.hasAnyAuthority("1", "2", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
+								"17", "28", "30", "29", "21", "23")
+						.requestMatchers("/api/v1/private/birms/payment/**")
+						.hasAnyAuthority("1", "7", "9", "22", "23", "11", "12")
+						// Password endpoints — admin only
+						.requestMatchers("/api/v1/user/password/**").hasAuthority("1")
+
+						// Everything else requires authentication
+						.anyRequest().authenticated())
+
+				// Stateless session — no HTTP session, no cookies
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
 				.authenticationProvider(authenticationProvider)
+
+				// JWT filter runs before username/password auth
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+				// Return 401 on authentication failure
 				.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-				})).build();
+				}))
+
+				.build();
 	}
+
 }

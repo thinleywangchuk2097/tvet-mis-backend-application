@@ -43,8 +43,8 @@ public class UserRoleManagementController {
 	
 	@GetMapping("/get-roles")
 	public ResponseEntity<List<ObjectNode>> getRoles() {
-	    List<ObjectNode> privileges = userRoleManagementService.getRoles();
-	    return ResponseEntity.ok(privileges);
+	    List<ObjectNode> getRoles = userRoleManagementService.getRoles();
+	    return ResponseEntity.ok(getRoles);
 	}
 	
 	@PostMapping("/create-user")
@@ -64,8 +64,8 @@ public class UserRoleManagementController {
 	
 	@GetMapping("/get-all-users")
 	public ResponseEntity<List<ObjectNode>> getAllUsers() {
-	    List<ObjectNode> privileges = userRoleManagementService.getAllUsers();
-	    return ResponseEntity.ok(privileges);
+	    List<ObjectNode> getAllUsers = userRoleManagementService.getAllUsers();
+	    return ResponseEntity.ok(getAllUsers);
 	}
 	
 	@GetMapping("/get-rec-users")
@@ -76,13 +76,13 @@ public class UserRoleManagementController {
 	
 	@GetMapping("/get-accreditor-users")
 	public ResponseEntity<List<ObjectNode>> getActiveAccreditorUsers() {
-	    List<ObjectNode> accreditorUsers = userRoleManagementService.getActiveAccreditorUsers();
-	    return ResponseEntity.ok(accreditorUsers);
+	    List<ObjectNode> getActiveAccreditorUsers = userRoleManagementService.getActiveAccreditorUsers();
+	    return ResponseEntity.ok(getActiveAccreditorUsers);
 	}
 	
 	@GetMapping("/get-assessors")
 	public ResponseEntity<List<ObjectNode>> getRegisteredAssessors() {
-	    List<ObjectNode> assessorUsers = userRoleManagementService.getRegisteredAssessors();
-	    return ResponseEntity.ok(assessorUsers);
+	    List<ObjectNode> getRegisteredAssessors = userRoleManagementService.getRegisteredAssessors();
+	    return ResponseEntity.ok(getRegisteredAssessors);
 	}
 }

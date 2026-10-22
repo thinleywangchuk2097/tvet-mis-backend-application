@@ -3,6 +3,7 @@ package com.moesd.tvet.mis.backend.application.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,24 +20,30 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/public/institute-proposal")
 public class InstituteProposalController {
-	
+
 	private final InstituteProposalService instituteProposalService;
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitInstituteProposal(@RequestBody InstituteProposaldto request) {
-		return(instituteProposalService.submitInstituteProposal(request));
+		return (instituteProposalService.submitInstituteProposal(request));
 	}
-	
+
 	@GetMapping("/get-institute-details/{application_no}")
-	public ResponseEntity<List<ObjectNode>> getInstituteDetails(@PathVariable String application_no){
-	    List<ObjectNode> instituteDetails = instituteProposalService.getInstituteDetails(application_no);
-	    return ResponseEntity.ok(instituteDetails);
+	public ResponseEntity<List<ObjectNode>> getInstituteDetails(@PathVariable("application_no") String applicationNo) {
+		List<ObjectNode> instituteDetails = instituteProposalService.getInstituteDetails(applicationNo);
+		return ResponseEntity.ok(instituteDetails);
 	}
-	
+
 	@PostMapping("/verify-institute-proposal")
 	public ResponseEntity<?> verifyInstituteProposal(@RequestBody InstituteProposaldto request) {
-		return(instituteProposalService.verifyInstituteProposal(request));
+		return (instituteProposalService.verifyInstituteProposal(request));
 	}
-	
-	
+
+	@PreAuthorize("hasAnyAuthority('7')")
+	@GetMapping("/get-applicant-details/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getApplicantDetails(@PathVariable("application_no") String applicationNo) {
+		List<ObjectNode> instituteDetails = instituteProposalService.getApplicantDetails(applicationNo);
+		return ResponseEntity.ok(instituteDetails);
+	}
+
 }

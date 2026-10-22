@@ -21,7 +21,7 @@ public interface OJTCompanyRepository extends JpaRepository<OJTCompany, Long>{
 					+ "FROM "
 					+ "  tbl_ojt_company_dtls a "
 					+ "WHERE a.institute_id = ?")
-	List<Tuple> getCompanyByInstituteId(String institute_id);
+	List<Tuple> getCompanyByInstituteId(String instituteId);
 	
 	
 	

@@ -1,7 +1,7 @@
 package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,8 +32,8 @@ import com.moesd.tvet.mis.backend.application.service.CourseEnrollmentTraineeApp
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
+import com.moesd.tvet.mis.backend.application.utility.GenerateCertificateNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +46,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	private final CourseEnrollmentTraineeAppRepository courseEnrollmentTraineeAppRepository;
 	private final CourseEnrollmentAppRepository courseEnrollmentAppRepository;
 	private final GenerateApplicationNumber generateApplicationNumber;
+	private final GenerateCertificateNumber generateCertificateNumber; 
 	private final ServiceMasterRepository serviceMasterRepository;
 	private final RoleServiceRepository roleServiceRepository;
 	private final DocumentFileUploadService documentFileUploadService;
@@ -53,7 +54,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	private final WorkTaskFlowService workTaskFlowService;
 	private final DropdownManagementRepository dropdownManagementRepository;
     private final AssessorTaskAssignmentRepository assessorTaskAssignmentRepository;
-    
+    private static final String PROGRAMME_NOT_FOUND = "Programme not found";
     
 	@Override
 	@Transactional
@@ -74,7 +75,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			// Generate application number
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(request.getServiceId());
 			CourseEnrollmentApp course = courseEnrollmentAppRepository.findByApplicationNo(request.getApplicationNo())
-					.orElseThrow(() -> new RuntimeException("Course not found"));
+					.orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 
 			// Build entity
 			CourseEnrollmentTraineeApp trainee = CourseEnrollmentTraineeApp.builder().applicationNo(applicationNo)
@@ -125,11 +126,9 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	}
 
 	@Override
-	public List<ObjectNode> getCourseAppliedTraineesByApplicationNo(String application_no) {
-		List<Tuple> resultList = courseEnrollmentTraineeAppRepository
-				.getCourseAppliedTraineesByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getCourseAppliedTraineesByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(
+	            courseEnrollmentTraineeAppRepository.getCourseAppliedTraineesByApplicationNo(applicationNo));
 	}
 
 	@Override
@@ -157,7 +156,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			//new added
 			CourseEnrollmentApp course = courseEnrollmentAppRepository
 						.findByApplicationNo(request.getApplicationNo())
-						.orElseThrow(() -> new RuntimeException("Course not found"));
+						.orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 			//this status is being used while trainee selection
 			course.setApplicationStatusId(request.getStatusId());
 			//ended new added line
@@ -171,7 +170,6 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 
 			// If traineeIds provided → filter
 			if (request.getTraineeIds() != null && !request.getTraineeIds().isEmpty()) {
-				System.out.println("inside getTraineeIds");
 				// Get initiated statusId
 				Integer taskStatusId = dropdownManagementRepository.findChildById(18)
 						.orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
@@ -252,10 +250,15 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 			// Validate required fields
 			CourseEnrollmentApp course = courseEnrollmentAppRepository
 					.findByApplicationNo(request.getApplicationNo())
-					.orElseThrow(() -> new RuntimeException("Course not found"));
+					.orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 			//this status is being used while trainee selection
 			course.setApplicationStatusId(request.getStatusId());
-
+			//set CA date
+			if (request.getCaStartDate() != null && request.getCaEndDate() != null) {
+			    course.setCaStartDate(request.getCaStartDate());
+			    course.setCaEndDate(request.getCaEndDate());
+			}
+			
 			List<CourseEnrollmentTraineeApp> trainees = courseEnrollmentTraineeAppRepository
 					.findByApplicationNo(request.getApplicationNo());
 
@@ -278,6 +281,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getTheoryAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));;
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);
@@ -286,6 +291,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getTheoryAssessment() == 91 && dto.getPracticalAssessment() == 91) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);
@@ -293,9 +300,6 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 						}
 
 					}
-					// if (dto.getPracticalAssessment() != null) {
-					// trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
-					// }
 				}
 				// Save all updates
 				courseEnrollmentTraineeAppRepository.saveAll(trainees);
@@ -318,6 +322,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getVivaAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);
@@ -326,6 +332,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getVivaAssessment() == 91 && dto.getPracticalAssessment() == 91) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);
@@ -374,10 +382,9 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	}
 
 	@Override
-	public List<ObjectNode> getFailedTraineeDetails(String user_id, String course_id, Integer certification_level_id) {
-		List<Tuple> resultList = courseEnrollmentTraineeAppRepository.getFailedTraineeDetails(user_id, course_id, certification_level_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId) {
+	    return objectTojson._toJson(
+	            courseEnrollmentTraineeAppRepository.getFailedTraineeDetails(userId, courseId, certificationLevelId));
 	}
 
 	@Override
@@ -411,166 +418,186 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 		}
 	}
 
+
+	
 	@Override
 	public ResponseEntity<?> submitReassessmentTrainees(SelectedTraineedto request) {
-		try {
-			// Validate required fields
-			if (request.getServiceId() == null) {
-				log.error("Validation failed: serviceId is required");
-				throw new RecordNotFoundException("serviceId is required");
-			}
-			if (request.getAssignedRoleId() == null) {
-				log.error("Validation failed: assignedRoleId is required");
-				throw new RecordNotFoundException("assigned RoleId is required");
-			}
-			if (request.getStatusId() == null) {
-				log.error("Validation failed: statusId is required");
-				throw new RecordNotFoundException("statusId is required");
-			}
+	    try {
+	        validateRequest(request);
 
-			Integer locationId = 14;
+	        List<CourseEnrollmentTraineeApp> existingTrainees = fetchFailedTrainees(request);
+	        markAsReassessment(existingTrainees);
+	        updateCourseStatus(request);
+	        ensureTraineesExist(existingTrainees, request);
 
-			// Fetch existing failed trainees
-			List<CourseEnrollmentTraineeApp> existingTrainees = courseEnrollmentTraineeAppRepository
-					.getFailedTraineeReassessment(request.getUserId(), request.getProgrammeId(), request.getCertificationLevelId());
-			
-			// Update resultStatusId for each trainee newly added
-			if (existingTrainees != null && !existingTrainees.isEmpty()) {
-			    Integer newResultStatusId = 141; //Re Assessment statusId
-			    
-			    for (CourseEnrollmentTraineeApp trainee : existingTrainees) {
-			        trainee.setResultStatusId(newResultStatusId);
-			    }
-			    
-			    // Save all updated trainees
-			    courseEnrollmentTraineeAppRepository.saveAll(existingTrainees);
-			}
-			//newly ended here 
-			
-			CourseEnrollmentApp course = courseEnrollmentAppRepository.findByApplicationNo(request.getApplicationNo())
-					.orElseThrow(() -> new RuntimeException("Programme not found"));
-			
-			//new added 
-			course.setApplicationStatusId(request.getStatusId());
-			courseEnrollmentAppRepository.save(course);
-			//ends
-			
-			if (existingTrainees.isEmpty()) {
-				throw new RecordNotFoundException("No trainees found for applicationNo: " + request.getApplicationNo());
-			}
+	        createReassessmentApplications(request, existingTrainees);
+	        updateInternalAssessments(request, existingTrainees);
 
-			// Handle new reassessment trainees (creating new applications)
-			if (request.getTraineeIds() != null && !request.getTraineeIds().isEmpty()) {
-				Integer taskStatusId = dropdownManagementRepository.findChildById(18)
-						.orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
+	        return ResponseEntity.status(HttpStatus.CREATED)
+	                .body(Map.of("status", HttpStatus.CREATED.value()));
 
-				List<CourseEnrollmentTraineeApp> newTrainees = new ArrayList<>();
+	    } catch (RecordNotFoundException e) {
+	        log.error("Record not found: {}", e.getMessage(), e);
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                .body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
+	    } catch (Exception e) {
+	        log.error("Error submitting trainees: {}", e.getMessage(), e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("message", "Failed to submit trainees course",
+	                        "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+	    }
+	}
 
-				for (TraineeStatusdto dto : request.getTraineeIds()) {
-					// Verify trainee exists in failed list
-					CourseEnrollmentTraineeApp existingTrainee = existingTrainees.stream()
-							.filter(t -> t.getId().equals(dto.getTraineeId())).findFirst().orElseThrow(
-									() -> new RuntimeException("Trainee not found with ID: " + dto.getTraineeId()));
+	private void validateRequest(SelectedTraineedto request) {
+	    if (request.getServiceId() == null) {
+	        log.error("Validation failed: serviceId is required");
+	        throw new RecordNotFoundException("serviceId is required");
+	    }
+	    if (request.getAssignedRoleId() == null) {
+	        log.error("Validation failed: assignedRoleId is required");
+	        throw new RecordNotFoundException("assigned RoleId is required");
+	    }
+	    if (request.getStatusId() == null) {
+	        log.error("Validation failed: statusId is required");
+	        throw new RecordNotFoundException("statusId is required");
+	    }
+	}
 
-					// Generate application number
-					String applicationNo = generateApplicationNumber.generateApplicationNumber(43);
+	private List<CourseEnrollmentTraineeApp> fetchFailedTrainees(SelectedTraineedto request) {
+	    return courseEnrollmentTraineeAppRepository.getFailedTraineeReassessment(
+	            request.getUserId(), request.getProgrammeId(), request.getCertificationLevelId());
+	}
 
-					// Create new reassessment application using data from existing trainee
-					CourseEnrollmentTraineeApp newTrainee = CourseEnrollmentTraineeApp.builder()
-							.applicationNo(applicationNo).applicantName(existingTrainee.getApplicantName())
-							.emailId(existingTrainee.getEmailId()).mobileNo(existingTrainee.getMobileNo())
-							.statusId(dto.getStatusId()).course(course)
-							.parentFailedId(dto.getTraineeId())
-							.internalAssessment(existingTrainee.getInternalAssessment())
-							.practicalAssessment(existingTrainee.getPracticalAssessment())
-							.vivaAssessment(existingTrainee.getVivaAssessment())
-							.theoryAssessment(existingTrainee.getTheoryAssessment())
-							.reAssessmentNo(existingTrainee.getReAssessmentNo() != null
-									? existingTrainee.getReAssessmentNo() + 1
-									: 1)
-							.academicQualificationId(existingTrainee.getAcademicQualificationId())
-							.cidNo(existingTrainee.getCidNo()).referenceNo(existingTrainee.getReferenceNo())
-							.dob(existingTrainee.getDob()).genderId(existingTrainee.getGenderId())
-							.traineeTypeId(existingTrainee.getTraineeTypeId())
-							.employmentStatusId(existingTrainee.getEmploymentStatusId())
-							.presentDzongkhagId(existingTrainee.getPresentDzongkhagId())
-							.presentGewogId(existingTrainee.getPresentGewogId()).createdAt(new java.util.Date())
-							.build();
+	private void markAsReassessment(List<CourseEnrollmentTraineeApp> trainees) {
+	    if (trainees == null || trainees.isEmpty()) {
+	        return;
+	    }
+	    Integer reassessmentStatusId = 141;
+	    trainees.forEach(t -> t.setResultStatusId(reassessmentStatusId));
+	    courseEnrollmentTraineeAppRepository.saveAll(trainees);
+	}
 
-					newTrainees.add(newTrainee);
-				}
+	private void updateCourseStatus(SelectedTraineedto request) {
+	    CourseEnrollmentApp course = courseEnrollmentAppRepository
+	            .findByApplicationNo(request.getApplicationNo())
+	            .orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
+	    course.setApplicationStatusId(request.getStatusId());
+	    courseEnrollmentAppRepository.save(course);
+	}
 
-				// Save all new trainees
-				courseEnrollmentTraineeAppRepository.saveAll(newTrainees);
+	private void ensureTraineesExist(List<CourseEnrollmentTraineeApp> trainees, SelectedTraineedto request) {
+	    if (trainees.isEmpty()) {
+	        throw new RecordNotFoundException("No trainees found for applicationNo: " + request.getApplicationNo());
+	    }
+	}
 
-				// Create workflow
-				WorkFlowList workflow = workTaskFlowService.createWorkflow(request.getApplicationNo(),
-						request.getCourseName(), request.getServiceId(), request.getStatusId(),
-						request.getAssignedRoleId(), request.getRemarks());
+	private void createReassessmentApplications(SelectedTraineedto request,
+	        List<CourseEnrollmentTraineeApp> existingTrainees) {
+	    if (request.getTraineeIds() == null || request.getTraineeIds().isEmpty()) {
+	        return;
+	    }
 
-				// Create task flow
-				workTaskFlowService.createTaskFlow(request.getApplicationNo(), taskStatusId,
-						request.getAssignedRoleId(), request.getAssignedUserId(), workflow, request.getRemarks(),
-						locationId);
-			}
+	    Integer taskStatusId = dropdownManagementRepository.findChildById(18)
+	            .orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
 
-			// Handle internal assessment updates for existing trainees
-			if (request.getTraineeInternalAssessments() != null && !request.getTraineeInternalAssessments().isEmpty()) {
-				log.info("Updating internal assessments for existing trainees");
-				
-				Integer taskStatusId = dropdownManagementRepository.findChildById(18)
-						.orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
+	    CourseEnrollmentApp course = courseEnrollmentAppRepository
+	            .findByApplicationNo(request.getApplicationNo())
+	            .orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 
-				for (TraineeInternaldto dto : request.getTraineeInternalAssessments()) {
-					CourseEnrollmentTraineeApp trainee = existingTrainees.stream()
-							.filter(t -> t.getId().equals(dto.getTraineeId())).findFirst().orElseThrow(
-									() -> new RuntimeException("Trainee not found with ID: " + dto.getTraineeId()));
+	    List<CourseEnrollmentTraineeApp> newTrainees = request.getTraineeIds().stream()
+	            .map(dto -> buildReassessmentTrainee(dto, existingTrainees, course))
+	            .toList();
 
-					trainee.setInternalAssessment(String.valueOf(dto.getInternalAssessment()));
-				}
+	    courseEnrollmentTraineeAppRepository.saveAll(newTrainees);
 
-				// Save all updated trainees
-				courseEnrollmentTraineeAppRepository.saveAll(existingTrainees);
+	    WorkFlowList workflow = workTaskFlowService.createWorkflow(
+	            request.getApplicationNo(), request.getCourseName(), request.getServiceId(),
+	            request.getStatusId(), request.getAssignedRoleId(), request.getRemarks());
 
-				// Fetch next role
-				RoleService roleService = roleServiceRepository
-						.getNextAssignedRole(request.getAssignedRoleId(), request.getServiceId(), request.getStatusId())
-						.orElseThrow(() -> new RecordNotFoundException("Next assigned role not found"));
+	    workTaskFlowService.createTaskFlow(request.getApplicationNo(), taskStatusId,
+	            request.getAssignedRoleId(), request.getAssignedUserId(), workflow,
+	            request.getRemarks(), 14);
+	}
 
-				workTaskFlowService.updateWorkflow(request.getApplicationNo(), request.getStatusId(),
-						request.getAssignedRoleId(), null, request.getRemarks(), request.getServiceId(), null);
+	private CourseEnrollmentTraineeApp buildReassessmentTrainee(TraineeStatusdto dto,
+	        List<CourseEnrollmentTraineeApp> existingTrainees, CourseEnrollmentApp course) {
+	    CourseEnrollmentTraineeApp existing = findTrainee(existingTrainees, dto.getTraineeId());
 
-				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
-						roleService.getNextRoleId(), null, request.getRemarks());
-			}
+	    return CourseEnrollmentTraineeApp.builder()
+	            .applicationNo(generateApplicationNumber.generateApplicationNumber(43))
+	            .applicantName(existing.getApplicantName())
+	            .emailId(existing.getEmailId())
+	            .mobileNo(existing.getMobileNo())
+	            .statusId(dto.getStatusId())
+	            .course(course)
+	            .parentFailedId(dto.getTraineeId())
+	            .internalAssessment(existing.getInternalAssessment())
+	            .practicalAssessment(existing.getPracticalAssessment())
+	            .vivaAssessment(existing.getVivaAssessment())
+	            .theoryAssessment(existing.getTheoryAssessment())
+	            .reAssessmentNo(existing.getReAssessmentNo() != null
+	                    ? existing.getReAssessmentNo() + 1 : 1)
+	            .academicQualificationId(existing.getAcademicQualificationId())
+	            .cidNo(existing.getCidNo())
+	            .referenceNo(existing.getReferenceNo())
+	            .dob(existing.getDob())
+	            .genderId(existing.getGenderId())
+	            .traineeTypeId(existing.getTraineeTypeId())
+	            .employmentStatusId(existing.getEmploymentStatusId())
+	            .presentDzongkhagId(existing.getPresentDzongkhagId())
+	            .presentGewogId(existing.getPresentGewogId())
+	            .createdAt(new java.util.Date())
+	            .build();
+	}
 
-			return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("status", HttpStatus.CREATED.value()));
+	private void updateInternalAssessments(SelectedTraineedto request,
+	        List<CourseEnrollmentTraineeApp> existingTrainees) {
+	    if (request.getTraineeInternalAssessments() == null
+	            || request.getTraineeInternalAssessments().isEmpty()) {
+	        return;
+	    }
 
-		} catch (RecordNotFoundException e) {
-			log.error("Record not found: {}", e.getMessage(), e);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
-		} catch (Exception e) {
-			log.error("Error submitting trainees: {}", e.getMessage(), e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to submit trainees course", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
-		}
+	    log.info("Updating internal assessments for existing trainees");
+
+	    Integer taskStatusId = dropdownManagementRepository.findChildById(18)
+	            .orElseThrow(() -> new RecordNotFoundException("Initiated status not found"));
+
+	    request.getTraineeInternalAssessments().forEach(dto -> {
+	        CourseEnrollmentTraineeApp trainee = findTrainee(existingTrainees, dto.getTraineeId());
+	        trainee.setInternalAssessment(String.valueOf(dto.getInternalAssessment()));
+	    });
+
+	    courseEnrollmentTraineeAppRepository.saveAll(existingTrainees);
+
+	    RoleService roleService = roleServiceRepository
+	            .getNextAssignedRole(request.getAssignedRoleId(), request.getServiceId(), request.getStatusId())
+	            .orElseThrow(() -> new RecordNotFoundException("Next assigned role not found"));
+
+	    workTaskFlowService.updateWorkflow(request.getApplicationNo(), request.getStatusId(),
+	            request.getAssignedRoleId(), null, request.getRemarks(), request.getServiceId(), null);
+
+	    workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
+	            roleService.getNextRoleId(), null, request.getRemarks());
+	}
+
+	private CourseEnrollmentTraineeApp findTrainee(List<CourseEnrollmentTraineeApp> trainees, Long traineeId) {
+	    return trainees.stream()
+	            .filter(t -> t.getId().equals(traineeId))
+	            .findFirst()
+	            .orElseThrow(() -> new RuntimeException("Trainee not found with ID: " + traineeId));
+	}
+	
+
+	@Override
+	public List<ObjectNode> getCourseAppliedTraineesReAssessmentByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(courseEnrollmentTraineeAppRepository
+	            .getCourseAppliedTraineesReAssessmentByApplicationNo(applicationNo));
 	}
 
 	@Override
-	public List<ObjectNode> getCourseAppliedTraineesReAssessmentByApplicationNo(String application_no) {
-		List<Tuple> resultList = courseEnrollmentTraineeAppRepository
-				.getCourseAppliedTraineesReAssessmentByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
-	}
-
-	@Override
-	public List<ObjectNode> fetchAssignedAssessors(String application_no) {
-		List<Tuple> resultList = courseEnrollmentTraineeAppRepository
-				.fetchAssignedAssessors(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> fetchAssignedAssessors(String applicationNo) {
+	    return objectTojson._toJson(
+	            courseEnrollmentTraineeAppRepository.fetchAssignedAssessors(applicationNo));
 	}
 
 	@Override
@@ -578,7 +605,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 
 	    CourseEnrollmentTraineeApp trainee = courseEnrollmentTraineeAppRepository
 	            .removeTraineeFromSelectedProgramme(request.getTraineeId())
-	            .orElseThrow(() -> new RuntimeException("Course not found"));
+	            .orElseThrow(() -> new RuntimeException(PROGRAMME_NOT_FOUND));
 	    // This status is being used while trainee selection
 	    trainee.setStatusId(request.getStatusId());
 	    trainee.setUpdatedBy(request.getUpdatedBy());

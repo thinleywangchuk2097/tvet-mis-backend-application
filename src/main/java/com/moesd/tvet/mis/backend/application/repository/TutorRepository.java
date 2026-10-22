@@ -14,7 +14,7 @@ public interface TutorRepository extends JpaRepository<Tutor, Long>{
 			+ "  tbl_tutor_dtls a "
 			+ "WHERE a.status_id = 1 "
 			+ "  AND a.institute_id = ?")
-	List<Tuple> getAllActiveTutors(Integer institute_id);
+	List<Tuple> getAllActiveTutors(String institute_id);
 	
 	@NativeQuery("SELECT "
 			+ "  b.citizen_id, "
@@ -27,6 +27,6 @@ public interface TutorRepository extends JpaRepository<Tutor, Long>{
 			+ "  LEFT JOIN tbl_tutor_dtls b "
 			+ "    ON a.tutor_id = b.id "
 			+ "    WHERE a.institute_id =? AND a.subject_id=?")
-	List<Tuple> getTutorBySubjectId(Integer institute_id, Integer subject_id);
+	List<Tuple> getTutorBySubjectId(Integer instituteId, Integer subjectId);
 	
 }

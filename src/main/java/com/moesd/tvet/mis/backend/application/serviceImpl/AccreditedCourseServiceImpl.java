@@ -33,7 +33,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -49,8 +48,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	private final ObjectToJson objectTojson;
 	private final RecMemberTaskAssignmentRepository recMemberTaskAssignmentRepository;
 	private final AccreditorTaskAssignmentRepository accreditorTaskAssignmentRepository;
-	
-	
+
 	@Override
 	public ResponseEntity<?> registerAccreditedCourse(AccreditedCoursedto request) {
 		try {
@@ -78,31 +76,21 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 
 			// Build main entity
 			AccreditedCourse course = AccreditedCourse.builder().applicationNo(applicationNo)
-					.instituteId(request.getInstituteId())
-					.curriculumId(request.getCurriculumId()).serviceId(serviceId)
-					.feesPerTrainee(request.getFeesPerTrainee())
-					.enrolmentCapacity(request.getEnrolmentCapacity())
-					.LeadTrainerCidNo(request.getLeadTrainerCidNo())
-					.leadTrainerName(request.getLeadTrainerName())
-					.genderId(request.getGenderId())
-					.professionalExperience(request.getProfessionalExperience())
-					.qualificationId(request.getQualificationId())
-					.registration_date(request.getRegistration_date())
-					.validity_date(request.getValidity_date())
-					.statusId(request.getStatusId())
-					.createdBy(request.getCreatedBy())
-					.updatedBy(request.getUpdatedBy())
-					.createdAt(new java.util.Date())
+					.instituteId(request.getInstituteId()).curriculumId(request.getCurriculumId()).serviceId(serviceId)
+					.feesPerTrainee(request.getFeesPerTrainee()).enrolmentCapacity(request.getEnrolmentCapacity())
+					.leadTrainerCidNo(request.getLeadTrainerCidNo()).leadTrainerName(request.getLeadTrainerName())
+					.genderId(request.getGenderId()).professionalExperience(request.getProfessionalExperience())
+					.qualificationId(request.getQualificationId()).registration_date(request.getRegistration_date())
+					.validity_date(request.getValidity_date()).statusId(request.getStatusId())
+					.createdBy(request.getCreatedBy()).updatedBy(request.getUpdatedBy()).createdAt(new java.util.Date())
 					.updatedAt(new java.util.Date()).build();
-			// Build AccreditedCourseQualityStandardResponse that were added while course add 
+			// Build AccreditedCourseQualityStandardResponse that were added while course
+			// add
 			if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
-				List<AccreditedCourseQualityStandardResponse> qualitystandards = request.getQualityStandards()
-						.stream()
+				List<AccreditedCourseQualityStandardResponse> qualitystandards = request.getQualityStandards().stream()
 						.map(qualitystandardsDto -> AccreditedCourseQualityStandardResponse.builder()
 								.standardId(qualitystandardsDto.getStandardId())
-								.responseId(qualitystandardsDto.getResponseId())
-								.accreditedCourse(course)
-								.build())
+								.responseId(qualitystandardsDto.getResponseId()).accreditedCourse(course).build())
 						.collect(Collectors.toList());
 				course.setQualityStandardResponses(qualitystandards);
 			}
@@ -130,26 +118,21 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			return ResponseEntity.status(201).body(java.util.Map.of("applicationNo", applicationNo, "id", saved.getId(),
 					"status", 201, "message", "Accredited course submitted successfully"));
 
-		}  catch (Exception e) {
-	        log.error("Failed to submit accredited course", e);  // Log for debugging
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Failed to submit accredited course");  // User-friendly only
-	    }
+		} catch (Exception e) {
+			log.error("Failed to submit accredited course", e); // Log for debugging
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to submit accredited course"); // User-friendly
+																														// only
+		}
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedCourseByApplicationNo(String application_no) {
-		List<Tuple> resultList = accreditedCourseRepository
-				.findByInstituteAccreditedCourseApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedCourseByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(accreditedCourseRepository.findByInstituteAccreditedCourseApplicationNo(applicationNo));
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedCourseDetailsByUserId(String user_id) {
-		List<Tuple> resultList = accreditedCourseRepository.getAccreditedCourseDetailsByUserId(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedCourseDetailsByUserId(String userId) {
+	    return objectTojson._toJson(accreditedCourseRepository.getAccreditedCourseDetailsByUserId(userId));
 	}
 
 	@Override
@@ -171,15 +154,14 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
-			Integer statusId = request.getStatusId();// workflow statusId
+			Integer statusId = request.getStatusId();
 			String actorId = String.valueOf(request.getUpdatedBy());
-			// Integer locationId = 14;
 			// Get task status
 			Integer taskStatusId;
 			if (statusId == 57 || statusId == 126) {
 				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
-			}else {
+			} else {
 				taskStatusId = dropdownManagementRepository.findChildById(18) // initiated taskId
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 			}
@@ -198,86 +180,69 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 					.orElseThrow(() -> new RecordNotFoundException(
 							"Non Accredited Course not found with applicationNo: " + request.getApplicationNo()));
 
-			// Update InstituteRegistration entity
+			// Update entity
 			existingAccreditedCourse.setStatusId(request.getStatusId());
 			existingAccreditedCourse.setUpdatedAt(new java.util.Date());
 			existingAccreditedCourse.setUpdatedBy(request.getUpdatedBy());
-			if(statusId == 126) {
+			existingAccreditedCourse.setEnrolmentCapacity(request.getEnrolmentCapacity());		
+			if (statusId == 126) {
 				existingAccreditedCourse.setRenewalDate(LocalDateTime.now().plusYears(1));
 			}
-			//Update ONLY existing records
-	        if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
-	            
-	            // Get existing quality standards for this registration
-	            List<AccreditedCourseQualityStandardResponse> existingStandards = 
-	            		existingAccreditedCourse.getQualityStandardResponses();
-	           
-	            if (existingStandards != null && !existingStandards.isEmpty()) {
-	                Map<Long, AccreditedCourseQualityStandardResponse> existingMap = 
-	                    existingStandards.stream()
-	                        .collect(Collectors.toMap(
-	                        		AccreditedCourseQualityStandardResponse::getStandardId,
-	                            standard -> standard
-	                        ));
-	                
-	                // Update only existing quality standards
-	                for (var qualityDto : request.getQualityStandards()) {
-	                    Long standardId = qualityDto.getStandardId();
-	                    AccreditedCourseQualityStandardResponse existingStandard = existingMap.get(standardId);
-	                    
-	                    if (existingStandard != null) {
-	                        // Update only responseId and remarks
-	                        existingStandard.setResponseId(qualityDto.getResponseId());
-	                        existingStandard.setRemarks(qualityDto.getRemarks());
-	                       
-	                    } else {
-	                        System.out.println("Quality standard with standardId " + standardId + " not found, skipping");
-	                    }
-	                }
-	               
-	            }
-	        }
+			// Update ONLY existing records
+			if (request.getQualityStandards() != null && !request.getQualityStandards().isEmpty()) {
+
+				// Get existing quality standards for this registration
+				List<AccreditedCourseQualityStandardResponse> existingStandards = existingAccreditedCourse
+						.getQualityStandardResponses();
+
+				if (existingStandards != null && !existingStandards.isEmpty()) {
+					Map<Long, AccreditedCourseQualityStandardResponse> existingMap = existingStandards.stream()
+							.collect(Collectors.toMap(AccreditedCourseQualityStandardResponse::getStandardId,
+									standard -> standard));
+
+					// Update only existing quality standards
+					for (var qualityDto : request.getQualityStandards()) {
+						Long standardId = qualityDto.getStandardId();
+						AccreditedCourseQualityStandardResponse existingStandard = existingMap.get(standardId);
+
+						if (existingStandard != null) {
+							// Update only responseId and remarks
+							existingStandard.setResponseId(qualityDto.getResponseId());
+							existingStandard.setRemarks(qualityDto.getRemarks());
+
+						} else {
+							log.warn("Quality standard with standardId {} not found, skipping", standardId);
+						}
+					}
+
+				}
+			}
 			// Save the updated registration
 			AccreditedCourse savedRegistration = accreditedCourseRepository.save(existingAccreditedCourse);
 
-			//starts
-			
-			//save accreditors
+			// Save accreditor
 			if (request.getAssignedAccreditors() != null && !request.getAssignedAccreditors().isEmpty()) {
-
-			    List<AccreditorTaskAssignment> assignments = request.getAssignedAccreditors()
-			            .stream()
-			            .map(accreditor -> AccreditorTaskAssignment.builder()
-			                    .userId(accreditor.getUserId())
-			                    .ApplicationNo(request.getApplicationNo())
-			                    .serviceId(serviceId)
-			                    .build())
-			            .toList();
-
-			    accreditorTaskAssignmentRepository.saveAll(assignments);
+				List<AccreditorTaskAssignment> assignments = request.getAssignedAccreditors().stream()
+						.map(accreditor -> AccreditorTaskAssignment.builder().userId(accreditor.getUserId())
+								.ApplicationNo(request.getApplicationNo()).serviceId(serviceId).build())
+						.toList();
+				accreditorTaskAssignmentRepository.saveAll(assignments);
 			}
-			//save REC members and its assignment to task
+			// save REC members and its assignment to task
 			if (request.getAssignedRecs() != null && !request.getAssignedRecs().isEmpty()) {
-				List<RecMemberTaskAssignment> assignments = request.getAssignedRecs()
-			            .stream()
-			            .map(dto -> RecMemberTaskAssignment.builder()
-			                    .userId(dto.getUserId())
-			                    .ApplicationNo(request.getApplicationNo())
-			                    .serviceId(serviceId)
-			                    .build())
-			            .toList();
+				List<RecMemberTaskAssignment> assignments = request.getAssignedRecs().stream()
+						.map(dto -> RecMemberTaskAssignment.builder().userId(dto.getUserId())
+								.ApplicationNo(request.getApplicationNo()).serviceId(serviceId).build())
+						.toList();
 
-			    recMemberTaskAssignmentRepository.saveAll(assignments);
-				
-				List<String> userIds = request.getAssignedRecs().stream()
-				        .map(AssignedRecsDto::getUserId)
-				        .filter(Objects::nonNull)
-				        .filter(id -> !id.trim().isEmpty())
-				        .collect(Collectors.toList());
+				recMemberTaskAssignmentRepository.saveAll(assignments);
+
+				List<String> userIds = request.getAssignedRecs().stream().map(AssignedRecsDto::getUserId)
+						.filter(Objects::nonNull).filter(id -> !id.trim().isEmpty()).collect(Collectors.toList());
 
 				// Add current userId only if it is not null
 				if (request.getUserId() != null) {
-				    userIds.add(String.valueOf(request.getUserId()));
+					userIds.add(String.valueOf(request.getUserId()));
 				}
 
 				String assignedRecString = String.join(",", userIds);
@@ -287,7 +252,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 
 				// update task flow
 				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId,
-						roleService.getNextRoleId(),assignedRecString, request.getRemarks());
+						roleService.getNextRoleId(), assignedRecString, request.getRemarks());
 			} else {
 				workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId,
 						request.getUserId(), request.getRemarks(), serviceId, null);
@@ -312,34 +277,61 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-	        log.error("Failed to update Accredited Course", e);  // Log for debugging
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body(Map.of("message", "Failed to update Accredited Course", 
-	                        "timestamp", LocalDateTime.now()));
-	    }
+			log.error("Failed to update Accredited Course", e); // Log for debugging
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("message", "Failed to update Accredited Course", "timestamp", LocalDateTime.now()));
+		}
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedApprovedCourseByUserId(String user_id) {
-		List<Tuple> resultList = accreditedCourseRepository.getAccreditedApprovedCourseByUserId(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedApprovedCourseByUserId(String userId) {
+	    return objectTojson._toJson(accreditedCourseRepository.getAccreditedApprovedCourseByUserId(userId));
 	}
 
 	@Override
-	public List<ObjectNode> getAccreditedCourseByInstituteId(String institute_id) {
-		List<Tuple> resultList = accreditedCourseRepository.getAccreditedCourseByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAccreditedCourseByInstituteId(String instituteId) {
+	    return objectTojson._toJson(accreditedCourseRepository.getAccreditedCourseByInstituteId(instituteId));
 	}
 
 	@Override
-	public List<ObjectNode> curriculumExist(Long curriculumId, String registration_no) {
-		List<Tuple> resultList = accreditedCourseRepository.curriculumExist(curriculumId, registration_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> curriculumExist(Long curriculumId, String registrationNo) {
+	    return objectTojson._toJson(accreditedCourseRepository.curriculumExist(curriculumId, registrationNo));
 	}
 
-	
+	@Override
+	public List<ObjectNode> getListSelectedBQFTraineeForExcel(String applicationNo) {
+	    return objectTojson._toJson(accreditedCourseRepository.getListSelectedBQFTraineeForExcel(applicationNo));
+	}
+
+	@Override
+	public List<ObjectNode> getListPassTraineeForCertificatePrinting(String applicationNo, Integer instituteId,
+			Integer serviceId, Integer certificationLevelId, Integer programmeId) {
+
+		List<Tuple> passTrainee = accreditedCourseRepository.getListPassTraineeForCertificatePrinting(applicationNo,
+				instituteId, serviceId, certificationLevelId, programmeId);
+
+		return objectTojson._toJson(passTrainee);
+	}
+
+	@Override
+	public List<ObjectNode> getServicesAssessementResult() {
+	    return objectTojson._toJson(accreditedCourseRepository.getServicesAssessementResult());
+	}
+
+	@Override
+	public List<ObjectNode> getProgrammesCertification(Integer instituteId, Integer serviceId,
+			Integer certificationLevelId) {
+
+		List<Tuple> listOfProgrammes;
+
+		if (serviceId == 39 || serviceId == 41) {
+			listOfProgrammes = accreditedCourseRepository.getRPLProgrammeForCertification(instituteId, serviceId,
+					certificationLevelId);
+		} else {
+			listOfProgrammes = accreditedCourseRepository.getBQFProgrammeForCertification(instituteId, serviceId,
+					certificationLevelId);
+		}
+		return objectTojson._toJson(listOfProgrammes);
+	}
 
 }

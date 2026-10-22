@@ -10,7 +10,7 @@ public interface TuitionAnnouncementService {
 	
 	ResponseEntity<?> submitTuitionAnnouncement(TuitionAnnouncementDto request);
 
-	List<ObjectNode> getAllTuitionAnnouncement(Integer institute_id);
+	List<ObjectNode> getAllTuitionAnnouncement(String  instituteId);
 
 	ResponseEntity<?> updateTuitionAnnouncement(TuitionAnnouncementDto request);
 

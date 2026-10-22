@@ -19,7 +19,7 @@ public interface InstituteRegistrationRepository extends JpaRepository<Institute
 					+ "    ON b.application_no = a.proposal_application_no "
 					+ "WHERE b.application_no = ? "
 					+ "  AND b.service_id = ?")
-		List<Tuple> findByProposalApplicationNo(String application_no, String service_id);
+		List<Tuple> findByProposalApplicationNo(String applicationNo, String serviceId);
 	
 	
 	Optional<InstituteRegistrationApp> findByApplicationNo(String applicationNo);
@@ -158,7 +158,7 @@ public interface InstituteRegistrationRepository extends JpaRepository<Institute
 					+ "FROM "
 					+ "  tbl_institute_registration_app ir "
 					+ "WHERE ir.application_no = ?")
-		List<Tuple> getInstituteRegistrationDetails(String application_no);
+		List<Tuple> getInstituteRegistrationDetails(String applicationNo);
 	
 		
 

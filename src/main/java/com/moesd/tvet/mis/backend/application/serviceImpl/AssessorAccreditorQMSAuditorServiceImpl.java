@@ -33,11 +33,9 @@ import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.GenerateLicenseNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 
 @Slf4j
 @Service
@@ -91,12 +89,11 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			AssessorAccreditorQMSAuditor registration = AssessorAccreditorQMSAuditor.builder()
 					.applicationNo(applicationNo).serviceId(serviceId).referenceNo(request.getReferenceNo())
 					.citizenId(request.getCitizenId()).dateOfBirth(request.getDateOfBirth())
-					.fullName(request.getFullName()).genderId(request.getGenderId())
-					.mobileNo(request.getMobileNo()).email(request.getEmail()).dzongkhagId(request.getDzongkhagId())
-					.organizationName(request.getOrganizationName())
-					.sectorId(request.getSectorId()).sectorName(request.getSectorName())
-					.occupationId(request.getOccupationId()).occupationName(request.getOccupationName())
-					.certificationLevelId(request.getCertificationLevelId())
+					.fullName(request.getFullName()).genderId(request.getGenderId()).mobileNo(request.getMobileNo())
+					.email(request.getEmail()).dzongkhagId(request.getDzongkhagId())
+					.organizationName(request.getOrganizationName()).sectorId(request.getSectorId())
+					.sectorName(request.getSectorName()).occupationId(request.getOccupationId())
+					.occupationName(request.getOccupationName()).certificationLevelId(request.getCertificationLevelId())
 					.certificationLevelName(request.getCertificationLevelName()).designation(request.getDesignation())
 					.yearsOfExperience(request.getYearsOfExperience()).responsibility(request.getResponsibility())
 					.qmsTraining(request.getQmsTraining()).academicBackground(request.getAcademicBackground())
@@ -106,7 +103,8 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			// Build work experiences and add to registration
 			if (request.getWorkExperiences() != null && !request.getWorkExperiences().isEmpty()) {
 				List<AuditorWorkExperience> workExperiences = request.getWorkExperiences().stream()
-						.map(workExpDto -> AuditorWorkExperience.builder().organizationName(workExpDto.getOrganizationName())
+						.map(workExpDto -> AuditorWorkExperience.builder()
+								.organizationName(workExpDto.getOrganizationName())
 								.designation(workExpDto.getDesignation()).year(workExpDto.getYear())
 								.responsibility(workExpDto.getResponsibility()).createdAt(LocalDateTime.now())
 								.updatedAt(LocalDateTime.now()).assessorAccreditorQMSAuditor(registration) // Set the
@@ -149,19 +147,16 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
-	        log.error("Failed to submit assessor/accreditor/qms auditor registration", e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body(Map.of("message", "Failed to submit assessor/accreditor/qms auditor registration", 
-	                        "timestamp", LocalDateTime.now()));
-	    }
+			log.error("Failed to submit assessor/accreditor/qms auditor registration", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
+					"Failed to submit assessor/accreditor/qms auditor registration", "timestamp", LocalDateTime.now()));
+		}
 	}
 
 	@Override
-	public List<ObjectNode> getApplicationDetails(String application_no) {
-		List<Tuple> resultList = assessorAccreditorQMSAuditorRepository
-				.getApplicationDetailByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getApplicationDetails(String applicationNo) {
+		return objectTojson
+				._toJson(assessorAccreditorQMSAuditorRepository.getApplicationDetailByApplicationNo(applicationNo));
 	}
 
 	@Override
@@ -215,26 +210,26 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 				editAssessorAccreditorQMSAuditor.setRegistrationNo(licenseNo);
 				// update
 				assessorAccreditorQMSAuditorRepository.save(editAssessorAccreditorQMSAuditor);
-				
+
 				// create user
 				// Check if user ID already exists
 				if (userRepository.findByUserId(licenseNo).isPresent()) {
 					return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
 							"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
 				}
-				
+
 				// Create new User
 				User user = new User();
 				// Get roleId from method
 				final Integer roleId = getRoleIdByServiceId(serviceId);
 				// Validate role mapping
 				if (roleId == null) {
-				    throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
+					throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
 				}
 				// Fetch the role
 				Role role = roleRepository.findById(roleId)
-				        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-				                "Role with ID " + roleId + " does not exist"));
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+								"Role with ID " + roleId + " does not exist"));
 				// Assign the single role
 				List<UserRole> userRoles = new ArrayList<>();
 				UserRole userRole = new UserRole();
@@ -262,7 +257,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 				userRoleRepository.saveAll(userRoles);
 				user.setUserRoles(userRoles);
 				userRepository.save(user);
-				
+
 			} else {
 				taskStatusId = dropdownManagementRepository.findChildById(18) // task unclaimed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
@@ -290,20 +285,22 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
 		}
 	}
-	
+
 	private Integer getRoleIdByServiceId(Integer serviceId) {
-	    if (serviceId == 32) return 30;
-	    if (serviceId == 5) return 29;
-	    if (serviceId == 3) return 10;
-	    return null;
+		if (serviceId == 32)
+			return 30;
+		if (serviceId == 5)
+			return 29;
+		if (serviceId == 3)
+			return 10;
+		return null;
 	}
 
 	@Override
-	public List<ObjectNode> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo,String serviceId) {
-		List<Tuple> resultList = assessorAccreditorQMSAuditorRepository
-				.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo,
+			String serviceId) {
+		return objectTojson._toJson(assessorAccreditorQMSAuditorRepository
+				.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId));
 	}
 
 }

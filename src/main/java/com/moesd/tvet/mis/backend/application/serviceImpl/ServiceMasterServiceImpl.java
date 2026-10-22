@@ -4,19 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.ServiceMasterRequestDTO;
 import com.moesd.tvet.mis.backend.application.model.ServiceMaster;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.service.ServiceMasterService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -126,9 +122,7 @@ public class ServiceMasterServiceImpl implements ServiceMasterService{
 
 	@Override
 	public List<ObjectNode> getAllServiceMaster() {
-		List<Tuple> resultList= serviceMasterRepository.getAllServiceMaster();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(serviceMasterRepository.getAllServiceMaster());
 	}
 	
 	@Override

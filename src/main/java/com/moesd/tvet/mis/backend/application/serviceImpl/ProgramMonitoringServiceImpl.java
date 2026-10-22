@@ -98,10 +98,8 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 	}
 
 	@Override
-	public List<ObjectNode> getProgramMonitoring(String user_id) {
-		List<Tuple> resultList = programMonitoringRepository.getProgramMonitoring(user_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getProgramMonitoring(String userId) {
+	    return objectTojson._toJson(programMonitoringRepository.getProgramMonitoring(userId));
 	}
 
 	@Override
@@ -228,28 +226,25 @@ public class ProgramMonitoringServiceImpl implements ProgramMonitoringService {
 
 	@Override
 	public List<ObjectNode> getProgramMonitoringByApplicationNo(String applicationNo) {
-		List<Tuple> resultList = programMonitoringRepository.getProgramMonitoringByApplicationNo(applicationNo);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(
+	            programMonitoringRepository.getProgramMonitoringByApplicationNo(applicationNo));
 	}
 
 	@Override
 	public List<ObjectNode> getCourseService() {
-		List<Tuple> resultList = programMonitoringRepository.getCourseService();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(programMonitoringRepository.getCourseService());
 	}
 
 	@Override
-	public List<ObjectNode> getCourseByInstituteId(Integer institute_id, Integer course_type_id) {
-		if(course_type_id == 26) {
-			List<Tuple> resultList = programMonitoringRepository.getAccreditedCourse(institute_id);
-			List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-			return DtlsJson;
+	public List<ObjectNode> getCourseByInstituteId(Integer instituteId, Integer courseTypeId) {
+		if(courseTypeId == 26) {
+			List<Tuple> resultList = programMonitoringRepository.getAccreditedCourse(instituteId);
+			List<ObjectNode> dtlsJson = objectTojson._toJson(resultList);
+			return dtlsJson;
 		}else {
-			List<Tuple> resultList = programMonitoringRepository.getNonAccreditedCourse(institute_id);
-			List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-			return DtlsJson;
+			List<Tuple> resultList = programMonitoringRepository.getNonAccreditedCourse(instituteId);
+			List<ObjectNode> dtlsJson = objectTojson._toJson(resultList);
+			return dtlsJson;
 		}
 		
 	}

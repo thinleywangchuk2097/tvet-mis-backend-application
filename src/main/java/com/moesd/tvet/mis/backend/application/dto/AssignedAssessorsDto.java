@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssignedAssessorsDto {
-	private String UserId;
+	private String userId;
 }

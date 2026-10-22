@@ -17,7 +17,6 @@ import com.moesd.tvet.mis.backend.application.service.NcsService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -106,33 +105,24 @@ public class NcsServiceImpl implements NcsService {
 		}
 	}
 
+
 	@Override
 	public List<ObjectNode> getNcsDetails() {
-		List<Tuple> resultList = ncsRepository.getNcsDetails();
-		List<ObjectNode> ncsDtls = objectTojson._toJson(resultList);
-		return ncsDtls;
-
+	    return objectTojson._toJson(ncsRepository.getNcsDetails());
 	}
 
 	@Override
-	public List<ObjectNode> getAlreadyNcsDetailsExist(Integer sector_id, Integer occupation_id, Integer certification_id) {
-		List<Tuple> resultList = ncsRepository.getAlreadyNcsDetailsExist(sector_id,occupation_id,certification_id);
-		List<ObjectNode> dtlsData = objectTojson._toJson(resultList);
-		return dtlsData;
-
+	public List<ObjectNode> getAlreadyNcsDetailsExist(Integer sectorId, Integer occupationId, Integer certificationId) {
+	    return objectTojson._toJson(ncsRepository.getAlreadyNcsDetailsExist(sectorId, occupationId, certificationId));
 	}
 
 	@Override
 	public List<ObjectNode> getProgrammeTitleById(Integer programmeId) {
-		List<Tuple> resultList = ncsRepository.getProgrammeTitleById(programmeId);
-		List<ObjectNode> dtlsTitle = objectTojson._toJson(resultList);
-		return dtlsTitle;
+	    return objectTojson._toJson(ncsRepository.getProgrammeTitleById(programmeId));
 	}
 
 	@Override
 	public List<ObjectNode> getAllNcsProgrammes() {
-		List<Tuple> resultList = ncsRepository.getAllNcsProgrammes();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(ncsRepository.getAllNcsProgrammes());
 	}
 }

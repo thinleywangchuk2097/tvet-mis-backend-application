@@ -38,7 +38,7 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "    ON a.application_no = tp.course_enrol_app_no "
 			+ "WHERE tp.course_enrol_app_no = ? "
 			+ "  AND a.service_id IN (37, 38, 39)")
-	List<Tuple> getCourseAppliedTraineesByApplicationNo(String application_no);
+	List<Tuple> getCourseAppliedTraineesByApplicationNo(String applicationNo);
 	
 	
 	@NativeQuery("SELECT "
@@ -70,7 +70,7 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "    ON a.application_no = tp.course_enrol_app_no "
 			+ "WHERE tp.course_enrol_app_no = ? "
 			+ "  AND a.service_id IN (41, 42)")
-	List<Tuple> getCourseAppliedTraineesReAssessmentByApplicationNo(String application_no);
+	List<Tuple> getCourseAppliedTraineesReAssessmentByApplicationNo(String applicationNo);
 	
 	
 	@NativeQuery("SELECT "
@@ -119,7 +119,7 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "  AND a.certification_level_id = ? "
 			+ "  AND tp.result_status_id = 95 "
 			+ "  AND a.service_id IN (37, 38, 39)")
-	List<Tuple> getFailedTraineeDetails(String user_id, String course_id, Integer certification_level_id);
+	List<Tuple> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId);
 	
 	@NativeQuery("SELECT "
 			+ "  a.* "
@@ -133,7 +133,8 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "    ON d.user_id = c.registration_no "
 			+ "WHERE d.user_id = ? "
 			+ "  AND b.programme_id = ? "
-			+ "  AND b.certification_level_id = ?")
+			+ "  AND b.certification_level_id = ? "
+			+ "  AND a.result_status_id = 95 ")
 	List<CourseEnrollmentTraineeApp> getFailedTraineeReassessment(String user_id, Long programme_id, Integer certification_level_id);
 	
 	@NativeQuery("SELECT "
@@ -141,7 +142,7 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "FROM "
 			+ "  tbl_assessor_task_assignment a "
 			+ "WHERE a.application_no = ?")
-	List<Tuple> fetchAssignedAssessors(String application_no);
+	List<Tuple> fetchAssignedAssessors(String applicationNo);
 	
 	@NativeQuery("SELECT "
 			+ "  a.* "

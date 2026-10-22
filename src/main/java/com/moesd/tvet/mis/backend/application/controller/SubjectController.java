@@ -17,17 +17,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/management/subject")
 public class SubjectController {
-	
+
 	private final SubjectService subjectService;
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitSubject(@RequestBody SubjectDto request) {
 		return (subjectService.submitSubject(request));
 	}
-	
+
 	@GetMapping("/get-all-subjects/{institute_id}")
-	public ResponseEntity<?> getAllActiveSubjects(@PathVariable Integer institute_id) {
-		List<ObjectNode> activeSubjects = subjectService.getAllActiveSubjects(institute_id);
+	public ResponseEntity<?> getAllActiveSubjects(@PathVariable("institute_id") String instituteId) {
+		List<ObjectNode> activeSubjects = subjectService.getAllActiveSubjects(instituteId);
 		return ResponseEntity.ok(activeSubjects);
 	}
 

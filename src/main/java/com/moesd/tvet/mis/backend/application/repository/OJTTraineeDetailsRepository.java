@@ -15,7 +15,7 @@ public interface OJTTraineeDetailsRepository extends JpaRepository<OJTTraineeDet
 					+ "FROM "
 					+ "  tbl_ojt_trainee_dtls a "
 					+ "WHERE a.institute_id = ?")
-	List<Tuple> getTraineeByInstituteId(String institute_id);
+	List<Tuple> getTraineeByInstituteId(String instituteId);
 	
 	@NativeQuery("SELECT "
 					+ "  t.id AS trainee_id, "

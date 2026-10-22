@@ -10,7 +10,7 @@ public interface AddTrainerService {
 	
 	ResponseEntity<?> submitTrainer(AddTrainerDto request);
 
-	List<ObjectNode> getAllTrainer(Integer institute_id);
+	List<ObjectNode> getAllTrainer(Integer instituteId);
 
 	ResponseEntity<?> updateTrainer(AddTrainerDto request);
 

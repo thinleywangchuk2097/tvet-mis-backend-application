@@ -20,7 +20,7 @@ public interface MonitoringAssessmentRepository extends JpaRepository<Monitoring
 					+ "FROM "
 					+ "  tbl_institute_registration_dtls a "
 					+ "WHERE a.service_id = ?")
-	List<Tuple> getInstituteDropdown(String service_id);
+	List<Tuple> getInstituteDropdown(String serviceId);
 	
 	@NativeQuery("SELECT "
 					+ "  ma.id, "
@@ -52,7 +52,7 @@ public interface MonitoringAssessmentRepository extends JpaRepository<Monitoring
 					+ "  tbl_monitoring_assessment_dtls ma "
 					+ "WHERE "
 					+ "  ma.registration_no = ?")
-	List<Tuple> getMonitoringAssessment(String user_id);
+	List<Tuple> getMonitoringAssessment(String userId);
 	
 	Optional<MonitoringAssessment> findByApplicationNo(String applicationNo);
 	

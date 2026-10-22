@@ -17,17 +17,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/management/tutor")
 public class TutorController {
-	
+
 	private final TutorService tutorService;
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> submitTutor(@RequestBody TutorDto request) {
 		return (tutorService.submitTutor(request));
 	}
-	
+
 	@GetMapping("/get-all-tutors/{institute_id}")
-	public ResponseEntity<?> getAllActiveTutors(@PathVariable Integer institute_id) {
-		List<ObjectNode> activeSubjects = tutorService.getAllActiveTutors(institute_id);
+	public ResponseEntity<?> getAllActiveTutors(@PathVariable("institute_id") String instituteId) {
+		List<ObjectNode> activeSubjects = tutorService.getAllActiveTutors(instituteId);
 		return ResponseEntity.ok(activeSubjects);
 	}
 
@@ -40,9 +40,10 @@ public class TutorController {
 	public ResponseEntity<?> softDeleteTutor(@PathVariable Long tutorId) {
 		return tutorService.softDeleteTutor(tutorId);
 	}
+
 	@GetMapping("/get-tutor/{institute_id}/{subject_id}")
-	public ResponseEntity<?> getTutorBySubjectId(@PathVariable Integer institute_id, @PathVariable Integer subject_id) {
-		List<ObjectNode> tutor = tutorService.getTutorBySubjectId(institute_id, subject_id);
+	public ResponseEntity<?> getTutorBySubjectId(@PathVariable("institute_id") Integer instituteId, @PathVariable("subject_id") Integer subjectId) {
+		List<ObjectNode> tutor = tutorService.getTutorBySubjectId(instituteId, subjectId);
 		return ResponseEntity.ok(tutor);
 	}
 }

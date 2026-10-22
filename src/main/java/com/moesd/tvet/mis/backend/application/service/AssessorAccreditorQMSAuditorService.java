@@ -11,7 +11,7 @@ public interface AssessorAccreditorQMSAuditorService {
 	
 	ResponseEntity<?> registerAssessorAccreditorQMSAuditor(AssessorAccreditorQMSAuditordto request);
 	
-	List<ObjectNode> getApplicationDetails(String application_no);
+	List<ObjectNode> getApplicationDetails(String applicationNo);
 	
 	ResponseEntity<?> verifyAssessorAccreditorQMSAuditor(AssessorAccreditorQMSAuditordto request);
 	

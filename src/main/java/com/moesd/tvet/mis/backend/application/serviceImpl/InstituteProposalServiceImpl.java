@@ -24,7 +24,6 @@ import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -130,10 +129,8 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 	}
 
 	@Override
-	public List<ObjectNode> getInstituteDetails(String application_no) {
-		List<Tuple> resultList = instituteProposalRepository.getInstituteDetails(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getInstituteDetails(String applicationNo) {
+	    return objectTojson._toJson(instituteProposalRepository.getInstituteDetails(applicationNo));
 	}
 
 	@Override
@@ -208,6 +205,11 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
 					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
 		}
+	}
+
+	@Override
+	public List<ObjectNode> getApplicantDetails(String applicationNo) {
+		return objectTojson._toJson(instituteProposalRepository.getApplicantDetails(applicationNo));
 	}
 
 	

@@ -28,24 +28,22 @@ public class CourseEnrollmentAppController {
 	}
 
 	@GetMapping("/get-application-details/{user_id}/{service_id}")
-	public ResponseEntity<List<ObjectNode>> getCourseDetailsAnnouncementByUserId(@PathVariable String user_id,
-			@PathVariable String service_id) {
-		List<ObjectNode> Details = courseEnrollmentAppService.getCourseDetailsAnnouncementByUserId(user_id, service_id);
-		return ResponseEntity.ok(Details);
+	public ResponseEntity<List<ObjectNode>> getCourseDetailsAnnouncementByUserId(@PathVariable("user_id") String userId,
+			@PathVariable("service_id") String serviceId) {
+		List<ObjectNode> getCourseDetailsAnnouncementDetails = courseEnrollmentAppService.getCourseDetailsAnnouncementByUserId(userId, serviceId);
+		return ResponseEntity.ok(getCourseDetailsAnnouncementDetails);
 	}
 
 	@GetMapping("/get-reassessment-service-name")
 	public ResponseEntity<List<ObjectNode>> getReAssessmentServiceName() {
-		List<ObjectNode> Details = courseEnrollmentAppService.getReAssessmentServiceName();
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> getReAssessmentServiceNameDetails = courseEnrollmentAppService.getReAssessmentServiceName();
+		return ResponseEntity.ok(getReAssessmentServiceNameDetails);
 	}
-	
+
 	@GetMapping("/get-trainee-verification-details/{traineeId}")
 	public ResponseEntity<List<ObjectNode>> getTraineeDetailsById(@PathVariable String traineeId) {
-		List<ObjectNode> Details = courseEnrollmentAppService.getTraineeDetailsById(traineeId);
-		return ResponseEntity.ok(Details);
+		List<ObjectNode> getTraineeDetails = courseEnrollmentAppService.getTraineeDetailsById(traineeId);
+		return ResponseEntity.ok(getTraineeDetails);
 	}
-	
-	
 
 }

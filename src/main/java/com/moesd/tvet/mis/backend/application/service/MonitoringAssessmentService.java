@@ -9,11 +9,11 @@ public interface MonitoringAssessmentService {
 	
 	List<ObjectNode> getInstituteTypeDropdown();
 	
-	List<ObjectNode> getInstituteDropdown(String service_id);
+	List<ObjectNode> getInstituteDropdown(String serviceId);
 	
 	ResponseEntity<?> submitMonitoringAssessment(MonitoringAssessmentDto request);
 	
-	List<ObjectNode> getMonitoringAssessment(String user_id);
+	List<ObjectNode> getMonitoringAssessment(String userId);
 	
 	ResponseEntity<?> verifyMonitoringAssessment(MonitoringAssessmentDto request);
 	

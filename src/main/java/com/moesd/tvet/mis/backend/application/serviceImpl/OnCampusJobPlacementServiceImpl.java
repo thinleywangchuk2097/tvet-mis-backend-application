@@ -19,7 +19,6 @@ import com.moesd.tvet.mis.backend.application.repository.OnCampusJobPlacementTra
 import com.moesd.tvet.mis.backend.application.service.OnCampusJobPlacementService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 
 
@@ -65,10 +64,8 @@ public class OnCampusJobPlacementServiceImpl implements OnCampusJobPlacementServ
 	}
 	
 	@Override
-	public List<ObjectNode> getPlacementSessionByInstituteId(String institute_id) {
-		List<Tuple> result = sessionRepository.getPlacementSessionByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
+	public List<ObjectNode> getPlacementSessionByInstituteId(String instituteId) {
+	    return objectTojson._toJson(sessionRepository.getPlacementSessionByInstituteId(instituteId));
 	}
 	
 	@Override
@@ -97,10 +94,8 @@ public class OnCampusJobPlacementServiceImpl implements OnCampusJobPlacementServ
 	}
 	
 	@Override
-	public List<ObjectNode> getFirmByInstituteId(String institute_id) {
-		List<Tuple> result = firmRepository.getFirmByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
+	public List<ObjectNode> getFirmByInstituteId(String instituteId) {
+	    return objectTojson._toJson(firmRepository.getFirmByInstituteId(instituteId));
 	}
 	
 	@Override
@@ -128,17 +123,13 @@ public class OnCampusJobPlacementServiceImpl implements OnCampusJobPlacementServ
 	}
 	
 	@Override
-	public List<ObjectNode> getTraineeByInstituteId(String institute_id) {
-		List<Tuple> result = traineeRepository.getTraineeByInstituteId(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
+	public List<ObjectNode> getTraineeByInstituteId(String instituteId) {
+	    return objectTojson._toJson(traineeRepository.getTraineeByInstituteId(instituteId));
 	}
 
 	@Override
 	public List<ObjectNode> getTraineeOnPlacementReport() {
-		List<Tuple> result = traineeRepository.getTraineeOnPlacementReport();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(result);
-		return DtlsJson;
+	    return objectTojson._toJson(traineeRepository.getTraineeOnPlacementReport());
 	}
 	
 

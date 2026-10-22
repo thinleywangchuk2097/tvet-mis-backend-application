@@ -27,8 +27,8 @@ public class TuitionAnnouncementController {
 	}
 
 	@GetMapping("/get-all-tuition-announcements/{institute_id}")
-	public ResponseEntity<?> getAllTuitionAnnouncement(@PathVariable Integer institute_id) {
-		List<ObjectNode> activeSubjects = tuitionAnnouncementService.getAllTuitionAnnouncement(institute_id);
+	public ResponseEntity<?> getAllTuitionAnnouncement(@PathVariable("institute_id") String  instituteId) {
+		List<ObjectNode> activeSubjects = tuitionAnnouncementService.getAllTuitionAnnouncement(instituteId);
 		return ResponseEntity.ok(activeSubjects);
 	}
 

@@ -11,7 +11,7 @@ public interface CourseEnrollmentAppService {
 	
 	ResponseEntity<?> submitCourseAnnouncement(CourseEnrollmentAppdto request);
 	
-	List<ObjectNode> getCourseDetailsAnnouncementByUserId(String user_id, String service_id);
+	List<ObjectNode> getCourseDetailsAnnouncementByUserId(String userId, String serviceId);
 	
 	List<ObjectNode> getReAssessmentServiceName();
 	

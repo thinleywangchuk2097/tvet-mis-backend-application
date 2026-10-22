@@ -5,12 +5,11 @@ import org.springframework.http.ResponseEntity;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.SubjectDto;
 
-
 public interface SubjectService {
-	
+
 	ResponseEntity<?> submitSubject(SubjectDto request);
-	
-	List<ObjectNode> getAllActiveSubjects(Integer institute_id);
+
+	List<ObjectNode> getAllActiveSubjects(String instituteId);
 
 	ResponseEntity<?> updateSubject(SubjectDto request);
 

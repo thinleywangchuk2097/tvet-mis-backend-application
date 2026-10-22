@@ -22,7 +22,6 @@ import com.moesd.tvet.mis.backend.application.repository.SectorRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.service.CommonService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 
 
@@ -92,23 +91,18 @@ public class CommonServiceImpl implements CommonService {
 
 	@Override
 	public List<ObjectNode> getAllCourseAnnouncement() {
-		List<Tuple> resultList = courseEnrollmentAppRepository.getAllCourseAnnouncement();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(courseEnrollmentAppRepository.getAllCourseAnnouncement());
 	}
 	
 	@Override
 	public List<ObjectNode> getAllCertificateLevels() {
-		List<Tuple> resultList = courseEnrollmentAppRepository.getAllCertificateLevels();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	    return objectTojson._toJson(courseEnrollmentAppRepository.getAllCertificateLevels());
 	}
 	
 	@Override
-	public List<ObjectNode> getCourseAnnouncementByApplicationNo(String application_no) {
-		List<Tuple> resultList = courseEnrollmentAppRepository.getCourseAnnouncementByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getCourseAnnouncementByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(
+	            courseEnrollmentAppRepository.getCourseAnnouncementByApplicationNo(applicationNo));
 	}
 
 	@Override
@@ -117,18 +111,15 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public List<ObjectNode> getReAssessmentAnnouncementByApplicationNo(String application_no) {
-		List<Tuple> resultList = courseEnrollmentAppRepository.getReAssessmentAnnouncementByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getReAssessmentAnnouncementByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(
+	            courseEnrollmentAppRepository.getReAssessmentAnnouncementByApplicationNo(applicationNo));
 	}
 
 	@Override
 	public List<ObjectNode> getInstituteNameByInstituteId(String instituteId) {
-		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteNameByInstituteId(instituteId);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
-	
+	    return objectTojson._toJson(
+	            instituteRegistrationDetailsRepository.getInstituteNameByInstituteId(instituteId));
 	}
 
 	

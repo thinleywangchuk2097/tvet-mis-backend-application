@@ -21,6 +21,7 @@ public class TotProgramDto {
 	private Integer createdBy;
 	private Integer updatedBy;
 	private List<TotModuleDto> modules;
+
 	// System fields
 	private Integer serviceId;
 	private Integer assignedRoleId;

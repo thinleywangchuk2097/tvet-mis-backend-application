@@ -5,19 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.SubjectDto;
 import com.moesd.tvet.mis.backend.application.model.Subject;
 import com.moesd.tvet.mis.backend.application.repository.SubjectRepository;
 import com.moesd.tvet.mis.backend.application.service.SubjectService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-
-import jakarta.persistence.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,10 +87,8 @@ public class SubjectServiceImpl implements SubjectService{
 	}
 	
 	@Override
-	public List<ObjectNode> getAllActiveSubjects(Integer institute_id) {
-		List<Tuple> resultList= subjectRepository.getAllActiveSubjects(institute_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getAllActiveSubjects(String instituteId) {
+	    return objectTojson._toJson(subjectRepository.getAllActiveSubjects(instituteId));
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,11 +14,9 @@ import com.moesd.tvet.mis.backend.application.service.CourseEnrollmentAppService
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 
 @Slf4j
 @Service
@@ -69,7 +66,6 @@ public class CourseEnrollmentAppServiceImpl implements CourseEnrollmentAppServic
 			// Save entity
 			courseEnrollmentAppRepository.save(course);
 
-	
 			// Documents
 			if (request.getDocuments() != null && request.getDocuments().length > 0) {
 				documentFileUploadService.saveDocument(request.getDocuments(), applicationNo, "course_announcement",
@@ -81,33 +77,26 @@ public class CourseEnrollmentAppServiceImpl implements CourseEnrollmentAppServic
 					"Course announcement submitted successfully"));
 
 		} catch (Exception e) {
-		    log.error("Failed to submit course announcement", e);
-		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-		            .body(Map.of("message", "Failed to submit course announcement"));
+			log.error("Failed to submit course announcement", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("message", "Failed to submit course announcement"));
 		}
 	}
 
 	@Override
-	public List<ObjectNode> getCourseDetailsAnnouncementByUserId(String user_id, String service_id) {
-		List<Tuple> resultList = courseEnrollmentAppRepository.getCourseDetailsAnnouncementByUserId(user_id,service_id);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getCourseDetailsAnnouncementByUserId(String userId, String serviceId) {
+		return objectTojson
+				._toJson(courseEnrollmentAppRepository.getCourseDetailsAnnouncementByUserId(userId, serviceId));
 	}
 
 	@Override
 	public List<ObjectNode> getReAssessmentServiceName() {
-		List<Tuple> resultList = courseEnrollmentAppRepository.getReAssessmentServiceName();
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+		return objectTojson._toJson(courseEnrollmentAppRepository.getReAssessmentServiceName());
 	}
 
 	@Override
 	public List<ObjectNode> getTraineeDetailsById(String traineeId) {
-		List<Tuple> resultList = courseEnrollmentAppRepository.getTraineeDetailsById(traineeId);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+		return objectTojson._toJson(courseEnrollmentAppRepository.getTraineeDetailsById(traineeId));
 	}
-
-	
 
 }

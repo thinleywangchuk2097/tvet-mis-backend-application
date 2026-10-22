@@ -59,7 +59,7 @@ public interface NcsRepository extends JpaRepository<NcsApp, Integer> {
     		+ "WHERE a.sector_id = ? "
     		+ "  AND a.occupation_id = ? "
     		+ "  AND a.certification_id = ?")
-    List<Tuple> getAlreadyNcsDetailsExist(Integer sector_id, Integer occupation_id, Integer certification_id);
+    List<Tuple> getAlreadyNcsDetailsExist(Integer sectorId, Integer occupationId, Integer certificationId);
     
     
     @NativeQuery("SELECT "

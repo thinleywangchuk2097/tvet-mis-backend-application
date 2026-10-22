@@ -27,7 +27,6 @@ public class GenerateLicenseNumber {
 		//Increment and save the sequence
 		serviceMaster.setLicenseLastSequence(serviceMaster.getLicenseLastSequence() + 1);
 		serviceMasterRepository.save(serviceMaster);
-		System.out.println("formattedLicenseNo" + formattedLicenseNo);
 		return formattedLicenseNo;
 	}
 }

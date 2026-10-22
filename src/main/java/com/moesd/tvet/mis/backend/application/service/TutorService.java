@@ -9,11 +9,11 @@ public interface TutorService {
 	
 	ResponseEntity<?> submitTutor(TutorDto request);
 
-	List<ObjectNode> getAllActiveTutors(Integer institute_id);
+	List<ObjectNode> getAllActiveTutors(String instituteId);
 
 	ResponseEntity<?> updateTutor(TutorDto request);
 
 	ResponseEntity<?> softDeleteTutor(Long tutorId);
 	
-	List<ObjectNode> getTutorBySubjectId(Integer institute_id,Integer subject_id);
+	List<ObjectNode> getTutorBySubjectId(Integer instituteId,Integer subjectId);
 }

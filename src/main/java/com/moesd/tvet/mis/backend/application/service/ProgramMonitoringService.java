@@ -11,12 +11,12 @@ public interface ProgramMonitoringService {
 	
 	ResponseEntity<?> submitProgramMonitoring(ProgramMonitoringDto request);
 	
-	List<ObjectNode> getProgramMonitoring(String user_id);
+	List<ObjectNode> getProgramMonitoring(String userId);
 	
 	ResponseEntity<?> verifyProgramMonitoring(ProgramMonitoringDto request);
 	
 	List<ObjectNode> getProgramMonitoringByApplicationNo(String applicationNo);
 	
-	List<ObjectNode> getCourseByInstituteId(Integer institute_id, Integer course_type_id);
+	List<ObjectNode> getCourseByInstituteId(Integer instituteId, Integer courseTypeId);
 	
 }

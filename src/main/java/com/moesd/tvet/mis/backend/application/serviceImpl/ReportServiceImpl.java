@@ -23,13 +23,13 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
 	public List<Map<String, Object>> courseServiceType() {
-		
+
 		return reportRepository.courseServiceType();
 	}
 
 	@Override
 	public List<Map<String, Object>> getAllInstitutes() {
-		
+
 		return reportRepository.getAllInstitutes();
 	}
 
@@ -37,7 +37,7 @@ public class ReportServiceImpl implements ReportService {
 	public List<Map<String, Object>> getInstitutesProposalType() {
 		return reportRepository.getInstitutesProposalType();
 	}
-	
+
 	@Override
 	public List<Map<String, Object>> getInstituteRegistrationType() {
 		return reportRepository.getInstituteRegistrationType();
@@ -57,4 +57,32 @@ public class ReportServiceImpl implements ReportService {
 	public List<Map<String, Object>> getInstitutesTraineesDetails() {
 		return reportRepository.getInstitutesTraineesDetails();
 	}
+
+	@Override
+	public List<Map<String, Object>> getRegistrationDetailsForCertificate(String registrationType,
+			String applicationNo) {
+
+		switch (registrationType) {
+		case "7":
+		case "36":
+		case "16":
+			return reportRepository.getInstituteSesCentreAssessmentCentreRegistrationDetails(registrationType,
+					applicationNo);
+
+		default:
+			return reportRepository.getAssessorAccreditorQualityAuditorDetails(registrationType, applicationNo);
+		}
+	}
+
+	@Override
+	public List<Map<String, Object>> getTraineesDetailsForCertificate(String registrationNo, String applicationNo) {
+		return reportRepository.getTraineesDetailsForCertificate(registrationNo, applicationNo);
+	}
+
+	@Override
+	public List<Map<String, Object>> getAccreditedProgrammeDetailsForCertificate(String registrationNo,
+			String applicationNo) {
+		return reportRepository.getAccreditedProgrammeDetailsForCertificate(registrationNo, applicationNo);
+	}
+
 }

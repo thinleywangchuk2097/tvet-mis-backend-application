@@ -12,7 +12,7 @@ import jakarta.persistence.Tuple;
 public interface InstituteRegistrationDetailsRepository extends JpaRepository<InstituteRegistrationDetails, Long> {
 	
 	@NativeQuery("SELECT * FROM tbl_institute_registration_dtls " + "WHERE registration_no = ?")
-	List<Tuple> getInstituteDetails(String registration_no);
+	List<Tuple> getInstituteDetails(String registrationNo);
 	
 	@NativeQuery("SELECT "
 			+ "  ir.application_no, "
@@ -145,7 +145,7 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 			+ "FROM "
 			+ "  tbl_institute_registration_dtls ir "
 			+ "WHERE ir.registration_no = ?")
-	List<Tuple> getInstituteRenewalDetails(String registration_no);
+	List<Tuple> getInstituteRenewalDetails(String registrationNo);
 	
 	@NativeQuery("SELECT "
 			+ "  p.id, "
@@ -196,7 +196,7 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 			+ "  LEFT JOIN tbl_institute_registration_dtls ipr "
 			+ "  ON ipr.application_no = rp.application_no "
 			+ "WHERE ipr.registration_no = ?")
-	List<Tuple> getInstituteChangeDetails(String registration_no);
+	List<Tuple> getInstituteChangeDetails(String registrationNo);
 	
 	
 	

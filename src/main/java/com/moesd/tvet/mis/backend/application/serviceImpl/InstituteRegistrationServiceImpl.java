@@ -223,17 +223,15 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	}
 
 	@Override
-	public List<Tuple> applicationExistOrNot(String application_no, String service_id) {
-		List<Tuple> resultList = instituteRegistrationRepository.findByProposalApplicationNo(application_no,
-				service_id);
+	public List<Tuple> applicationExistOrNot(String applicationNo, String serviceId) {
+		List<Tuple> resultList = instituteRegistrationRepository.findByProposalApplicationNo(applicationNo,
+				serviceId);
 		return resultList;
 	}
 
 	@Override
-	public List<ObjectNode> getInstituteRegistrationDetails(String application_no) {
-		List<Tuple> resultList = instituteRegistrationRepository.getInstituteRegistrationDetails(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getInstituteRegistrationDetails(String applicationNo) {
+	    return objectTojson._toJson(instituteRegistrationRepository.getInstituteRegistrationDetails(applicationNo));
 	}
 
 	@Override
@@ -577,24 +575,19 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	}
 	
 	@Override
-	public List<ObjectNode> getInstituteDetails(String registration_no) {
-		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteDetails(registration_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getInstituteDetails(String registrationNo) {
+	    return objectTojson._toJson(instituteRegistrationDetailsRepository.getInstituteDetails(registrationNo));
 	}
 
 	@Override
-	public List<ObjectNode> getInstituteRenewalDetails(String registration_no) {
-		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteRenewalDetails(registration_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getInstituteRenewalDetails(String registrationNo) {
+	    return objectTojson._toJson(instituteRegistrationDetailsRepository.getInstituteRenewalDetails(registrationNo));
 	}
 
 	@Override
-	public List<ObjectNode> getInstituteChangeDetails(String registration_no) {
-		List<Tuple> resultList = instituteRegistrationDetailsRepository.getInstituteChangeDetails(registration_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getInstituteChangeDetails(String registrationNo) {
+	    return objectTojson._toJson(
+	            instituteRegistrationDetailsRepository.getInstituteChangeDetails(registrationNo));
 	}
 
 	@Override
@@ -684,10 +677,8 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	}
 
 	@Override
-	public List<ObjectNode> getInstituteChangeByApplicationNo(String application_no) {
-		List<Tuple> resultList = instituteChangeRepository.getInstituteChangeByApplicationNo(application_no);
-		List<ObjectNode> DtlsJson = objectTojson._toJson(resultList);
-		return DtlsJson;
+	public List<ObjectNode> getInstituteChangeByApplicationNo(String applicationNo) {
+	    return objectTojson._toJson(instituteChangeRepository.getInstituteChangeByApplicationNo(applicationNo));
 	}
 
 	

@@ -20,7 +20,7 @@ public interface OJTCompanyAgreementRepository extends JpaRepository<OJTCompanyA
 					+ "FROM "
 					+ "  tbl_ojt_company_agreement_dtls a "
 					+ "WHERE a.institute_id = ?")
-	List<Tuple> getAgreementByInstituteId(String institute_id);
+	List<Tuple> getAgreementByInstituteId(String instituteId);
 	
 	
 	

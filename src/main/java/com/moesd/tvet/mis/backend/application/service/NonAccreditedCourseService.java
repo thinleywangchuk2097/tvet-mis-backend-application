@@ -9,13 +9,13 @@ public interface NonAccreditedCourseService {
 	
 	ResponseEntity<?> submitNonAccreditedCourse(NonAccreditedCoursedto request);
 	
-	List<ObjectNode> getNonAccreditedCourseByApplicationNo(String application_no);
+	List<ObjectNode> getNonAccreditedCourseByApplicationNo(String applicationNo);
 	
 	ResponseEntity<?> verifyNonAccreditedCourse(NonAccreditedCoursedto request);
 	
-	List<ObjectNode> getNonAccreditedCourseDetailsByUserId(String user_id);
+	List<ObjectNode> getNonAccreditedCourseDetailsByUserId(String userId);
 	
-	List<ObjectNode> getNonAccreditedApprovedCourseByUserId(String user_id);
+	List<ObjectNode> getNonAccreditedApprovedCourseByUserId(String userId);
 	
-	List<ObjectNode> curriculumAlreadyExist(Long curriculumId, String registration_no);
+	List<ObjectNode> curriculumAlreadyExist(Long curriculumId, String registrationNo);
 }
