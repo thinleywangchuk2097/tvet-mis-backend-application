@@ -1,5 +1,5 @@
 package com.moesd.tvet.mis.backend.application.serviceImpl;
-
+import java.util.logging.Logger;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -41,7 +41,8 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 	private final NonAccreditedCourseRepository nonAccreditedCourseRepository;
 	private final ObjectToJson objectTojson;
 	private final RoleServiceRepository roleServiceRepository;
-
+	private static final Logger logger = Logger.getLogger(NonAccreditedCourseServiceImpl.class.getName());
+	
 	@Override
 	public ResponseEntity<?> submitNonAccreditedCourse(NonAccreditedCoursedto request) {
 		try {
@@ -141,6 +142,7 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 	@Transactional
 	public ResponseEntity<?> verifyNonAccreditedCourse(NonAccreditedCoursedto request) {
 		try {
+			System.out.println("payload" + request);
 			// Validate required fields for editing
 			if (request.getApplicationNo() == null || request.getApplicationNo().isEmpty())
 				throw new RecordNotFoundException("applicationNo is required");
@@ -215,7 +217,7 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 	                        existingStandard.setRemarks(qualityDto.getRemarks());
 	                       
 	                    } else {
-	                        System.out.println("Quality standard with standardId " + standardId + " not found, skipping");
+	                    	logger.warning("Quality standard with standardId " + standardId + " not found, skipping");
 	                    }
 	                }
 	               
@@ -242,7 +244,7 @@ public class NonAccreditedCourseServiceImpl implements NonAccreditedCourseServic
 			// Return response
 			return ResponseEntity
 					.ok(Map.of("applicationNo", request.getApplicationNo(), "id", savedRegistration.getId(), "status",
-							HttpStatus.OK.value(), "message", "Non Accredited Course registered successfully"));
+							HttpStatus.OK.value(), "message", "Non Accredited Course verify successfully"));
 
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)

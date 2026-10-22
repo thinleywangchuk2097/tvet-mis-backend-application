@@ -37,7 +37,9 @@ public class TOTProgramAnnouncementDto {
 	private String remarks;
 
 	private Integer createdBy;
-
+	
+	private Integer showId;
+	
 	private Integer updatedBy;
 
 }

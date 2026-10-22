@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.TOTProgramAnnouncementDto;
 import com.moesd.tvet.mis.backend.application.dto.TOTProgramTrainerAppliedDto;
+import com.moesd.tvet.mis.backend.application.dto.TotCourseContentDto;
 import com.moesd.tvet.mis.backend.application.dto.TotModuleDto;
 import com.moesd.tvet.mis.backend.application.dto.TotProgramDto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.TOTAnnouncement;
+import com.moesd.tvet.mis.backend.application.model.TOTCourseContent;
 import com.moesd.tvet.mis.backend.application.model.TOTModule;
 import com.moesd.tvet.mis.backend.application.model.TOTProgram;
 import com.moesd.tvet.mis.backend.application.model.TOTProgramTrainerApplied;
@@ -46,81 +48,158 @@ public class TotServiceImpl implements TotService {
 	private final DropdownManagementRepository dropdownManagementRepository;
 
 	public ResponseEntity<?> submitTOTProgram(TotProgramDto request) {
-		try {
-			if (request.getId() != null && request.getId() > 0) {
-				TOTProgram program = totProgramRepository.findById(request.getId()).orElseThrow(
-						() -> new RecordNotFoundException("TOT Program not found with id: " + request.getId()));
+	    try {
 
-				program.setProgramName(request.getProgramName());
-				program.setProgramCode(request.getProgramCode());
-				program.setStatusId(request.getStatusId());
-				program.setProgramTypeId(request.getProgramTypeId());
-				program.setDescription(request.getDescription());
-				program.setUpdatedBy(request.getCreatedBy());
-				program.setUpdatedAt(new java.util.Date());
+	        // ================= UPDATE =================
+	        if (request.getId() != null && request.getId() > 0) {
 
-				totProgramRepository.save(program);
+	            TOTProgram program = totProgramRepository.findById(request.getId()).orElseThrow(
+	                    () -> new RecordNotFoundException("TOT Program not found with id: " + request.getId()));
 
-				if (request.getModules() != null && !request.getModules().isEmpty()) {
+	            program.setProgramName(request.getProgramName());
+	            program.setProgramCode(request.getProgramCode());
+	            program.setStatusId(request.getStatusId());
+	            program.setProgramTypeId(request.getProgramTypeId());
+	            program.setDescription(request.getDescription());
+	            program.setUpdatedBy(request.getCreatedBy());
+	            program.setUpdatedAt(new java.util.Date());
 
-					List<TOTModule> modules = new ArrayList<>();
+	            totProgramRepository.save(program);
 
-					for (TotModuleDto moduleDto : request.getModules()) {
+	            if (request.getModules() != null && !request.getModules().isEmpty()) {
 
-						TOTModule module = totModuleRepository.findByModuleCode(moduleDto.getModuleCode())
-								.orElse(new TOTModule());
+	                List<TOTModule> modules = new ArrayList<>();
 
-						// Set values (works for both update and new creation)
-						module.setModuleCode(moduleDto.getModuleCode());
-						module.setModuleName(moduleDto.getModuleName());
-						module.setDescription(moduleDto.getDescription());
-						module.setDuration(moduleDto.getDuration());
-						module.setLearningOutcomes(moduleDto.getLearningOutcomes());
-						module.setPrerequisites(moduleDto.getPrerequisites());
-						module.setModuleOrder(moduleDto.getOrder());
-						module.setTotProgram(program);
+	                for (TotModuleDto moduleDto : request.getModules()) {
 
-						modules.add(module);
-					}
+	                    // Find existing module by moduleCode (or create new)
+	                    TOTModule module;
+	                    if (moduleDto.getModuleCode() != null && !moduleDto.getModuleCode().isBlank()) {
+	                        module = totModuleRepository.findByModuleCode(moduleDto.getModuleCode())
+	                                .orElse(new TOTModule());
+	                    } else {
+	                        module = new TOTModule();
+	                    }
 
-					totModuleRepository.saveAll(modules);
-					program.setModules(modules);
-				}
+	                    module.setModuleCode(moduleDto.getModuleCode());
+	                    module.setModuleName(moduleDto.getModuleName());
+	                    module.setDescription(moduleDto.getDescription());
+	                    module.setDuration(moduleDto.getDuration());
+	                    module.setWeightage(moduleDto.getWeightage());	       
+	                    module.setLearningOutcomes(moduleDto.getLearningOutcomes());
+	                    module.setPrerequisites(moduleDto.getPrerequisites());
+	                    module.setModuleOrder(moduleDto.getOrder());
+	                    module.setTotProgram(program);
 
-				return ResponseEntity.ok(Map.of("status", 200, "message", "TOT Program updated successfully."));
+	                    // ---- Replace course contents (orphanRemoval deletes old rows) ----
+	                    List<TOTCourseContent> contents = module.getTotCourseContent();
+	                    if (contents == null) {
+	                        contents = new ArrayList<>();
+	                        module.setTotCourseContent(contents);
+	                    } else {
+	                        contents.clear();
+	                    }
 
-			} else {
-				// Build entity
-				TOTProgram program = TOTProgram.builder().programName(request.getProgramName())
-						.programCode(request.getProgramCode()).statusId(request.getStatusId())
-						.programTypeId(request.getProgramTypeId()).description(request.getDescription())
-						.createdBy(request.getCreatedBy()).createdAt(new java.util.Date()).build();
+	                    if (moduleDto.getCourseContents() != null) {
+	                        for (TotCourseContentDto ccDto : moduleDto.getCourseContents()) {
+	                            if (ccDto == null) continue;
 
-				// Build program modules
-				if (request.getModules() != null && !request.getModules().isEmpty()) {
-					List<TOTModule> modules = request.getModules().stream()
-							.map(moduleDto -> TOTModule.builder().moduleCode(moduleDto.getModuleCode())
-									.moduleName(moduleDto.getModuleName()).description(moduleDto.getDescription())
-									.duration(moduleDto.getDuration()).learningOutcomes(moduleDto.getLearningOutcomes())
-									.prerequisites(moduleDto.getPrerequisites()).totProgram(program).statusId(122)
-									.moduleOrder(moduleDto.getOrder()).build())
-							.collect(Collectors.toList());
-					program.setModules(modules);
-				}
+	                            boolean contentBlank = ccDto.getCourseContent() == null
+	                                    || ccDto.getCourseContent().isBlank();
+	                            boolean markBlank = ccDto.getFullMark() == null
+	                                    || ccDto.getFullMark().isBlank();
+	                            if (contentBlank && markBlank) continue; // skip empty row
 
-				// Save (cascade handles children)
-				totProgramRepository.save(program);
+	                            TOTCourseContent cc = TOTCourseContent.builder()
+	                                    .courseContent(ccDto.getCourseContent())
+	                                    .fullMark(ccDto.getFullMark())
+	                                    .totModule(module)
+	                                    .build();
+	                            contents.add(cc);
+	                        }
+	                    }
 
-				return ResponseEntity.ok(Map.of("status", 200, "message", "TOT Program added successfully."));
-			}
+	                    modules.add(module);
+	                }
 
-		} catch (RecordNotFoundException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("status", 404, "message", e.getMessage()));
-		} catch (Exception e) {
-		    log.error("Failed to submit TOT Program", e);
-		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-		            .body(Map.of("status", 500, "message", "Failed to submit TOT Program"));
-		}
+	                totModuleRepository.saveAll(modules);
+	                program.setModules(modules);
+	            }
+
+	            return ResponseEntity.ok(Map.of("status", 200, "message", "TOT Program updated successfully."));
+	        }
+
+	        // ================= CREATE =================
+	        TOTProgram program = TOTProgram.builder()
+	                .programName(request.getProgramName())
+	                .programCode(request.getProgramCode())
+	                .statusId(request.getStatusId())
+	                .programTypeId(request.getProgramTypeId())
+	                .description(request.getDescription())
+	                .createdBy(request.getCreatedBy())
+	                .createdAt(new java.util.Date())
+	                .build();
+
+	        if (request.getModules() != null && !request.getModules().isEmpty()) {
+
+	            List<TOTModule> modules = new ArrayList<>();
+
+	            for (TotModuleDto moduleDto : request.getModules()) {
+
+	                TOTModule module = TOTModule.builder()
+	                        .moduleCode(moduleDto.getModuleCode())
+	                        .moduleName(moduleDto.getModuleName())
+	                        .description(moduleDto.getDescription())
+	                        .duration(moduleDto.getDuration())
+	                        .weightage(moduleDto.getWeightage())
+	                        .learningOutcomes(moduleDto.getLearningOutcomes())
+	                        .prerequisites(moduleDto.getPrerequisites())
+	                        .totProgram(program)
+	                        .statusId(122)
+	                        .moduleOrder(moduleDto.getOrder())
+	                        .build();
+
+	                // Build course contents
+	                List<TOTCourseContent> contents = new ArrayList<>();
+	                if (moduleDto.getCourseContents() != null) {
+	                    for (TotCourseContentDto ccDto : moduleDto.getCourseContents()) {
+	                        if (ccDto == null) continue;
+
+	                        boolean contentBlank = ccDto.getCourseContent() == null
+	                                || ccDto.getCourseContent().isBlank();
+	                        boolean markBlank = ccDto.getFullMark() == null
+	                                || ccDto.getFullMark().isBlank();
+	                        if (contentBlank && markBlank) continue; // skip empty row
+
+	                        TOTCourseContent cc = TOTCourseContent.builder()
+	                                .courseContent(ccDto.getCourseContent())
+	                                .fullMark(ccDto.getFullMark())
+	                                .totModule(module)
+	                                .build();
+	                        contents.add(cc);
+	                    }
+	                }
+	                module.setTotCourseContent(contents);
+
+	                modules.add(module);
+	            }
+
+	            program.setModules(modules);
+	        }
+
+	        // CascadeType.ALL persists TOTProgram -> TOTModule -> TOTCourseContent
+	        totProgramRepository.save(program);
+
+	        return ResponseEntity.ok(Map.of("status", 200, "message", "TOT Program added successfully."));
+
+	    } catch (RecordNotFoundException e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                .body(Map.of("status", 404, "message", e.getMessage()));
+	    } catch (Exception e) {
+	        log.error("Failed to submit TOT Program", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("status", 500, "message", "Failed to submit TOT Program"));
+	    }
 	}
 
 	@Override
@@ -157,7 +236,7 @@ public class TotServiceImpl implements TotService {
 				totAnnouncement.setEligibilityCriteria(request.getEligibilityCriteria());
 				totAnnouncement.setRemarks(request.getRemarks());
 				totAnnouncement.setProgramTypeId(request.getProgramTypeId());
-
+				totAnnouncement.setShowId(request.getShowId());
 				// Audit fields (if available)
 				totAnnouncement.setUpdatedBy(request.getCreatedBy());
 				totAnnouncement.setUpdatedAt(new Date());
@@ -181,6 +260,7 @@ public class TotServiceImpl implements TotService {
 						.eligibilityCriteria(request.getEligibilityCriteria())
 						.maxParticipants(request.getMaxParticipants()).venue(request.getVenue()).statusId(122)
 						.totProgram(program).programTypeId(request.getProgramTypeId())
+						.showId(request.getShowId())
 						.programStartDate(request.getProgramStartDate()).programEndDate(request.getProgramEndDate())
 						.remarks(request.getRemarks()).createdBy(request.getCreatedBy()).createdAt(new Date()).build();
 

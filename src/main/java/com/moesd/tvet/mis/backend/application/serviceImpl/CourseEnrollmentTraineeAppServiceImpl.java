@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ import com.moesd.tvet.mis.backend.application.service.CourseEnrollmentTraineeApp
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
+import com.moesd.tvet.mis.backend.application.utility.GenerateCertificateNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +46,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	private final CourseEnrollmentTraineeAppRepository courseEnrollmentTraineeAppRepository;
 	private final CourseEnrollmentAppRepository courseEnrollmentAppRepository;
 	private final GenerateApplicationNumber generateApplicationNumber;
+	private final GenerateCertificateNumber generateCertificateNumber; 
 	private final ServiceMasterRepository serviceMasterRepository;
 	private final RoleServiceRepository roleServiceRepository;
 	private final DocumentFileUploadService documentFileUploadService;
@@ -278,6 +281,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getTheoryAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));;
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);
@@ -286,6 +291,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getTheoryAssessment() == 91 && dto.getPracticalAssessment() == 91) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);
@@ -315,6 +322,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getVivaAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);
@@ -323,6 +332,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 							if (dto.getVivaAssessment() == 91 && dto.getPracticalAssessment() == 91) {
 								resultId = 94;
 								trainee.setResultStatusId(resultId);
+								trainee.setCertificateIssuedDate(new Date());
+								trainee.setCertificateNo(generateCertificateNumber.generateCertificateNumber(30));
 							} else {
 								resultId = 95;
 								trainee.setResultStatusId(resultId);

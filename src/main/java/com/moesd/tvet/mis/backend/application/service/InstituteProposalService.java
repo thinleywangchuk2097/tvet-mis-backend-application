@@ -14,4 +14,6 @@ public interface InstituteProposalService {
 	List<ObjectNode> getInstituteDetails(String applicationNo);
 	
 	ResponseEntity<?> verifyInstituteProposal(InstituteProposaldto request);
+	
+	List<ObjectNode> getApplicantDetails(String applicationNo);
 }

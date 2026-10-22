@@ -133,7 +133,8 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "    ON d.user_id = c.registration_no "
 			+ "WHERE d.user_id = ? "
 			+ "  AND b.programme_id = ? "
-			+ "  AND b.certification_level_id = ?")
+			+ "  AND b.certification_level_id = ? "
+			+ "  AND a.result_status_id = 95 ")
 	List<CourseEnrollmentTraineeApp> getFailedTraineeReassessment(String user_id, Long programme_id, Integer certification_level_id);
 	
 	@NativeQuery("SELECT "

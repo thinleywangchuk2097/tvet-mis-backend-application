@@ -64,7 +64,9 @@ public class TracerQuestionGenerator {
 
 	@Column(name = "max_selections")
 	private Integer maxSelections;
-
+	
+	private Integer maxDigits;
+	
 	@Column(name = "multiple_text_fields", columnDefinition = "TEXT")
 	private String multipleTextFields;
 

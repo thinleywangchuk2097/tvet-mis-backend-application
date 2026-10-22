@@ -57,6 +57,8 @@ public class TOTAnnouncement {
 
 	private Date updatedAt;
 	
+	private Integer showId;
+	
 	@ManyToOne
 	@JoinColumn(name = "program_id")
 	private TOTProgram totProgram;

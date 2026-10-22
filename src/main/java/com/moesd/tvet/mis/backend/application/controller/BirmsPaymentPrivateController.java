@@ -1,29 +1,41 @@
 package com.moesd.tvet.mis.backend.application.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
-import tools.jackson.databind.node.ObjectNode;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.moesd.tvet.mis.backend.application.dto.BirmsPaymentRequestdto;
 import com.moesd.tvet.mis.backend.application.model.BirmsPayment;
 import com.moesd.tvet.mis.backend.application.service.BirmsPaymentService;
-import java.util.*;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.node.ObjectNode;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/public/auth/birms/payment")
-public class BirmsPaymentController {
+@RequestMapping("/api/v1/private/birms/payment")
+public class BirmsPaymentPrivateController {
 
 	private final BirmsPaymentService birmsPaymentService;
 
-	
 	@PostMapping("/create-token")
 	public ResponseEntity<?> createToken() {
 		return birmsPaymentService.createToken();
 	}
-	
+
 	@PostMapping("/create-payment-advice-no")
 	public String createPaymentAdvice(@RequestBody BirmsPaymentRequestdto paymentRequest) {
 		return birmsPaymentService.createPaymentAdvice(paymentRequest);
@@ -78,12 +90,7 @@ public class BirmsPaymentController {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
-	
-	@GetMapping("/get-payment-details/{application_no}")
-	public Optional<BirmsPayment> getPaymentByApplicationNo(@PathVariable("application_no") String applicationNo) {
-		return birmsPaymentService.getPaymentByApplicationNo(applicationNo);
-	}
-	
+
 	@GetMapping("/get-all-payment-details")
 	public ResponseEntity<List<ObjectNode>> getAllPaymentDetails() {
 		return ResponseEntity.ok(birmsPaymentService.getAllPaymentDetails());
@@ -93,14 +100,15 @@ public class BirmsPaymentController {
 	public ResponseEntity<List<ObjectNode>> getByUserPenaltyApplicationDetails(@PathVariable("user_id") String userId) {
 		return ResponseEntity.ok(birmsPaymentService.getByUserPenaltyApplicationDetails(userId));
 	}
-	
+
 	@GetMapping("/get-course-details/{instituteId}")
 	public ResponseEntity<List<ObjectNode>> getCourseByInstituteId(@PathVariable String instituteId) {
 		return ResponseEntity.ok(birmsPaymentService.getCourseByInstituteId(instituteId));
 	}
-	
-	@GetMapping("/get-payment/{paymentAdviceNo}")
-	public Optional<BirmsPayment> getPaymentByPaymentAdviceNo(@PathVariable String paymentAdviceNo) {
-		return birmsPaymentService.getPaymentByPaymentAdviceNo(paymentAdviceNo);
+
+	@GetMapping("/get-payment-details/{application_no}")
+	public Optional<BirmsPayment> getPaymentByApplicationNo(@PathVariable("application_no") String applicationNo) {
+		return birmsPaymentService.getPaymentByApplicationNo(applicationNo);
 	}
+
 }

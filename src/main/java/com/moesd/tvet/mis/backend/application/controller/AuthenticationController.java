@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
-	
+
 	private final AuthenticationService authenticationservice;
 
 	@PostMapping("/register")
@@ -26,8 +26,8 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/authenticate")
-	public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
-		return (authenticationservice.authenticate(request));
+	public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request, HttpServletRequest httpRequest) {
+		return authenticationservice.authenticate(request, httpRequest);
 	}
 
 	@PostMapping("/refresh-token")

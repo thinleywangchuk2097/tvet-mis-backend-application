@@ -24,7 +24,7 @@ public class NonAccreditedCoursedto {
 	private Date validityDate;
 	private String createdBy;
 	private Integer updatedBy;
-	private String ApplicationNo;
+	private String applicationNo;
 	private String applicantName;
 	private List<QualityStandardsdto> qualityStandards;
 	// System fields

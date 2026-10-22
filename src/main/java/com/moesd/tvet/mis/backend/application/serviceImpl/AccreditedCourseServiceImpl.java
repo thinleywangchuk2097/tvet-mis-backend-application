@@ -78,7 +78,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			AccreditedCourse course = AccreditedCourse.builder().applicationNo(applicationNo)
 					.instituteId(request.getInstituteId()).curriculumId(request.getCurriculumId()).serviceId(serviceId)
 					.feesPerTrainee(request.getFeesPerTrainee()).enrolmentCapacity(request.getEnrolmentCapacity())
-					.LeadTrainerCidNo(request.getLeadTrainerCidNo()).leadTrainerName(request.getLeadTrainerName())
+					.leadTrainerCidNo(request.getLeadTrainerCidNo()).leadTrainerName(request.getLeadTrainerName())
 					.genderId(request.getGenderId()).professionalExperience(request.getProfessionalExperience())
 					.qualificationId(request.getQualificationId()).registration_date(request.getRegistration_date())
 					.validity_date(request.getValidity_date()).statusId(request.getStatusId())
@@ -180,10 +180,11 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 					.orElseThrow(() -> new RecordNotFoundException(
 							"Non Accredited Course not found with applicationNo: " + request.getApplicationNo()));
 
-			// Update InstituteRegistration entity
+			// Update entity
 			existingAccreditedCourse.setStatusId(request.getStatusId());
 			existingAccreditedCourse.setUpdatedAt(new java.util.Date());
 			existingAccreditedCourse.setUpdatedBy(request.getUpdatedBy());
+			existingAccreditedCourse.setEnrolmentCapacity(request.getEnrolmentCapacity());		
 			if (statusId == 126) {
 				existingAccreditedCourse.setRenewalDate(LocalDateTime.now().plusYears(1));
 			}

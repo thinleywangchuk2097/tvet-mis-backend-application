@@ -1,5 +1,6 @@
 package com.moesd.tvet.mis.backend.application.model;
 import java.io.Serial;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -70,6 +71,13 @@ public class User implements UserDetails {
 	
 	private String doB;
 	
+	@Builder.Default
+	@Column(name = "failed_login_attempts")
+	private Integer failedLoginAttempts = 0;
+
+	@Column(name = "lock_until")
+	private LocalDateTime lockUntil;   
+	
 	private Integer createdBy;
 	
 	private Date createdAt;
@@ -98,22 +106,6 @@ public class User implements UserDetails {
 	    return authorities;
 	}
 	
-//	@Override
-//	public Collection<? extends GrantedAuthority> getAuthorities() {
-//		List<GrantedAuthority> authorities = new ArrayList<>();
-//	    if (userRoles != null) {
-//	    	for (UserRole r : userRoles) {
-//	    		//authorities.add(new SimpleGrantedAuthority(r.getRole().getRoleName()));
-//	    		
-//	    		// Use role ID instead of role name
-//	    		authorities.add(new SimpleGrantedAuthority(r.getRole().getId().toString()));// Convert Long ID to String
-//	    		
-//            }
-//	    }
-//
-//	    return authorities;
-//	}
-
 	@Override
 	public String getUsername() {
 		return userId;

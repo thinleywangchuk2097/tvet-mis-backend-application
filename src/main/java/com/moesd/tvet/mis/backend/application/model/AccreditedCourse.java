@@ -51,7 +51,7 @@ public class AccreditedCourse {
 	
 	private Integer serviceId;
 	
-	private String LeadTrainerCidNo;
+	private String leadTrainerCidNo;
 	
 	private Integer genderId;
 	

@@ -6,4 +6,9 @@ import com.moesd.tvet.mis.backend.application.model.TracerSurveyResponseDetails;
 
 public interface TracerSurveyResponseDetailsRepository extends JpaRepository<TracerSurveyResponseDetails, Long>{
 	 List<TracerSurveyResponseDetails> findByApplicationNo(String applicationNo);
+	 
+	// TracerSurveyResponseDetailsRepository
+	 boolean existsByUniqueId(String uniqueId);
+
+	 List<TracerSurveyResponseDetails> findByUniqueId(String uniqueId);
 }

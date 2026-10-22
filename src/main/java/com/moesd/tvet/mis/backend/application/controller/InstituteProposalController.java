@@ -3,6 +3,7 @@ package com.moesd.tvet.mis.backend.application.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,13 @@ public class InstituteProposalController {
 	@PostMapping("/verify-institute-proposal")
 	public ResponseEntity<?> verifyInstituteProposal(@RequestBody InstituteProposaldto request) {
 		return (instituteProposalService.verifyInstituteProposal(request));
+	}
+
+	@PreAuthorize("hasAnyAuthority('7')")
+	@GetMapping("/get-applicant-details/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getApplicantDetails(@PathVariable("application_no") String applicationNo) {
+		List<ObjectNode> instituteDetails = instituteProposalService.getApplicantDetails(applicationNo);
+		return ResponseEntity.ok(instituteDetails);
 	}
 
 }

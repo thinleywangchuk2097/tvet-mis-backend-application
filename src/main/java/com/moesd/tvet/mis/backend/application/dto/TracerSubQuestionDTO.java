@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class TracerSubQuestionDTO {
+	private Long id;  
 	private String clientId;
 	private Integer subQuestionOrder;
 	private String questionText;
@@ -19,4 +20,5 @@ public class TracerSubQuestionDTO {
 	private String dependsOnClientId;
 	private String showWhenOption;
 	private Integer maxSelections;
+	private Integer maxDigits;
 }

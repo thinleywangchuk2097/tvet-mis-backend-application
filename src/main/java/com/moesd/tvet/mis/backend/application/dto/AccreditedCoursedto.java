@@ -21,7 +21,7 @@ public class AccreditedCoursedto {
 	private Integer curriculumId;
 	private String validity_date;
 	private boolean isRenewal;
-	private String LeadTrainerCidNo;
+	private String leadTrainerCidNo;
 	private Integer genderId;
 	private String leadTrainerName;
 	private String professionalExperience;

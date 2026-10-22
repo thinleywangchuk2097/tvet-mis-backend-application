@@ -36,6 +36,8 @@ public class CourseEnrollmentTraineeApp {
 	private String dosCertificateNo;
 
 	private String certificateNo;
+	
+	private Date  certificateIssuedDate;
 
 	private Integer resultStatusId;
 

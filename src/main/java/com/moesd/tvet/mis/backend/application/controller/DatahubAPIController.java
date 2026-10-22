@@ -2,8 +2,8 @@ package com.moesd.tvet.mis.backend.application.controller;
 
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import com.moesd.tvet.mis.backend.application.dto.PublicCitizenDetailsResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,9 +43,10 @@ public class DatahubAPIController {
 	private RestTemplate restTemplate;
 
 	@GetMapping("/citizendetails/{citizenshipNo}")
-	public ResponseEntity<Object> getCitizenDetails(@PathVariable String citizenshipNo) throws ParseException {
+	public ResponseEntity<PublicCitizenDetailsResponse> getCitizenDetails(@PathVariable String citizenshipNo)
+			throws ParseException {
 
-		// Step 1: Generate token (no model, no DB)
+		// Step 1: Generate token
 		String accessToken = generateNewToken();
 
 		// Step 2: Prepare headers
@@ -54,19 +56,59 @@ public class DatahubAPIController {
 		HttpEntity<String> request = new HttpEntity<>(headers);
 
 		// Step 3: Call citizen API
-		ResponseEntity<Object> response = restTemplate.exchange(citizenshipUrl + citizenshipNo, HttpMethod.GET, request,
-				Object.class);
+		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(citizenshipUrl + citizenshipNo,
+				HttpMethod.GET, request, new ParameterizedTypeReference<Map<String, Object>>() {
+				});
 
-		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
+		// Step 4: Extract ONLY the fields the public page needs
+		PublicCitizenDetailsResponse safeResponse = mapToPublicDto(response.getBody());
+
+		return new ResponseEntity<>(safeResponse, HttpStatus.OK);
+	}
+
+	/**
+	 * Maps the upstream DataHub response to a minimal public DTO. Any field not
+	 * explicitly copied here is NOT exposed to the caller.
+	 */
+	@SuppressWarnings("unchecked")
+	private PublicCitizenDetailsResponse mapToPublicDto(Map<String, Object> upstreamBody) {
+		PublicCitizenDetailsResponse dto = new PublicCitizenDetailsResponse();
+
+		if (upstreamBody == null) {
+			return dto;
+		}
+
+		Map<String, Object> citizenDetailsResponse = (Map<String, Object>) upstreamBody.get("citizenDetailsResponse");
+		if (citizenDetailsResponse == null) {
+			return dto;
+		}
+
+		List<Map<String, Object>> citizenDetailList = (List<Map<String, Object>>) citizenDetailsResponse
+				.get("citizenDetail");
+		if (citizenDetailList == null || citizenDetailList.isEmpty()) {
+			return dto;
+		}
+
+		Map<String, Object> citizen = citizenDetailList.get(0);
+		// Copy ONLY fields
+		dto.setCid((String) citizen.get("cid"));
+		dto.setFirstName((String) citizen.get("firstName"));
+		dto.setMiddleName((String) citizen.get("middleName"));
+		dto.setLastName((String) citizen.get("lastName"));
+		dto.setFirstDzoName((String) citizen.get("firstDzoName"));
+		dto.setMiddleDzoName((String) citizen.get("middleDzoName"));
+		dto.setLastDzoName((String) citizen.get("lastDzoName"));
+		dto.setDob((String) citizen.get("dob"));
+		dto.setGender((String) citizen.get("gender"));
+		return dto;
 	}
 
 	private String generateNewToken() {
-
 		String authStringEnc = Base64.getEncoder().encodeToString((consumerKey + ":" + consumerSecret).getBytes());
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", "Basic " + authStringEnc);
-
+		
 		HttpEntity<String> request = new HttpEntity<>(headers);
 
 		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -74,7 +116,6 @@ public class DatahubAPIController {
 				new ParameterizedTypeReference<Map<String, Object>>() {
 				});
 
-		// Extract access_token directly from response
 		return (String) response.getBody().get("access_token");
 	}
 }

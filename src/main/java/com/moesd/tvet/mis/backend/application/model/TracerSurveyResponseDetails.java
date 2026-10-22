@@ -35,6 +35,9 @@ public class TracerSurveyResponseDetails {
     
     private Integer isSubQuestion;  // 1 for true, 0 for false
     
+    @Column(name = "unique_id", length = 100)
+    private String uniqueId;
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

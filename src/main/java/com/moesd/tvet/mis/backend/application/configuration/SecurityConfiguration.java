@@ -40,18 +40,14 @@ public class SecurityConfiguration {
 						.requestMatchers("/error").permitAll()
 
 						// Public API endpoints
-						.requestMatchers("/api/v1/auth/**",
-								"/api/v1/public/**", 
-								"/api/v1/common/**")
-						.permitAll()
+						.requestMatchers("/api/v1/auth/**", "/api/v1/public/**", "/api/v1/common/**").permitAll()
 
 						// User management — restricted to listed authorities
 						.requestMatchers("/api/v1/user/management/**")
-						.hasAnyAuthority("1", "2", "5", "6", "7",
-								"8", "9", "10", "11",
-								"12", "13", "14", "15", "16",
-								"17", "28", "30", "29", "21", "23") 
-
+						.hasAnyAuthority("1", "2", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
+								"17", "28", "30", "29", "21", "23")
+						.requestMatchers("/api/v1/private/birms/payment/**")
+						.hasAnyAuthority("1", "7", "9", "22", "23", "11", "12")
 						// Password endpoints — admin only
 						.requestMatchers("/api/v1/user/password/**").hasAuthority("1")
 

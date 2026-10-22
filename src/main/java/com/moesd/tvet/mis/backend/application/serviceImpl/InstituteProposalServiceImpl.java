@@ -207,6 +207,11 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 		}
 	}
 
+	@Override
+	public List<ObjectNode> getApplicantDetails(String applicationNo) {
+		return objectTojson._toJson(instituteProposalRepository.getApplicantDetails(applicationNo));
+	}
+
 	
 
 }

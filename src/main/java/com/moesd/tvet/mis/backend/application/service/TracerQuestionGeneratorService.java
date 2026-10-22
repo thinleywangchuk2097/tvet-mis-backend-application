@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
 
@@ -30,7 +31,9 @@ public interface TracerQuestionGeneratorService {
 
 	TracerSurveySendDetails getSurveyByUniqueId(String uniqueId);
 
-	 List<TracerSurveyResponseDetails> saveSurveyResponses(String applicationNo, 
+	List<TracerSurveyResponseDetails> saveSurveyResponses(String applicationNo, 
 	            List<ResponseItem> responses);
+	 
+	Set<Long> getQuestionIdsByApplicationNo(String applicationNo);
 
 }

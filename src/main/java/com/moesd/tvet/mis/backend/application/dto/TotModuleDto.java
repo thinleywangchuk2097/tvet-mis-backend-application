@@ -1,5 +1,6 @@
 package com.moesd.tvet.mis.backend.application.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,11 @@ public class TotModuleDto {
 	private String prerequisites;
 
 	private String learningOutcomes;
-
+	
+	private String weightage;
+	
 	private Integer order;
+	
+	private List<TotCourseContentDto> courseContents;
+	
 }

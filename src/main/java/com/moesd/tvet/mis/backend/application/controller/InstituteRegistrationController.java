@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +27,7 @@ public class InstituteRegistrationController {
 
 	private final InstituteRegistrationService instituteRegistrationService;
 	private static final String MESSAGE_KEY = "Your application is already submitted for Registration";
-	
+
 	@PostMapping("/submit")
 	public ResponseEntity<?> registerInstitute(@RequestBody InstituteRegistrationdto request) {
 		return (instituteRegistrationService.registerInstitute(request));
@@ -91,10 +92,12 @@ public class InstituteRegistrationController {
 	private record StatusResult(String message, boolean alreadySubmitted) {
 	}
 
+	@PreAuthorize("hasAnyAuthority('7', '22', '23')")
 	@GetMapping("/get-institute-application-details/{application_no}")
 	public ResponseEntity<List<ObjectNode>> getInstituteRegistrationDetails(
 			@PathVariable("application_no") String applicationNo) {
-		List<ObjectNode> instituteRegistrationDetails = instituteRegistrationService.getInstituteRegistrationDetails(applicationNo);
+		List<ObjectNode> instituteRegistrationDetails = instituteRegistrationService
+				.getInstituteRegistrationDetails(applicationNo);
 		return ResponseEntity.ok(instituteRegistrationDetails);
 	}
 
@@ -113,14 +116,16 @@ public class InstituteRegistrationController {
 	@GetMapping("/get-renewal-details/{registration_no}")
 	public ResponseEntity<List<ObjectNode>> getInstituteRenewalDetails(
 			@PathVariable("registration_no") String registrationNo) {
-		List<ObjectNode> instituteRenewalDetails = instituteRegistrationService.getInstituteRenewalDetails(registrationNo);
+		List<ObjectNode> instituteRenewalDetails = instituteRegistrationService
+				.getInstituteRenewalDetails(registrationNo);
 		return ResponseEntity.ok(instituteRenewalDetails);
 	}
 
 	@GetMapping("/get-institute-change-details/{registration_no}")
 	public ResponseEntity<List<ObjectNode>> getInstituteChangeDetails(
 			@PathVariable("registration_no") String registrationNo) {
-		List<ObjectNode> instituteChangeDetails = instituteRegistrationService.getInstituteChangeDetails(registrationNo);
+		List<ObjectNode> instituteChangeDetails = instituteRegistrationService
+				.getInstituteChangeDetails(registrationNo);
 		return ResponseEntity.ok(instituteChangeDetails);
 	}
 
