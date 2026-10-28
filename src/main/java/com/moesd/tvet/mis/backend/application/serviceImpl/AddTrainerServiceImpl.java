@@ -40,42 +40,52 @@ public class AddTrainerServiceImpl implements AddTrainerService {
         try {
             log.info("Submitting new trainer: {}", request.getName());
             
-            // Check if citizenId already exists
-            if (request.getCitizenId() != null && !request.getCitizenId().isEmpty()) {
-                Optional<AddTrainer> existingTrainer = addTrainerRepository.findAll()
-                    .stream()
-                    .filter(t -> request.getCitizenId().equals(t.getCitizenId()))
-                    .findFirst();
-                
-                if (existingTrainer.isPresent()) {
-                    Map<String, Object> errorResponse = new HashMap<>();
-                    errorResponse.put("message", "Trainer with Citizen ID " + request.getCitizenId() + " already exists");
-                    errorResponse.put("status", "ERROR");
-                    errorResponse.put("data", null);
-                    
-                    return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
-                        .body(errorResponse);
-                }
+            // Look for an existing trainer with the same CID / work permit no
+            boolean hasCid = request.getCitizenId() != null && !request.getCitizenId().isEmpty();
+            boolean hasWp = request.getWorkPermitNo() != null && !request.getWorkPermitNo().isEmpty();
+            List<AddTrainer> matches = (hasCid || hasWp)
+                ? addTrainerRepository.findAll().stream()
+                    .filter(t -> (hasCid && request.getCitizenId().equals(t.getCitizenId()))
+                              || (hasWp && request.getWorkPermitNo().equals(t.getWorkPermitNo())))
+                    .collect(Collectors.toList())
+                : List.of();
+
+            // Active trainer with the same CID / work permit -> duplicate
+            Optional<AddTrainer> active = matches.stream()
+                .filter(t -> Integer.valueOf(1).equals(t.getStatusId()))
+                .findFirst();
+            if (active.isPresent()) {
+                AddTrainer dup = active.get();
+                String message = hasCid && request.getCitizenId().equals(dup.getCitizenId())
+                    ? "Trainer with Citizen ID " + request.getCitizenId() + " already exists"
+                    : "Trainer with Work Permit No " + request.getWorkPermitNo() + " already exists";
+                log.warn("Duplicate trainer rejected: {} (existing trainer id {}, institute {})",
+                    message, dup.getId(), dup.getInstituteId());
+
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("message", message);
+                errorResponse.put("status", "ERROR");
+                errorResponse.put("data", null);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
             }
-            
-            // Check if workPermitNo already exists
-            if (request.getWorkPermitNo() != null && !request.getWorkPermitNo().isEmpty()) {
-                Optional<AddTrainer> existingTrainer = addTrainerRepository.findAll()
-                    .stream()
-                    .filter(t -> request.getWorkPermitNo().equals(t.getWorkPermitNo()))
-                    .findFirst();
-                
-                if (existingTrainer.isPresent()) {
-                    Map<String, Object> errorResponse = new HashMap<>();
-                    errorResponse.put("message", "Trainer with Work Permit No " + request.getWorkPermitNo() + " already exists");
-                    errorResponse.put("status", "ERROR");
-                    errorResponse.put("data", null);
-                    
-                    return ResponseEntity
-                        .status(HttpStatus.CONFLICT)
-                        .body(errorResponse);
+
+            // Previously deleted (soft-deleted) trainer -> reactivate with the new details
+            if (!matches.isEmpty()) {
+                AddTrainer deleted = matches.get(0);
+                log.info("Reactivating soft-deleted trainer id {} for {}", deleted.getId(), request.getName());
+                request.setId(deleted.getId());
+                if (request.getUpdatedBy() == null) {
+                    request.setUpdatedBy(request.getCreatedBy());
                 }
+                ResponseEntity<?> reactivated = updateTrainer(request);
+                if (reactivated.getStatusCode().is2xxSuccessful()) {
+                    Map<String, Object> successResponse = new HashMap<>();
+                    successResponse.put("message", "Trainer added successfully (previously deleted record restored)");
+                    successResponse.put("status", "SUCCESS");
+                    successResponse.put("data", null);
+                    return ResponseEntity.status(HttpStatus.CREATED).body(successResponse);
+                }
+                return reactivated;
             }
             
             // Create new trainer entity

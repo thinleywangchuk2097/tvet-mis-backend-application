@@ -91,6 +91,16 @@ public class TracerQuestionGeneratorController {
 		}
 	}
 
+	@GetMapping("/get-tracer-responses/{application_no}")
+	public ResponseEntity<?> getTracerResponses(@PathVariable("application_no") String applicationNo) {
+		try {
+			return ResponseEntity.ok(tracerQuestionGeneratorService.getTracerResponses(applicationNo));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(java.util.Map.of("message", "Failed to fetch tracer responses"));
+		}
+	}
+
 	@PostMapping("/send-trainee-survey")
 	public ResponseEntity<?> sendTraineeTracerSurvey(@RequestBody TracerSendRequestDTO request) {
 		try {

@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,9 @@ public interface TracerQuestionGeneratorService {
 	List<ObjectNode> getTracerDetailsByApplicationNo(String applicationNo);
 
 	List<ObjectNode> getTracerAllApplications();
+
+	/** Sent surveys + submitted answers of one tracer (for the response page / Excel). */
+	Map<String, Object> getTracerResponses(String applicationNo);
 
 	ResponseEntity<?> sendTraineeTracerSurvey(TracerSendRequestDTO request);
 

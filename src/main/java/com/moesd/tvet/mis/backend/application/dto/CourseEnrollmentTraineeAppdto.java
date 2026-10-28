@@ -39,6 +39,13 @@ public class CourseEnrollmentTraineeAppdto {
 	private String stream;
 	
 	private Long parentFailedId;
+
+	// Gyalsung (National Service) details from GyalsungApiService, as received
+	private String completed; // "Yes" / "No"
+	private String year; // e.g. "2026"
+	private String academy;
+	private String trainingStartDate; // yyyy-MM-dd (or null)
+	private String trainingEndDate; // yyyy-MM-dd (or null)
 	
 	private List<TraineeAppDto>traineeMarks;
 

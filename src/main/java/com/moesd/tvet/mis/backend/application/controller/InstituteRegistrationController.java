@@ -92,7 +92,7 @@ public class InstituteRegistrationController {
 	private record StatusResult(String message, boolean alreadySubmitted) {
 	}
 
-	@PreAuthorize("hasAnyAuthority('7', '22', '23')")
+	//@PreAuthorize("hasAnyAuthority('7', '22', '23')")
 	@GetMapping("/get-institute-application-details/{application_no}")
 	public ResponseEntity<List<ObjectNode>> getInstituteRegistrationDetails(
 			@PathVariable("application_no") String applicationNo) {

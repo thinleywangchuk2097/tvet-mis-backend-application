@@ -25,6 +25,8 @@ public interface BirmsPaymentService {
 
     List<ObjectNode> getAllPaymentDetails();
 
+    List<ObjectNode> getPaymentDetailsByInstituteId(Integer instituteId);
+
     List<ObjectNode> getByUserPenaltyApplicationDetails(String userId);
     
     List<ObjectNode> getCourseByInstituteId(String instituteId);

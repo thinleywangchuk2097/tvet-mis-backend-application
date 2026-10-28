@@ -39,4 +39,8 @@ public class PublicPageServiceImpl implements PublicPageService {
 		return publicPageRepository.getCourseAnnounceNotifications();
 	}
 
+	@Override
+	public Map<String, Object> getHomeStats() {
+		return publicPageRepository.getHomeStats();
+	}
 }

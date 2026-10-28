@@ -89,7 +89,15 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					.guardianName(request.getGuardianName()).guardianMobileNo(request.getGuardianMobileNo())
 					.guardianOccupationId(request.getGuardianOccupationId())
 					.guardianMaritalStatusId(request.getGuardianMaritalStatusId()).statusId(request.getStatusId())
-					.createdAt(new java.util.Date()).build();
+					.createdAt(new java.util.Date())
+					// Gyalsung details
+					.completed(trimToNull(request.getCompleted()))
+					.isGyalsung("yes".equalsIgnoreCase(trimToNull(request.getCompleted())) ? 'Y' : 'N')
+					.academy(trimToNull(request.getAcademy()))
+					.completedYear(yearToDate(request.getYear()))
+					.trainingStartDate(isoToDate(request.getTrainingStartDate()))
+					.trainingEndDate(isoToDate(request.getTrainingEndDate()))
+					.build();
 
 			// Process trainee marks - set the relationship
 			if (request.getTraineeMarks() != null && !request.getTraineeMarks().isEmpty()) {
@@ -122,6 +130,34 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 		    log.error("Failed to submit Trainee", e);
 		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 		            .body(Map.of("message", "Failed to submit Trainee"));
+		}
+	}
+
+	// ---- Gyalsung value helpers (bad / empty values are stored as null, never fail the submit) ----
+	private static String trimToNull(String v) {
+		return (v == null || v.trim().isEmpty() || "null".equalsIgnoreCase(v.trim())) ? null : v.trim();
+	}
+
+	/** "2026" -> 2026-01-01 (completed_year column is a date). */
+	private static java.util.Date yearToDate(String year) {
+		String y = trimToNull(year);
+		if (y == null || !y.matches("\\d{4}")) {
+			return null;
+		}
+		return java.sql.Date.valueOf(java.time.LocalDate.of(Integer.parseInt(y), 1, 1));
+	}
+
+	/** "2026-03-01" or "2026-03-01T00:00:00..." -> date; anything else -> null. */
+	private static java.util.Date isoToDate(String value) {
+		String v = trimToNull(value);
+		if (v == null || v.length() < 10) {
+			return null;
+		}
+		try {
+			return java.sql.Date.valueOf(java.time.LocalDate.parse(v.substring(0, 10)));
+		} catch (java.time.format.DateTimeParseException e) {
+			log.warn("Ignoring invalid Gyalsung date: {}", v);
+			return null;
 		}
 	}
 

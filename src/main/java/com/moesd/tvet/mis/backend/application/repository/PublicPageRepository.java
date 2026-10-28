@@ -127,5 +127,38 @@ public class PublicPageRepository {
 		return jdbcTemplate.queryForList(sql);
 		
 	}
-	
+
+	// Headline figures for the public home page ("TVET by the numbers").
+	// Each figure is read on its own so one failing query does not hide the others.
+	public java.util.Map<String, Object> getHomeStats() {
+		java.util.Map<String, Object> stats = new java.util.LinkedHashMap<>();
+		// all approved (status 57) registered providers: institutes, SES centres and assessment centres
+		stats.put("trainingInstitutes", count(
+				"SELECT COUNT(*) FROM tbl_institute_registration_dtls WHERE status_id = 57"));
+		// approved accredited + non-accredited programmes
+		stats.put("programsOffered", count(
+				"SELECT (SELECT COUNT(*) FROM tbl_accredited_course_dtls WHERE status_id = 57) "
+						+ "+ (SELECT COUNT(*) FROM tbl_non_accredited_course_dtls WHERE status_id = 57)"));
+		// registered trainers (tbl_trainer_dtls, AddTrainer): active ones only (deleted = status 0),
+		// each person once even if listed by more than one institute
+		stats.put("registeredTrainers", count(
+				"SELECT COUNT(DISTINCT COALESCE(NULLIF(citizen_id, ''), NULLIF(work_permit_no, ''), CONCAT('id-', id))) "
+						+ "FROM tbl_trainer_dtls WHERE COALESCE(status_id, 1) <> 0"));
+		// trainee applications to announced programmes
+		stats.put("traineesEnrolled", count("SELECT COUNT(*) FROM tbl_programme_trainee_enrollment_dtls"));
+		// Dzongkhags with at least one approved registered provider
+		stats.put("dzongkhagsReached", count(
+				"SELECT COUNT(DISTINCT dzongkhag_id) FROM tbl_institute_registration_dtls "
+						+ "WHERE status_id = 57 AND dzongkhag_id IS NOT NULL AND dzongkhag_id <> ''"));
+		return stats;
+	}
+
+	private Long count(String sql) {
+		try {
+			Long n = jdbcTemplate.queryForObject(sql, Long.class);
+			return n == null ? 0L : n;
+		} catch (Exception e) {
+			return null; // shown as "—" on the page
+		}
+	}
 }
