@@ -15,28 +15,32 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/v1/public/gyalsung")
 public class GyalsungApiController {
 
-    @Value("${gyalsung-token-api}")
-    private String gyalsungTokenUrl;
+	@Value("${gyalsung-token-api}")
+	private String gyalsungTokenUrl;
 
-    @Value("${gyalsung-consumer-key}")
-    private String consumerKey;
+	@Value("${gyalsung-consumer-key}")
+	private String consumerKey;
 
-    @Value("${gyalsung-consumer-secret}")
-    private String consumerSecret;
+	@Value("${gyalsung-consumer-secret}")
+	private String consumerSecret;
 
-    @Value("${gyalsung-data-api}")
-    private String gyalsungDataUrl;
+	@Value("${gyalsung-data-api}")
+	private String gyalsungDataUrl;
 
-    @Autowired
-    private RestTemplate restTemplate;
+	@Autowired
+	private RestTemplate restTemplate;
 
-    @GetMapping("/gyalsungDetails/{citizenshipNo}")
+	@GetMapping("/gyalsungDetails/{citizenshipNo}")
     public ResponseEntity<?> getGyalsungDetails(@PathVariable String citizenshipNo) {
 
         try {
@@ -51,7 +55,11 @@ public class GyalsungApiController {
             HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
             // 3. Correct API format (QUERY PARAM, not path variable)
-            String url = gyalsungDataUrl + "?cid=" + citizenshipNo;
+            //    .../getGyalsungDetails?cid=XXXXXXXXXXX  (no trailing "/" before "?")
+            String base = gyalsungDataUrl.trim().replaceAll("/+$", "");
+            String url = UriComponentsBuilder.fromUriString(base)
+                    .queryParam("cid", citizenshipNo)
+                    .toUriString();
 
             // 4. Call external API
             ResponseEntity<Object> response = restTemplate.exchange(
@@ -63,38 +71,36 @@ public class GyalsungApiController {
 
             return ResponseEntity.ok(response.getBody());
 
+        } catch (HttpStatusCodeException e) {
+            log.error("Gyalsung lookup failed for {}: {} {}", citizenshipNo, e.getStatusCode(),
+                    e.getResponseBodyAsString());
+            return ResponseEntity.status(e.getStatusCode())
+                    .body(Map.of("message", "Failed to retrieve Gyalsung details"));
         } catch (Exception e) {
+            log.error("Gyalsung lookup failed for {}", citizenshipNo, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to retrieve Gyalsung details");
+                    .body(Map.of("message", "Failed to retrieve Gyalsung details"));
         }
     }
 
-    private String generateNewToken() {
+	private String generateNewToken() {
 
-        // Request body as per curl
-        Map<String, String> requestBody = Map.of(
-                "client_id", consumerKey,
-                "client_secret", consumerSecret
-        );
+		// Request body as per curl
+		Map<String, String> requestBody = Map.of("client_id", consumerKey, "client_secret", consumerSecret);
 
-        // Headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+		// Headers
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<Map<String, String>> request =
-                new HttpEntity<>(requestBody, headers);
+		HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
 
-        // Call token API
-        ResponseEntity<Map<String, Object>> response =
-                restTemplate.exchange(
-                        gyalsungTokenUrl,
-                        HttpMethod.POST,
-                        request,
-                        new ParameterizedTypeReference<Map<String, Object>>() {}
-                );
+		// Call token API
+		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(gyalsungTokenUrl.trim(), HttpMethod.POST, request,
+				new ParameterizedTypeReference<Map<String, Object>>() {
+				});
 
-        // Extract token
-        return (String) response.getBody().get("access_token");
-    }
+		// Extract token
+		return (String) response.getBody().get("access_token");
+	}
 }

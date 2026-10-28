@@ -42,4 +42,8 @@ public class InstituteRegistrationQualityStandard {
 	private LocalDateTime createdAt;
 
 	private Integer updatedBy;
+
+	/** PARENT, SUB_PARENT or CHECKLIST (null for older rows: type is then inferred from the tree). */
+	@Column(name = "item_type", length = 20)
+	private String itemType;
 }

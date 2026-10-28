@@ -385,6 +385,11 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 	}
 
 	@Override
+	public List<ObjectNode> getPaymentDetailsByInstituteId(Integer instituteId) {
+		return objectTojson._toJson(birmsPaymentRepository.getPaymentDetailsByInstituteId(instituteId));
+	}
+
+	@Override
 	public List<ObjectNode> getByUserPenaltyApplicationDetails(String userId) {
 		return new ArrayList<>();
 	}

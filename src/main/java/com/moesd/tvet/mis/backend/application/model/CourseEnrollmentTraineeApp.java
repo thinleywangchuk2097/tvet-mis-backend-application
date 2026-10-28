@@ -108,6 +108,20 @@ public class CourseEnrollmentTraineeApp {
 	private Integer updatedBy;
 
 	private Date updatedAt;
+	
+	@Builder.Default
+	@Column(length = 1)
+	private Character isGyalsung = 'N';
+	
+	private String completed;
+	
+	private String academy;
+	
+	private Date completedYear;
+	
+	private Date trainingStartDate;
+	
+	private Date trainingEndDate;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "course_enrol_app_no", // FK column in trainee table

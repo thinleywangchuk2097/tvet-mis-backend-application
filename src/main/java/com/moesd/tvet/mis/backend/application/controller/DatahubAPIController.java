@@ -1,7 +1,6 @@
 package com.moesd.tvet.mis.backend.application.controller;
 
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import com.moesd.tvet.mis.backend.application.dto.PublicCitizenDetailsResponse;
+import com.moesd.tvet.mis.backend.application.service.DatahubTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,28 +27,22 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/public/datahub")
 public class DatahubAPIController {
 
-	@Value("${datahub.token-api}")
-	String tokenApi;
-
-	@Value("${datahub.consumer-key}")
-	String consumerKey;
-
-	@Value("${datahub.consumer-secret}")
-	String consumerSecret;
-
 	@Value("${datahub.citizen-api}")
 	String citizenshipUrl;
 
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Autowired
+	private DatahubTokenService datahubTokenService;
+
 	@GetMapping("/citizendetails/{citizenshipNo}")
 	public ResponseEntity<PublicCitizenDetailsResponse> getCitizenDetails(@PathVariable String citizenshipNo)
 			throws ParseException {
 
 		// Step 1: Generate token
-		String accessToken = generateNewToken();
-
+		String accessToken = datahubTokenService.generateNewToken();
+        
 		// Step 2: Prepare headers
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", "Bearer " + accessToken);
@@ -101,21 +95,5 @@ public class DatahubAPIController {
 		dto.setDob((String) citizen.get("dob"));
 		dto.setGender((String) citizen.get("gender"));
 		return dto;
-	}
-
-	private String generateNewToken() {
-		String authStringEnc = Base64.getEncoder().encodeToString((consumerKey + ":" + consumerSecret).getBytes());
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Basic " + authStringEnc);
-		
-		HttpEntity<String> request = new HttpEntity<>(headers);
-
-		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-				tokenApi + "?grant_type=client_credentials", HttpMethod.POST, request,
-				new ParameterizedTypeReference<Map<String, Object>>() {
-				});
-
-		return (String) response.getBody().get("access_token");
 	}
 }

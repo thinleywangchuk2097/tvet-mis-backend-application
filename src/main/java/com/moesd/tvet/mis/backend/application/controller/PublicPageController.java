@@ -44,4 +44,9 @@ public class PublicPageController {
 		return publicPageService.getCourseAnnounceNotifications();
 	}
 
+	// Headline figures for the home page "TVET by the numbers" card
+	@GetMapping("/home-stats")
+	public Map<String, Object> getHomeStats() {
+		return publicPageService.getHomeStats();
+	}
 }

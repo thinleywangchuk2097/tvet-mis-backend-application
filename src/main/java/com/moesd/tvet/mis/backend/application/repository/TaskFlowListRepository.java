@@ -9,6 +9,8 @@ import jakarta.persistence.Tuple;
 public interface TaskFlowListRepository extends JpaRepository <TaskFlowList,Long>{
 	
 TaskFlowList findByApplicationNo(String applicationNo);
+
+	List<TaskFlowList> findAllByApplicationNo(String applicationNo);
 	
 	@NativeQuery("SELECT "
 			+ "  a.application_no, "
@@ -88,7 +90,10 @@ TaskFlowList findByApplicationNo(String applicationNo);
 		    "  a.service_id, " +
 		    "  a.role_id, " +
 		    "  a.wf_remarks, " +
-		    "  a.action_date " +
+		    "  a.action_date, " +
+		    // current step: not updated yet -> turnaround = time since the action (ongoing)
+		    "  CAST(NULL AS DATETIME) AS updated_date, " +
+		    "  TIMESTAMPDIFF(MINUTE, a.action_date, NOW()) AS turnaround_minutes " +
 		    "FROM tbl_workflow_dtls a " +
 		    "WHERE a.application_no = ?1 " +
 
@@ -103,7 +108,10 @@ TaskFlowList findByApplicationNo(String applicationNo);
 		    "  b.service_id, " +
 		    "  b.role_id, " +
 		    "  b.wf_remarks, " +
-		    "  b.action_date " +
+		    // audit row = a past step: acted on at created_at, replaced (updated) at action_date
+		    "  COALESCE(b.created_at, b.action_date) AS action_date, " +
+		    "  b.action_date AS updated_date, " +
+		    "  TIMESTAMPDIFF(MINUTE, COALESCE(b.created_at, b.action_date), b.action_date) AS turnaround_minutes " +
 		    "FROM tbl_workflow_dtls_audit b " +
 		    "WHERE b.application_no = ?1 " +
 		    ") t " +

@@ -22,6 +22,15 @@ public interface BirmsPaymentRepository extends JpaRepository<BirmsPayment, Long
     				 + "FROM "
     				 + "  tbl_birms_payment_details a")
 	List<Tuple> getAllPaymentDetails();
+
+    // Payments of one institute only (institute payment page)
+    @NativeQuery("SELECT "
+    				 + "  a.* "
+    				 + "FROM "
+    				 + "  tbl_birms_payment_details a "
+    				 + "WHERE a.institute_id = ? "
+    				 + "ORDER BY a.created_at DESC")
+	List<Tuple> getPaymentDetailsByInstituteId(Integer instituteId);
     
     @NativeQuery("SELECT "
     				+ "  c.id AS course_id, "
