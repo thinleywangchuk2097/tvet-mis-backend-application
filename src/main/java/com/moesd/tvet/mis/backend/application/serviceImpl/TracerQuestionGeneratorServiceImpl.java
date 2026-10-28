@@ -714,4 +714,40 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 		return new HashSet<>(
 				tracerQuestionGeneratorRepository.findQuestionIdsByApplicationNo(applicationNo));
 	}
+
+	@Override
+	public Map<String, Object> getTracerResponses(String applicationNo) {
+		List<Map<String, Object>> sends = tracerSurveySendDetailsRepository.findSendsForTracer(applicationNo)
+				.stream().map(sd -> {
+					Map<String, Object> m = new HashMap<>();
+					m.put("id", sd.getId());
+					m.put("applicationNo", sd.getApplicationNo());
+					m.put("uniqueId", sd.getUniqueId());
+					m.put("applicationName", sd.getApplicationName());
+					m.put("mobileNo", sd.getMobileNo());
+					m.put("emailId", sd.getEmailId());
+					m.put("statusId", sd.getStatusId());
+					m.put("parentTracerTypeId", sd.getParentTracerTypeId());
+					m.put("subTracerTypeId", sd.getSubTracerTypeId());
+					m.put("createdAt", sd.getCreatedAt());
+					m.put("updatedAt", sd.getUpdatedAt());
+					return m;
+				}).collect(Collectors.toList());
+
+		List<Map<String, Object>> responses = tracerSurveyResponseDetailsRepository.findByApplicationNo(applicationNo)
+				.stream().map(r -> {
+					Map<String, Object> m = new HashMap<>();
+					m.put("uniqueId", r.getUniqueId());
+					m.put("questionId", r.getQuestionId());
+					m.put("isSubQuestion", r.getIsSubQuestion());
+					m.put("response", r.getResponseId()); // JSON text as stored
+					m.put("createdAt", r.getCreatedAt());
+					return m;
+				}).collect(Collectors.toList());
+
+		Map<String, Object> result = new HashMap<>();
+		result.put("sends", sends);
+		result.put("responses", responses);
+		return result;
+	}
 }

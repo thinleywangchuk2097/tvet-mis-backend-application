@@ -96,6 +96,12 @@ public class BirmsPaymentPrivateController {
 		return ResponseEntity.ok(birmsPaymentService.getAllPaymentDetails());
 	}
 
+	// Only the given institute's payments (institute payment page)
+	@GetMapping("/get-payment-details-by-institute/{instituteId}")
+	public ResponseEntity<List<ObjectNode>> getPaymentDetailsByInstituteId(@PathVariable Integer instituteId) {
+		return ResponseEntity.ok(birmsPaymentService.getPaymentDetailsByInstituteId(instituteId));
+	}
+
 	@GetMapping("/get-payment-by-user/{user_id}")
 	public ResponseEntity<List<ObjectNode>> getByUserPenaltyApplicationDetails(@PathVariable("user_id") String userId) {
 		return ResponseEntity.ok(birmsPaymentService.getByUserPenaltyApplicationDetails(userId));

@@ -1,6 +1,8 @@
 package com.moesd.tvet.mis.backend.application.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,6 +31,18 @@ public class TOTProgramTrainerApplied {
 	private Date createdAt;
 	private Integer updatedBy;
 	private Date updatedAt;
+	// Selection by reviewer (1 = selected, 0 = not selected, null = not yet reviewed)
+	private Integer isSelected;
+	private Integer selectedBy;
+	private Date selectedAt;
+	// Mark sheet / certificate result
+	@Column(precision = 10, scale = 2)
+	private BigDecimal overallPercentage;
+	private String grade;
+	private String result;
+	private String certificateNo;
+	private Integer certificateGeneratedBy;
+	private Date certificateGeneratedAt;
 	
 	
 }

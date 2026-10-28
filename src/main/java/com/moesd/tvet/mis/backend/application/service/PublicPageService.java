@@ -16,4 +16,6 @@ public interface PublicPageService {
 	List<Map<String, Object>> getCourseBySector();
 	
 	List<Map<String, Object>> getCourseAnnounceNotifications();
+
+	Map<String, Object> getHomeStats();
 }

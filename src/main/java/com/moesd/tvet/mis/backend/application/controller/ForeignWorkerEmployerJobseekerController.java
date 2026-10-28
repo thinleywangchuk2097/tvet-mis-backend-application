@@ -1,12 +1,8 @@
 package com.moesd.tvet.mis.backend.application.controller;
 
 import java.text.ParseException;
-import java.util.Base64;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-
+import com.moesd.tvet.mis.backend.application.service.DatahubTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,15 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/public/data")
 public class ForeignWorkerEmployerJobseekerController {
 	
-	@Value("${mis-token-api}")
-	String tokenApi;
-
-	@Value("${mis-consumer-key}")
-	String consumerKey;
-
-	@Value("${mis-consumer-secret}")
-	String consumerSecret;
-
 	@Value("${mis-jobseek-api}")
 	String jobseekApiUrl;
 	
@@ -44,15 +31,24 @@ public class ForeignWorkerEmployerJobseekerController {
 	
 	@Value("${mis-foreign-worker-api}")
 	String foreignWorkerApiUrl;
+
+	@Value("${datahub.immigrant-api}")
+	String immigrantApiUrl;
+
+	@Value("${datahub.zest-employee-api}")
+	String zestEmployeeApiUrl;
 	
 	@Autowired
 	private RestTemplate restTemplate;
+
+	@Autowired
+	private DatahubTokenService datahubTokenService;
 
 	@GetMapping("/job-seeker-details/{citizenshipNo}")
 	public ResponseEntity<Object> getJobSeekerDetails(@PathVariable String citizenshipNo) throws ParseException {
 
 		// Step 1: Generate token (no model, no DB)
-		String accessToken = generateNewToken();
+		String accessToken = datahubTokenService.generateNewToken();
 
 		// Step 2: Prepare headers
 		HttpHeaders headers = new HttpHeaders();
@@ -71,7 +67,7 @@ public class ForeignWorkerEmployerJobseekerController {
 	public ResponseEntity<Object> getForeignWorkerDetails(@PathVariable String workPermitNo) throws ParseException {
 
 		// Step 1: Generate token (no model, no DB)
-		String accessToken = generateNewToken();
+		String accessToken = datahubTokenService.generateNewToken();
 
 		// Step 2: Prepare headers
 		HttpHeaders headers = new HttpHeaders();
@@ -90,7 +86,7 @@ public class ForeignWorkerEmployerJobseekerController {
 	public ResponseEntity<Object> getEmployerDetails(@PathVariable String applicationNo) throws ParseException {
 
 		// Step 1: Generate token (no model, no DB)
-		String accessToken = generateNewToken();
+		String accessToken = datahubTokenService.generateNewToken();
 
 		// Step 2: Prepare headers
 		HttpHeaders headers = new HttpHeaders();
@@ -105,21 +101,37 @@ public class ForeignWorkerEmployerJobseekerController {
 		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
 	}
 
-	private String generateNewToken() {
+	// MoHCA immigration: /immigrantdetail/{workerid}
+	@GetMapping("/immigrant-details/{workerId}")
+	public ResponseEntity<Object> getImmigrantDetails(@PathVariable String workerId) throws ParseException {
 
-		String authStringEnc = Base64.getEncoder().encodeToString((consumerKey + ":" + consumerSecret).getBytes());
+		String accessToken = datahubTokenService.generateNewToken();
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Basic " + authStringEnc);
-		
+		headers.add("Authorization", "Bearer " + accessToken);
+
 		HttpEntity<String> request = new HttpEntity<>(headers);
 
-		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-				tokenApi + "?grant_type=client_credentials", HttpMethod.POST, request,
-				new ParameterizedTypeReference<Map<String, Object>>() {
-				});
-		// Extract access_token directly from response
-		return (String) response.getBody().get("access_token");
+		ResponseEntity<Object> response = restTemplate.exchange(immigrantApiUrl + workerId, HttpMethod.GET, request,
+				Object.class);
+
+		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
 	}
-	
+
+	// RCSC ZESt: /employeeFullDetailsByCID/{cid}
+	@GetMapping("/civil-servant-details/{cid}")
+	public ResponseEntity<Object> getCivilServantDetails(@PathVariable String cid) throws ParseException {
+
+		String accessToken = datahubTokenService.generateNewToken();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Bearer " + accessToken);
+
+		HttpEntity<String> request = new HttpEntity<>(headers);
+
+		ResponseEntity<Object> response = restTemplate.exchange(zestEmployeeApiUrl + cid, HttpMethod.GET, request,
+				Object.class);
+
+		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
+	}
 }
