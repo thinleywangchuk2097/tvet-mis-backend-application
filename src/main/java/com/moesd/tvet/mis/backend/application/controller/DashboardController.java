@@ -54,6 +54,18 @@ public class DashboardController {
 		return roleDashboardService.getRoleOverview(roleId, fromDate, toDate);
 	}
 
+	/** TTTRC dashboards (Verifier 14 / Head 15): TOT programmes, curriculum data and open tasks. */
+	@GetMapping("/tttrc-overview/{roleId}")
+	public Map<String, Object> getTttrcOverview(@PathVariable int roleId) {
+		return roleDashboardService.getTttrcOverview(roleId);
+	}
+
+	/** DWPS 1 dashboard: curriculum applications, tracer surveys and open tasks. */
+	@GetMapping("/dwps1-overview/{roleId}")
+	public Map<String, Object> getDwps1Overview(@PathVariable int roleId) {
+		return roleDashboardService.getDwps1Overview(roleId);
+	}
+
 	/** Admin: users, roles, dropdowns, services and open tasks per role. Dates are yyyy-MM-dd. */
 	@GetMapping("/admin-overview")
 	public Map<String, Object> getAdminOverview(

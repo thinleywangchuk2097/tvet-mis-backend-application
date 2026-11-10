@@ -45,4 +45,10 @@ public class AssessorAccreditorQMSAuditorController {
 				.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId);
 		return ResponseEntity.ok(instituteDetails);
 	}
+
+	// Public report: approved registrations for a service (32 Assessor, 5 Accreditor, 3 QMS Auditor)
+	@GetMapping("/get-registered/{serviceId}")
+	public ResponseEntity<List<ObjectNode>> getRegisteredByServiceId(@PathVariable Integer serviceId) {
+		return ResponseEntity.ok(assessorAccreditorQMSAuditorService.getRegisteredByServiceId(serviceId));
+	}
 }

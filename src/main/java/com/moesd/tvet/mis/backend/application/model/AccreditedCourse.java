@@ -39,6 +39,8 @@ public class AccreditedCourse {
 
 	private Integer curriculumId;
 	
+	private Long ncsId;
+	
 	private String feesPerTrainee;
 	
 	private String enrolmentCapacity;

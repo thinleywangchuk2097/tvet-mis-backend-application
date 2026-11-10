@@ -11,6 +11,23 @@ public interface SelfAssessmentReportRepository extends JpaRepository<SelfAssess
 
 	Optional<SelfAssessmentReport> findByApplicationNo(String applicationNo);
 
+	/**
+	 * Latest SAR grade of an institute: an approved (57) report first, otherwise the latest
+	 * graded report that was not rejected (58).
+	 */
+	@NativeQuery("SELECT sar.grade "
+			+ "FROM tbl_self_assessment_report_dtls sar "
+			+ "WHERE sar.institute_id = ?1 "
+			+ "  AND sar.grade IS NOT NULL AND sar.grade <> '' "
+			+ "  AND (sar.status_id IS NULL OR sar.status_id <> 58) "
+			+ "ORDER BY CASE WHEN sar.status_id = 57 THEN 0 ELSE 1 END, sar.created_at DESC, sar.id DESC "
+			+ "LIMIT 1")
+	Optional<String> findLatestGradeByInstituteId(Integer instituteId);
+
+	/** Number of Self Assessment Reports of an institute (institute is accredited when > 0). */
+	@NativeQuery("SELECT COUNT(*) FROM tbl_self_assessment_report_dtls sar WHERE sar.institute_id = ?1")
+	Long countByInstitute(Integer instituteId);
+
 	// ------------------------------------------------------------------
 	// Self Assessment Report details (verification page)
 	// ------------------------------------------------------------------
@@ -75,6 +92,21 @@ public interface SelfAssessmentReportRepository extends JpaRepository<SelfAssess
 			+ "    tbl_self_assessment_report_member m "
 			+ "  WHERE m.application_no = sar.application_no "
 			+ "    AND m.member_type = 'COORDINATOR') AS coordinators, "
+			+ "  (SELECT "
+			+ "    IFNULL( "
+			+ "      JSON_ARRAYAGG( "
+			+ "        JSON_OBJECT( "
+			+ "          'id', r.id, "
+			+ "          'userId', r.user_id, "
+			+ "          'remarks', r.remarks "
+			+ "        ) "
+			+ "      ), "
+			+ "      JSON_ARRAY() "
+			+ "    ) "
+			+ "  FROM "
+			+ "    tbl_rec_member_task_assignment r "
+			+ "  WHERE r.application_no = sar.application_no "
+			+ "    AND r.service_id = 19) AS rec_members, "
 			+ "  (SELECT "
 			+ "    IFNULL( "
 			+ "      JSON_ARRAYAGG( "

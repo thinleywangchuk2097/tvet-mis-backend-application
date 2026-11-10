@@ -303,4 +303,13 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 				.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId));
 	}
 
+	@Override
+	public List<ObjectNode> getRegisteredByServiceId(Integer serviceId) {
+		// only the three registration services are listed publicly
+		if (serviceId == null || !List.of(3, 5, 32).contains(serviceId)) {
+			return List.of();
+		}
+		return objectTojson._toJson(assessorAccreditorQMSAuditorRepository.getRegisteredByServiceId(serviceId));
+	}
+
 }

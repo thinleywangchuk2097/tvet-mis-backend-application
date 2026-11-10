@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.InstituteChangeRequestDto;
+import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
+import com.moesd.tvet.mis.backend.application.dto.InstituteChangeVerifyDto;
 import com.moesd.tvet.mis.backend.application.dto.InstituteRegistrationdto;
 import com.moesd.tvet.mis.backend.application.service.InstituteRegistrationService;
 
@@ -101,6 +104,12 @@ public class InstituteRegistrationController {
 		return ResponseEntity.ok(instituteRegistrationDetails);
 	}
 
+	// Public report: registered institutes with their accredited courses
+	@GetMapping("/get-registered-institutes")
+	public ResponseEntity<List<ObjectNode>> getRegisteredInstitutesWithCourses() {
+		return ResponseEntity.ok(instituteRegistrationService.getRegisteredInstitutesWithCourses());
+	}
+
 	@GetMapping("/get-institute-details/{registration_no}")
 	public ResponseEntity<List<ObjectNode>> getInstituteDetails(
 			@PathVariable("registration_no") String registrationNo) {
@@ -132,6 +141,25 @@ public class InstituteRegistrationController {
 	@PostMapping("/change-institute")
 	public ResponseEntity<?> instituteChange(@RequestBody InstituteChangeRequestDto request) {
 		return (instituteRegistrationService.instituteChange(request));
+	}
+
+	// Verify (56) / reject (58) an institute change request.
+	// Verify: current registration -> tbl_institute_registration_dtls_audit, then the change is applied.
+	@PostMapping("/verify-institute-change")
+	public ResponseEntity<?> verifyInstituteChange(
+			@RequestBody InstituteChangeVerifyDto request) {
+		return instituteRegistrationService.verifyInstituteChange(request);
+	}
+
+	// Renewal period: institute renewal (service 8) by latest SAR grade (C 2y, B 3y, A 4y, A+ 5y, else 1y); other services 1y
+	@GetMapping("/get-renewal-validity/{registration_no}")
+	public ResponseEntity<?> getRenewalValidity(@PathVariable("registration_no") String registrationNo,
+			@RequestParam(value = "serviceId", required = false) Integer serviceId) {
+		try {
+			return ResponseEntity.ok(instituteRegistrationService.getRenewalValidity(registrationNo, serviceId));
+		} catch (RecordNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+		}
 	}
 
 	@GetMapping("/get-change-institute/{application_no}")

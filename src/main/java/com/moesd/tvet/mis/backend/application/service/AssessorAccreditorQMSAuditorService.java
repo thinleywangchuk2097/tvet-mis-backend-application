@@ -16,5 +16,7 @@ public interface AssessorAccreditorQMSAuditorService {
 	ResponseEntity<?> verifyAssessorAccreditorQMSAuditor(AssessorAccreditorQMSAuditordto request);
 	
 	List<ObjectNode> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo, String serviceId);
+
+	List<ObjectNode> getRegisteredByServiceId(Integer serviceId);
 	
 }

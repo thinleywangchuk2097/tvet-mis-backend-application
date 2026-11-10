@@ -31,7 +31,8 @@ public class TracerQuestionGenerator {
 	@Column(name = "application_no", nullable = false)
 	private String applicationNo;
 
-	@Column(name = "tracer_title", nullable = false)
+	//letter text shown on the survey page, can be long
+	@Column(name = "tracer_title", nullable = false, columnDefinition = "TEXT")
 	private String tracerTitle;
 
 	private String parentTracerTypeId;

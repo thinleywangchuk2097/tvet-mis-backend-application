@@ -70,6 +70,12 @@ public class ReportController {
 		return reportService.getTraineesDetailsForCertificate(registrationNo, applicationNo);
 	}
 	
+	// Certificate printing: competent trainees of all institutes
+	@GetMapping("/get-all-trainee-certificate-details")
+	public List<Map<String, Object>> getAllTraineesDetailsForCertificate() {
+		return reportService.getAllTraineesDetailsForCertificate();
+	}
+
 	@GetMapping("/get-accredited-programme-details/{registration_no}/{application_no}")
 	public List<Map<String, Object>> getAccreditedProgrammeDetailsForCertificate(
 			@PathVariable("registration_no") String registrationNo,
@@ -77,4 +83,23 @@ public class ReportController {
 		return reportService.getAccreditedProgrammeDetailsForCertificate(registrationNo, applicationNo);
 	}
 
+
+	// Assessment report (Excel) for the logged-in institute
+	@GetMapping("/get-institute-assessment-report/{registration_no}")
+	public List<Map<String, Object>> getInstituteAssessmentReport(
+			@PathVariable("registration_no") String registrationNo) {
+		return reportService.getInstituteAssessmentReport(registrationNo);
+	}
+
+	// Assessor / Accreditor / QMS Auditor registrations report (logged-in users only)
+	@GetMapping("/get-assessor-accreditor-auditor-report")
+	public List<Map<String, Object>> getAssessorAccreditorAuditorReport() {
+		return reportService.getAssessorAccreditorAuditorReport();
+	}
+
+	// BQF / RPL / Non-BQF programmes report (AccreditedCourse + NonAccreditedCourse)
+	@GetMapping("/get-programmes-report")
+	public List<Map<String, Object>> getProgrammesReport() {
+		return reportService.getProgrammesReport();
+	}
 }

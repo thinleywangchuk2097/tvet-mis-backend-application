@@ -24,7 +24,7 @@ public class InstituteDashboardRepository {
 	public Map<String, Object> findInstitute(String registrationNo) {
 		List<Map<String, Object>> rows = jdbc.queryForList("""
 				SELECT i.institute_id, i.proposed_institute_name AS institute_name, i.registration_no,
-				       i.application_no, i.created_at, i.institute_renewal_date, i.email_id, i.mobile_no,
+				       i.application_no, i.created_at, i.institute_renewal_date, i.validity_date, i.email_id, i.mobile_no,
 				       i.exact_location, i.bhutanese_employees, i.non_bhutanese_employees,
 				       d.dzongkhag_name, s.name AS status_name
 				FROM tbl_institute_registration_dtls i
@@ -179,8 +179,24 @@ public class InstituteDashboardRepository {
 				LEFT JOIN tbl_dropdown_child_master st ON st.id = w.status_id
 				WHERE w.application_no IN (""" + in + """
 				)
+				  -- recent = action taken in the last 3 days
+				  AND w.action_date >= DATE_SUB(CURRENT_DATE, INTERVAL 3 DAY)
 				ORDER BY w.action_date DESC
 				LIMIT 200
 				""", applicationNos.toArray());
+	}
+
+	/** Latest APPROVED (status 57) Self Assessment Report grade of the institute, or null. */
+	public Map<String, Object> approvedSarGrade(Long instituteId) {
+		List<Map<String, Object>> rows = jdbc.queryForList("""
+				SELECT sar.application_no, sar.grade, sar.total_score, sar.submitted_date, sar.updated_at
+				FROM tbl_self_assessment_report_dtls sar
+				WHERE sar.institute_id = ?
+				  AND sar.status_id = 57
+				  AND sar.grade IS NOT NULL AND sar.grade <> ''
+				ORDER BY COALESCE(sar.updated_at, sar.created_at) DESC, sar.id DESC
+				LIMIT 1
+				""", instituteId);
+		return rows.isEmpty() ? null : rows.get(0);
 	}
 }

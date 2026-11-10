@@ -16,4 +16,7 @@ public class TraineeVivadto {
 	
 	//new added
     private Integer internalAssessment;
+
+    // approver's remarks for the trainee (saved like the theory/practical path)
+    private String remarks;
 }

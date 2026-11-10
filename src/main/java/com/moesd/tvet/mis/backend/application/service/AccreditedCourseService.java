@@ -17,7 +17,9 @@ public interface AccreditedCourseService {
 	List<ObjectNode> getAccreditedCourseByInstituteId(String instituteId);
 
 	List<ObjectNode> getAccreditedApprovedCourseByUserId(String userId);
-
+	
+	List<ObjectNode> getAccreditedApprovedCertificateCourseByUserId(String userId);
+	
 	ResponseEntity<?> verifyAccreditedCourse(AccreditedCoursedto request);
 
 	List<ObjectNode> curriculumExist(Long curriculumId, String registrationNo);

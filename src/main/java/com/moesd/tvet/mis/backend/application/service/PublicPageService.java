@@ -18,4 +18,14 @@ public interface PublicPageService {
 	List<Map<String, Object>> getCourseAnnounceNotifications();
 
 	Map<String, Object> getHomeStats();
+
+	List<Map<String, Object>> getNcsPublications();
+
+	List<Map<String, Object>> getCurriculumPublications();
+
+	List<Map<String, Object>> getAssessmentResultsByCid(String cidNo);
+
+	List<Map<String, Object>> getPublicTrainers();
+
+	List<Map<String, Object>> getAccreditedCoursesWithInstitutes();
 }

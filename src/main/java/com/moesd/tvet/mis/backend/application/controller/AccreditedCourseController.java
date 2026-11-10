@@ -52,6 +52,15 @@ public class AccreditedCourseController {
 		List<ObjectNode> getAccreditedApprovedCourseDetails = instituteAccreditedCourseService.getAccreditedApprovedCourseByUserId(userId);
 		return ResponseEntity.ok(getAccreditedApprovedCourseDetails);
 	}
+	
+	@GetMapping("/get-accredited-approved-certificate-course-details/{user_id}")
+	public ResponseEntity<List<ObjectNode>> getAccreditedApprovedCertificateCourseByUserId(
+			@PathVariable("user_id") String userId) {
+		List<ObjectNode> getAccreditedCertificateApprovedCourseDetails = instituteAccreditedCourseService.getAccreditedApprovedCertificateCourseByUserId(userId);
+		return ResponseEntity.ok(getAccreditedCertificateApprovedCourseDetails);
+	}
+	
+	
 
 	@PostMapping("/verify-accredited-course")
 	public ResponseEntity<?> verifyAccreditedCourse(@RequestBody AccreditedCoursedto request) {

@@ -13,6 +13,8 @@ public interface SectorOccupationService {
 
 	List<ObjectNode> getSectorOccupationLists();
 
+	List<ObjectNode> getSectorOccupationListBySector(Integer sectorId);
+
 	ResponseEntity<?> updateSectorWithOccupations(SectorRequestDTO sectorRequestDTO);
 	
 	ResponseEntity<?> deleteSectorWithOccupations(Integer sectorId);

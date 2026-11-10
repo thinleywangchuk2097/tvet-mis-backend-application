@@ -27,6 +27,8 @@ public class SelfAssessmentReportdto {
 	// ACCREDITATORS section (verification page only)
 	private List<SelfAssessmentMemberdto> accreditors;
 	private List<SelfAssessmentMemberdto> coordinators;
+	// REC Members tab (verification page only)
+	private List<SelfAssessmentMemberdto> recMembers;
 
 	// System / workflow fields
 	private Integer serviceId;
@@ -35,6 +37,8 @@ public class SelfAssessmentReportdto {
 	private String userId;
 	private Integer statusId;
 	private String remarks;
+	// REC endorsement stage: user id of the REC member who is acting (logged in user)
+	private String recMemberUserId;
 
 	// Documents
 	private Documentdto[] businessLicenseDocuments;

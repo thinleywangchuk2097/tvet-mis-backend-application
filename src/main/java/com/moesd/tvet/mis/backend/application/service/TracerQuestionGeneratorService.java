@@ -35,6 +35,9 @@ public interface TracerQuestionGeneratorService {
 
 	TracerSurveySendDetails getSurveyByUniqueId(String uniqueId);
 
+	// true when this survey link has already been submitted
+	boolean isSurveySubmitted(String uniqueId);
+
 	List<TracerSurveyResponseDetails> saveSurveyResponses(String applicationNo, 
 	            List<ResponseItem> responses);
 	 

@@ -21,12 +21,16 @@ import com.moesd.tvet.mis.backend.application.dto.SelfAssessmentQualityStandardd
 import com.moesd.tvet.mis.backend.application.dto.SelfAssessmentReportdto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationQualityStandard;
+import com.moesd.tvet.mis.backend.application.model.RecMemberTaskAssignment;
+import com.moesd.tvet.mis.backend.application.model.TaskFlowList;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.model.SelfAssessmentReport;
 import com.moesd.tvet.mis.backend.application.model.SelfAssessmentReportMember;
 import com.moesd.tvet.mis.backend.application.model.SelfAssessmentReportQualityResponse;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
 import com.moesd.tvet.mis.backend.application.repository.QualityStandardRepository;
+import com.moesd.tvet.mis.backend.application.repository.RecMemberTaskAssignmentRepository;
+import com.moesd.tvet.mis.backend.application.repository.TaskFlowListRepository;
 import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
 import com.moesd.tvet.mis.backend.application.repository.SelfAssessmentReportRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
@@ -49,6 +53,8 @@ public class SelfAssessmentReportServiceImpl implements SelfAssessmentReportServ
 	private static final int STATUS_VERIFIED = 56;
 	private static final int STATUS_APPROVED = 57;
 	private static final int STATUS_REJECTED = 58;
+	private static final int STATUS_ENDORSED = 59;
+	private static final int ROLE_REC = 23;
 	private static final int TASK_INITIATED = 18;
 	private static final int TASK_COMPLETED = 20;
 	private static final int DEFAULT_LOCATION_ID = 14;
@@ -68,6 +74,8 @@ public class SelfAssessmentReportServiceImpl implements SelfAssessmentReportServ
 	private final DocumentFileUploadService documentFileUploadService;
 	private final RoleServiceRepository roleServiceRepository;
 	private final ObjectToJson objectTojson;
+	private final RecMemberTaskAssignmentRepository recMemberTaskAssignmentRepository;
+	private final TaskFlowListRepository taskFlowListRepository;
 
 	// =====================================================================
 	// Submit (Institute)
@@ -225,12 +233,26 @@ public class SelfAssessmentReportServiceImpl implements SelfAssessmentReportServ
 
 			SelfAssessmentReport report = findReport(request.getApplicationNo());
 
+			// REC endorsement with several REC members (same as InstituteRegistrationServiceImpl):
+			// every assigned REC member must endorse; only the last one forwards to the next role.
+			if (statusId == STATUS_ENDORSED && Integer.valueOf(ROLE_REC).equals(assignedRoleId)) {
+				ResponseEntity<?> partial = recordRecEndorsement(request);
+				if (partial != null)
+					return partial; // others still pending: stay with REC
+			}
+
 			updateVerificationData(report, request);
 
 			// Verification requires at least one accreditor
 			if (statusId == STATUS_VERIFIED && report.getMembers().stream()
 					.noneMatch(m -> SelfAssessmentReportMember.TYPE_ACCREDITOR.equals(m.getMemberType())))
 				throw new RecordNotFoundException("Please add at least one Accreditor before verification");
+
+			// ... and at least one REC member (tbl_rec_member_task_assignment), who receives the endorsement task
+			List<String> recUserIds = recMemberTaskAssignmentRepository
+					.findUserIdsByApplicationNoAndServiceId(request.getApplicationNo(), SAR_SERVICE_ID);
+			if (statusId == STATUS_VERIFIED && recUserIds.isEmpty())
+				throw new RecordNotFoundException("Please add at least one REC member before verification");
 
 			report.setStatusId(statusId);
 			report.setUpdatedAt(new java.util.Date());
@@ -242,8 +264,15 @@ public class SelfAssessmentReportServiceImpl implements SelfAssessmentReportServ
 			workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, assignedRoleId, workflowActor,
 					request.getRemarks(), serviceId, request.getUpdatedBy());
 
+			// On verification the endorsement task goes to the assigned REC members
+			// (their user ids from tbl_rec_member_task_assignment, comma separated, like accredited courses)
+			String nextAssignedUserId = request.getAssignedUserId();
+			if (statusId == STATUS_VERIFIED && !recUserIds.isEmpty()) {
+				nextAssignedUserId = String.join(",", recUserIds);
+			}
+
 			workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId, roleService.getNextRoleId(),
-					request.getAssignedUserId(), request.getRemarks());
+					nextAssignedUserId, request.getRemarks());
 
 			saveDocuments(request.getDocuments(), request.getApplicationNo(), serviceId, actorId,
 					ATTACHMENT_VERIFICATION);
@@ -367,14 +396,95 @@ public class SelfAssessmentReportServiceImpl implements SelfAssessmentReportServ
 			}
 		}
 
-		// Members are replaced only when the section is sent
-		if (request.getAccreditors() != null || request.getCoordinators() != null) {
-			report.getMembers().clear();
-			addMembers(report, request.getAccreditors(), SelfAssessmentReportMember.TYPE_ACCREDITOR);
-			addMembers(report, request.getCoordinators(), SelfAssessmentReportMember.TYPE_COORDINATOR);
-		}
+		// Each member list is replaced only when it is sent (other types are kept)
+		replaceMembers(report, request.getAccreditors(), SelfAssessmentReportMember.TYPE_ACCREDITOR);
+		replaceMembers(report, request.getCoordinators(), SelfAssessmentReportMember.TYPE_COORDINATOR);
+		saveRecMembers(report.getApplicationNo(), request.getRecMembers());
 
 		applyScore(report, serviceId);
+	}
+
+	/**
+	 * Records one REC member's endorsement in tbl_rec_member_task_assignment (remarks NULL = pending).
+	 * Returns a response when other REC members still have to endorse (the task stays with REC and
+	 * this member is removed from tbl_task_dtls.assigned_user_id); returns null when this was the
+	 * last pending member, so the normal flow forwards the report to the next role.
+	 */
+	private ResponseEntity<?> recordRecEndorsement(SelfAssessmentReportdto request) {
+		String applicationNo = request.getApplicationNo();
+		Long pending = recMemberTaskAssignmentRepository.getRECMemberCount(applicationNo);
+		if (pending == null || pending == 0)
+			return null; // no individual REC assignment -> old behaviour
+
+		String recUserId = request.getRecMemberUserId() != null ? request.getRecMemberUserId().trim() : "";
+		if (recUserId.isEmpty())
+			throw new RecordNotFoundException("REC member user id is required");
+
+		RecMemberTaskAssignment recMember = recMemberTaskAssignmentRepository
+				.findRecMemberUser(recUserId, applicationNo)
+				.orElseThrow(() -> new RecordNotFoundException(
+						"You are not an assigned REC member for this report"));
+		if (recMember.getRemarks() != null)
+			throw new RecordNotFoundException("You have already endorsed this report");
+
+		// mark this member as done (non-null remarks)
+		String remarks = request.getRemarks() != null && !request.getRemarks().isBlank()
+				? request.getRemarks().trim()
+				: "Endorsed";
+		recMember.setRemarks(remarks);
+		recMemberTaskAssignmentRepository.save(recMember);
+
+		if (pending <= 1)
+			return null; // last REC member -> forward to the next role
+
+		// others still pending: take this member off the task, keep it with REC
+		TaskFlowList taskFlow = taskFlowListRepository.findByApplicationNo(applicationNo);
+		if (taskFlow != null && taskFlow.getAssignedUserId() != null && !taskFlow.getAssignedUserId().isBlank()) {
+			String remaining = java.util.Arrays.stream(taskFlow.getAssignedUserId().split(","))
+					.map(String::trim).filter(id -> !id.isEmpty() && !id.equals(recUserId))
+					.collect(Collectors.joining(","));
+			taskFlow.setAssignedUserId(remaining.isEmpty() ? null : remaining);
+			taskFlowListRepository.save(taskFlow);
+		}
+
+		long stillPending = pending - 1;
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("applicationNo", applicationNo);
+		body.put("status", HttpStatus.OK.value());
+		body.put("pendingRecMembers", stillPending);
+		body.put("message", "Your endorsement is recorded. Waiting for " + stillPending
+				+ " more REC member(s) before the report moves to the next stage.");
+		return ResponseEntity.ok(body);
+	}
+
+	/**
+	 * REC members are kept only in tbl_rec_member_task_assignment (application_no, user_id, service_id;
+	 * remarks NULL = not yet endorsed). The list is replaced while it is still being prepared, i.e.
+	 * before any REC member has endorsed.
+	 */
+	private void saveRecMembers(String applicationNo, List<SelfAssessmentMemberdto> recMembers) {
+		if (recMembers == null)
+			return; // not sent -> keep what is saved
+		Long completed = recMemberTaskAssignmentRepository.countCompletedByApplicationNoAndServiceId(applicationNo,
+				SAR_SERVICE_ID);
+		if (completed != null && completed > 0)
+			return; // REC members already endorsing -> list is locked
+
+		recMemberTaskAssignmentRepository.deleteByApplicationNoAndServiceId(applicationNo, SAR_SERVICE_ID);
+		List<RecMemberTaskAssignment> rows = recMembers.stream().filter(Objects::nonNull)
+				.map(SelfAssessmentMemberdto::getUserId).filter(Objects::nonNull).map(String::trim)
+				.filter(id -> !id.isEmpty()).distinct()
+				.map(uid -> RecMemberTaskAssignment.builder().userId(uid).ApplicationNo(applicationNo)
+						.serviceId(SAR_SERVICE_ID).build())
+				.toList();
+		recMemberTaskAssignmentRepository.saveAll(rows);
+	}
+
+	private void replaceMembers(SelfAssessmentReport report, List<SelfAssessmentMemberdto> members, String type) {
+		if (members == null)
+			return; // not sent -> keep what is saved
+		report.getMembers().removeIf(m -> type.equals(m.getMemberType()));
+		addMembers(report, members, type);
 	}
 
 	private void addMembers(SelfAssessmentReport report, List<SelfAssessmentMemberdto> members, String type) {

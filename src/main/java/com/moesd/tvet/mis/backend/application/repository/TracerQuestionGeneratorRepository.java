@@ -122,11 +122,14 @@ public interface TracerQuestionGeneratorRepository extends JpaRepository<TracerQ
             + "  a.* "
             + "FROM "
             + "  tbl_tracer_question_dtls a "
+            // one row per tracer (its first question) - works with ONLY_FULL_GROUP_BY
+            + "  JOIN (SELECT MIN(id) AS id FROM tbl_tracer_question_dtls GROUP BY application_no) f "
+            + "    ON f.id = a.id "
             + "  LEFT JOIN tbl_dropdown_master b "
             + "    ON a.parent_tracer_type_id = b.id "
             + "  LEFT JOIN tbl_dropdown_child_master c "
             + "    ON c.id = a.sub_tracer_type_id "
-            + "    GROUP BY a.application_no")
+            + "ORDER BY a.created_at DESC")
     List<Tuple> getTracerAllApplications();
     
     @Query(value = """

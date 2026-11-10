@@ -87,6 +87,10 @@ public class InstituteRegistrationDetails {
 	private Integer updatedBy;
 
 	private LocalDateTime instituteRenewalDate;
+
+	// Registration valid until (one year from the registration / last renewal)
+	@Column(name = "validity_date")
+	private LocalDateTime validityDate;
 	
 	
 }

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class InstituteRegistrationdto {
 	private String applicationNo;
 	private String instituteName;
-	private String RegistrationNo;
+	private String registrationNo;
 	private Integer currentRoleId;
 	private String dzongkhagId;
 	private String exactLocation;

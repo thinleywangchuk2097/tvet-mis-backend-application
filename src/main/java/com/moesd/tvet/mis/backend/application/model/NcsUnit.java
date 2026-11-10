@@ -27,10 +27,10 @@ public class NcsUnit {
     @Column(name = "unit_id", nullable = false, unique = true)
     private Integer unitId;
     
-    @Column(name = "unit_code", nullable = false, length = 50)
+    @Column(name = "unit_code", columnDefinition = "TEXT")
     private String unitCode;
     
-    @Column(name = "unit_title", nullable = false, length = 255)
+    @Column(name = "unit_title", columnDefinition = "TEXT")
     private String unitTitle;
     
     @ManyToOne(fetch = FetchType.LAZY)

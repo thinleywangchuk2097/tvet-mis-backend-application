@@ -83,8 +83,6 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 
 			ResponseEntity<String> response = restTemplate.exchange(tokenUrl, HttpMethod.POST, entity, String.class);
 
-			System.out.println("RAW RESPONSE: " + response.getBody());
-
 			// Parse JSON from external API
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode jsonNode = mapper.readTree(response.getBody());
@@ -162,6 +160,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 			try {
 				ResponseEntity<String> response = restTemplate.exchange(paymentUrl, HttpMethod.POST, requestEntity,
 						String.class);
+				
 				if (response.getStatusCode() == HttpStatus.CREATED || response.getStatusCode() == HttpStatus.OK) {
 					// Parse response body (assuming it's JSON)
 					ObjectMapper objectMapper = new ObjectMapper();
@@ -174,6 +173,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 					if (existingRecord.isPresent()) {
 						return "Payment advice already exists with paymentAdviceNo: " + paymentAdviceNo;
 					}
+			
 					BirmsPayment birmsPaymentDetails = new BirmsPayment();
 
 					birmsPaymentDetails.setPlatform(content.path("platform").asString());
@@ -201,8 +201,7 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 					birmsPaymentRepository.save(birmsPaymentDetails);
 
 				}
-
-				return response.getBody();
+                return response.getBody();
 
 			} catch (HttpClientErrorException e) {
 				return "Client error: " + e.getMessage();
@@ -387,6 +386,14 @@ public class BirmsPaymentServiceImpl implements BirmsPaymentService {
 	@Override
 	public List<ObjectNode> getPaymentDetailsByInstituteId(Integer instituteId) {
 		return objectTojson._toJson(birmsPaymentRepository.getPaymentDetailsByInstituteId(instituteId));
+	}
+
+	@Override
+	public List<ObjectNode> searchInstitutePayments(Integer instituteId, String query) {
+		if (instituteId == null)
+			return List.of();
+		String q = query == null ? "" : query.trim();
+		return objectTojson._toJson(birmsPaymentRepository.searchInstitutePayments(instituteId, q));
 	}
 
 	@Override

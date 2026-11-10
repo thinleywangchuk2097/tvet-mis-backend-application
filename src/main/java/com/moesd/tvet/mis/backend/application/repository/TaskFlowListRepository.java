@@ -80,43 +80,43 @@ TaskFlowList findByApplicationNo(String applicationNo);
 			+ "  AND b.assigned_role_id = ?")
 	List<Tuple>getApplicationStatusDtl(String application_no, String applicant_name, String application_date);
 	
-	@NativeQuery("SELECT * FROM ( " +
-		    "SELECT " +
-		    "  'CURRENT' AS record_type, " +
-		    "  a.id, " +
-		    "  a.application_no, " +
-		    "  a.application_name, " +
-		    "  a.status_id, " +
-		    "  a.service_id, " +
-		    "  a.role_id, " +
-		    "  a.wf_remarks, " +
-		    "  a.action_date, " +
-		    // current step: not updated yet -> turnaround = time since the action (ongoing)
-		    "  CAST(NULL AS DATETIME) AS updated_date, " +
-		    "  TIMESTAMPDIFF(MINUTE, a.action_date, NOW()) AS turnaround_minutes " +
-		    "FROM tbl_workflow_dtls a " +
-		    "WHERE a.application_no = ?1 " +
+	
+	// Application history + current step:
+	//  tbl_workflow_dtls = current step, tbl_workflow_dtls_audit = earlier steps (copied on each update).
+	//  Turnaround = action date -> now, for every row.
+	// Only numeric joins here (tbl_role on role_id, tbl_dropdown_child_master on status_id). User names and the current task (tbl_task_dtls) are
+	// added in TaskFlowListServiceImpl, so no text column is compared across tables.
+	@NativeQuery("SELECT * FROM ( "
+			+ "SELECT 'CURRENT' AS record_type, w.id, w.application_no, w.application_name, w.status_id, "
+			+ "       s.name AS status_name, w.service_id, w.role_id, r.role_name, w.actor_id, w.wf_remarks, "
+			+ "       w.action_date, "
+			+ "       TIMESTAMPDIFF(MINUTE, w.action_date, NOW()) AS turnaround_minutes "
+			+ "  FROM tbl_workflow_dtls w "
+			+ "  LEFT JOIN tbl_role r ON r.id = w.role_id "
+			+ "  LEFT JOIN tbl_dropdown_child_master s ON s.id = w.status_id "
+			+ " WHERE w.application_no = ?1 "
+			+ "UNION ALL "
+			+ "SELECT 'AUDIT' AS record_type, b.id, b.application_no, b.application_name, b.status_id, "
+			+ "       s.name AS status_name, b.service_id, b.role_id, r.role_name, b.actor_id, b.wf_remarks, "
+			+ "       COALESCE(b.created_at, b.action_date) AS action_date, "
+			+ "       TIMESTAMPDIFF(MINUTE, COALESCE(b.created_at, b.action_date), NOW()) AS turnaround_minutes "
+			+ "  FROM tbl_workflow_dtls_audit b "
+			+ "  LEFT JOIN tbl_role r ON r.id = b.role_id "
+			+ "  LEFT JOIN tbl_dropdown_child_master s ON s.id = b.status_id "
+			+ " WHERE b.application_no = ?1 "
+			+ ") h "
+			// oldest step first, by action date (the current step is the latest, so it comes last)
+			+ "ORDER BY h.action_date, h.id")
+	List<Tuple> getApplicationStatusAuditCurrentTaskDtl(String applicationNo);
 
-		    "UNION ALL " +
+	// Names for a list of tbl_user.user_id values (current task holders)
+	@NativeQuery("SELECT u.user_id AS user_id, "
+			+ "       TRIM(CONCAT_WS(' ', u.first_name, NULLIF(u.middle_name, ''), u.last_name)) AS name "
+			+ "  FROM tbl_user u WHERE u.user_id IN (?1)")
+	List<Tuple> findUserNamesByUserIds(List<String> userIds);
 
-		    "SELECT " +
-		    "  'AUDIT' AS record_type, " +
-		    "  b.id, " +
-		    "  b.application_no, " +
-		    "  b.application_name, " +
-		    "  b.status_id, " +
-		    "  b.service_id, " +
-		    "  b.role_id, " +
-		    "  b.wf_remarks, " +
-		    // audit row = a past step: acted on at created_at, replaced (updated) at action_date
-		    "  COALESCE(b.created_at, b.action_date) AS action_date, " +
-		    "  b.action_date AS updated_date, " +
-		    "  TIMESTAMPDIFF(MINUTE, COALESCE(b.created_at, b.action_date), b.action_date) AS turnaround_minutes " +
-		    "FROM tbl_workflow_dtls_audit b " +
-		    "WHERE b.application_no = ?1 " +
-		    ") t " +
-		    "ORDER BY " +
-		    "CASE WHEN t.record_type = 'CURRENT' THEN 0 ELSE 1 END, " +
-		    "t.action_date")
-		List<Tuple> getApplicationStatusAuditCurrentTaskDtl(String applicationNo);
+	// REC members who have already completed their part (tbl_rec_member_task_assignment.remarks filled)
+	@NativeQuery("SELECT r.user_id FROM tbl_rec_member_task_assignment r "
+			+ " WHERE r.application_no = ?1 AND r.remarks IS NOT NULL")
+	List<String> findCompletedRecUserIds(String applicationNo);
 }

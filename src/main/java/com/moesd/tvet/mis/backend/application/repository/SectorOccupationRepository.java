@@ -40,4 +40,36 @@ public interface SectorOccupationRepository extends JpaRepository<Sector, Intege
 					+ "WHERE s.is_active = 'Y'")
 		List<Tuple> getSectorOccupationLists();
 
+	// One sector with its occupations (keeps the Sector & Occupation page fast)
+	@NativeQuery("SELECT "
+					+ "  JSON_ARRAYAGG( "
+					+ "    JSON_OBJECT( "
+					+ "      'sector_id', "
+					+ "      s.id, "
+					+ "      'sector_name', "
+					+ "      s.sector_name, "
+					+ "      'occupations', "
+					+ "      (SELECT "
+					+ "        JSON_ARRAYAGG( "
+					+ "          JSON_OBJECT( "
+					+ "            'occupation_id', "
+					+ "            o.id, "
+					+ "            'occupation_name', "
+					+ "            o.occupation_name, "
+					+ "            'isco_code', "
+					+ "            o.isco_code "
+					+ "          ) "
+					+ "        ) "
+					+ "      FROM "
+					+ "        tbl_occupation_master o "
+					+ "      WHERE o.sector_id = s.id "
+					+ "        AND o.is_active = 'Y') "
+					+ "    ) "
+					+ "  ) AS result "
+					+ "FROM "
+					+ "  tbl_sector_master s "
+					+ "WHERE s.is_active = 'Y' "
+					+ "  AND s.id = ?")
+		List<Tuple> getSectorOccupationListBySector(Integer sectorId);
+
 }
