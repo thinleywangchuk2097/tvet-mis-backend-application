@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,11 +17,20 @@ import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AssignedRecsDto;
 import com.moesd.tvet.mis.backend.application.dto.InstituteChangeRequestDto;
+import com.moesd.tvet.mis.backend.application.dto.InstituteChangeVerifyDto;
 import com.moesd.tvet.mis.backend.application.dto.InstituteRegistrationdto;
 import com.moesd.tvet.mis.backend.application.dto.PartnerDto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.AccreditorTaskAssignment;
 import com.moesd.tvet.mis.backend.application.model.InstituteChangeDetails;
+import com.moesd.tvet.mis.backend.application.model.InstituteProposal;
+import com.moesd.tvet.mis.backend.application.model.InstituteProposalAudit;
+import com.moesd.tvet.mis.backend.application.model.InstituteProposalPartnership;
+import com.moesd.tvet.mis.backend.application.model.InstituteProposalPartnershipAudit;
+import com.moesd.tvet.mis.backend.application.repository.InstituteProposalRepository;
+import com.moesd.tvet.mis.backend.application.repository.SelfAssessmentReportRepository;
+import com.moesd.tvet.mis.backend.application.repository.InstituteProposalAuditRepository;
+import com.moesd.tvet.mis.backend.application.repository.InstituteProposalPartnershipAuditRepository;
 import com.moesd.tvet.mis.backend.application.model.InstituteChangePartnership;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationApp;
 import com.moesd.tvet.mis.backend.application.model.InstituteRegistrationAppCourse;
@@ -84,6 +94,10 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
     private final AccreditorTaskAssignmentRepository accreditorTaskAssignmentRepository;
     private final InstituteRegistrationDetailsAuditRepository instituteRegistrationDetailsAuditRepository;
     private final InstituteChangeRepository instituteChangeRepository;
+    private final SelfAssessmentReportRepository selfAssessmentReportRepository;
+    private final InstituteProposalRepository instituteProposalRepository;
+    private final InstituteProposalAuditRepository instituteProposalAuditRepository;
+    private final InstituteProposalPartnershipAuditRepository instituteProposalPartnershipAuditRepository;
     
     
 	@Override
@@ -316,9 +330,10 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
 				if(serviceId == 8 || serviceId == 52 || serviceId == 53) {
 					
+					String renewalRegNo = resolveRenewalRegistrationNo(request, existingRegistration);
 					InstituteRegistrationDetails instituteRegistration = instituteRegistrationDetailsRepository
-				                .findByRegistrationNo(request.getRegistrationNo())
-				                .orElseThrow(() -> new RecordNotFoundException("Institute registration not found with registrationNo: " + request.getRegistrationNo()));
+				                .findByRegistrationNo(renewalRegNo)
+				                .orElseThrow(() -> new RecordNotFoundException("Institute registration not found with registrationNo: " + renewalRegNo));
 					//save audit
 					saveInstituteRegistrationAudit(instituteRegistration);
 				    // Update basic fields
@@ -338,12 +353,15 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 					instituteRegistration.setKeyContactDesignation(request.getKeyContactDesignation());
 					instituteRegistration.setKeyContactMobileNo(request.getKeyContactMobileNo());
 					instituteRegistration.setStatusId(request.getStatusId());
-					instituteRegistration.setInstituteRenewalDate(
-						    instituteRegistration.getInstituteRenewalDate() != null
-						        ? instituteRegistration.getInstituteRenewalDate().plusYears(1)
-						        : LocalDateTime.now().plusYears(1)
-						);
-					instituteRegistration.setServiceId(serviceId);
+					// Institute renewal (service 8): validity depends on the latest Self Assessment Report grade:
+					// C = 1 + 1 = 2 years, B = 1 + 2 = 3, A = 1 + 3 = 4, A+ = 1 + 4 = 5, otherwise 1 year
+					// Other renewals (52, 53): 1 year
+					LocalDateTime renewedOn = LocalDateTime.now();
+					int validYears = serviceId == INSTITUTE_RENEWAL_SERVICE_ID
+							? renewalYearsForGrade(latestSarGrade(instituteRegistration.getInstituteId()))
+							: 1;
+					instituteRegistration.setInstituteRenewalDate(renewedOn);
+					instituteRegistration.setValidityDate(renewedOn.plusYears(validYears));
 					instituteRegistration.setUpdatedAt(LocalDateTime.now());
 					instituteRegistration.setUpdatedBy(request.getUpdatedBy());
 					
@@ -364,6 +382,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 							.businessLicenseNo(request.getBusinessLicenseNo()).keyContactName(request.getKeyContactName())
 							.keyContactDesignation(request.getKeyContactDesignation())
 							.instituteRenewalDate(LocalDateTime.now())
+							.validityDate(LocalDateTime.now().plusYears(1))
 							.keyContactMobileNo(request.getKeyContactMobileNo()).statusId(request.getStatusId())
 							.createdAt(LocalDateTime.now()).updatedAt(LocalDateTime.now()).serviceId(serviceId)
 							.createdBy(userId).build();
@@ -541,6 +560,31 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 		}
 	}
 
+	/**
+	 * Registration no being renewed: from the request, else the renewal application,
+	 * else the institute user who submitted it (institute user_id = registration no).
+	 * Back-fills the renewal application when it was saved without one.
+	 */
+	private String resolveRenewalRegistrationNo(InstituteRegistrationdto request,
+			InstituteRegistrationApp application) {
+		String regNo = request.getRegistrationNo();
+		if (regNo == null || regNo.isBlank())
+			regNo = application.getRenewalRegistrationNo();
+		if ((regNo == null || regNo.isBlank()) && application.getCreatedBy() != null) {
+			try {
+				regNo = userRepository.findById(Long.valueOf(application.getCreatedBy().trim()))
+						.map(User::getUserId).orElse(null);
+			} catch (NumberFormatException ignored) {
+				regNo = null;
+			}
+		}
+		if (regNo != null && !regNo.isBlank() && application.getRenewalRegistrationNo() == null) {
+			application.setRenewalRegistrationNo(regNo);
+			instituteRegistrationRepository.save(application);
+		}
+		return regNo;
+	}
+
 	private Integer getRoleIdByServiceId(Integer serviceId) {
 		if (serviceId == 7)
 			return 11;
@@ -551,6 +595,59 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 		return null;
 	}
 	
+	private static final int INSTITUTE_RENEWAL_SERVICE_ID = 8;
+
+	/** Latest SAR grade of the institute (null when none). */
+	private String latestSarGrade(Long instituteId) {
+		if (instituteId == null)
+			return null;
+		return selfAssessmentReportRepository.findLatestGradeByInstituteId(instituteId.intValue()).orElse(null);
+	}
+
+	/**
+	 * Renewal period by SAR grade: 1 year + additional years.
+	 * C -> 2, B -> 3, A -> 4, A+ -> 5; no grade / Not Accredited -> 1.
+	 */
+	static int renewalYearsForGrade(String grade) {
+		if (grade == null)
+			return 1;
+		switch (grade.trim().toUpperCase()) {
+		case "A+":
+			return 5;
+		case "A":
+			return 4;
+		case "B":
+			return 3;
+		case "C":
+			return 2;
+		default:
+			return 1;
+		}
+	}
+
+	/** Renewal preview for the renewal view page: latest SAR grade, years and validity if approved today. */
+	@Override
+	public Map<String, Object> getRenewalValidity(String registrationNo, Integer serviceId) {
+		InstituteRegistrationDetails registration = instituteRegistrationDetailsRepository
+				.findByRegistrationNo(registrationNo)
+				.orElseThrow(() -> new RecordNotFoundException(
+						"Institute registration not found with registrationNo: " + registrationNo));
+		// grade rule applies to institute renewal (service 8) only; others are 1 year
+		boolean gradeBased = serviceId == null || serviceId == INSTITUTE_RENEWAL_SERVICE_ID;
+		String grade = gradeBased ? latestSarGrade(registration.getInstituteId()) : null;
+		int years = gradeBased ? renewalYearsForGrade(grade) : 1;
+		Map<String, Object> out = new LinkedHashMap<>();
+		out.put("registrationNo", registrationNo);
+		out.put("gradeBased", gradeBased);
+		out.put("grade", grade);
+		out.put("years", years);
+		out.put("additionalYears", years - 1);
+		out.put("currentValidity", registration.getValidityDate() != null
+				? registration.getValidityDate().toLocalDate().toString() : null);
+		out.put("validUntilIfApprovedToday", LocalDateTime.now().plusYears(years).toLocalDate().toString());
+		return out;
+	}
+
 	private void saveInstituteRegistrationAudit(InstituteRegistrationDetails registration) {
 		InstituteRegistrationDetailsAudit registrationAudit = InstituteRegistrationDetailsAudit.builder()
 				.applicationNo(registration.getApplicationNo())
@@ -577,6 +674,11 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	@Override
 	public List<ObjectNode> getInstituteDetails(String registrationNo) {
 	    return objectTojson._toJson(instituteRegistrationDetailsRepository.getInstituteDetails(registrationNo));
+	}
+
+	@Override
+	public List<ObjectNode> getRegisteredInstitutesWithCourses() {
+	    return objectTojson._toJson(instituteRegistrationDetailsRepository.getRegisteredInstitutesWithCourses());
 	}
 
 	@Override
@@ -627,7 +729,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 					.instituteName(request.getInstituteName()).changeType(request.getChangeType())
 					.dzongkhagId(request.getDzongkhagId()).exactLocation(request.getExactLocation())
 					.promoterCitizenId(request.getPromoterCitizenId()).promoterName(request.getPromoterName())
-					.createdBy(request.getCreatedBy())
+					.createdBy(request.getCreatedBy()).serviceId(serviceId)
 					.statusId(request.getStatusId()).createdAt(LocalDateTime.now()).build();
 
 			// 6. Handle partners safely
@@ -679,6 +781,217 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	@Override
 	public List<ObjectNode> getInstituteChangeByApplicationNo(String applicationNo) {
 	    return objectTojson._toJson(instituteChangeRepository.getInstituteChangeByApplicationNo(applicationNo));
+	}
+
+	private static final int CHANGE_VERIFY_STATUS = 56; // workflow: verified
+	private static final int CHANGE_REJECT_STATUS = 58; // workflow: rejected
+	private static final int CHANGE_APPROVED = 57; // approved status
+	private static final int INSTITUTE_CHANGE_SERVICE_ID = 10;
+	private static final int INSTITUTE_CHANGE_APPROVER_ROLE_ID = 22; // then this role approves
+
+	
+	/** Proposal of a registered institute (registration -> registration app -> proposal). */
+	private InstituteProposal findProposalOfInstitute(InstituteRegistrationDetails registration) {
+		String proposalAppNo = instituteProposalRepository
+				.findProposalApplicationNoByInstituteId(registration.getInstituteId())
+				.orElseThrow(() -> new RecordNotFoundException(
+						"Institute proposal not found for institute id: " + registration.getInstituteId()));
+		return instituteProposalRepository.findByApplicationNo(proposalAppNo)
+				.orElseThrow(() -> new RecordNotFoundException("Institute proposal not found: " + proposalAppNo));
+	}
+
+	/** Snapshot of the proposal (and its partners) into the audit tables before it is changed. */
+	private void auditProposal(InstituteProposal proposal, InstituteChangeDetails change, LocalDateTime now) {
+		// proposal as it is now
+		instituteProposalAuditRepository.save(InstituteProposalAudit.builder()
+				.proposalId(proposal.getId()).applicationNo(proposal.getApplicationNo())
+				.changeApplicationNo(change.getApplicationNo())
+				.ownershipTypeId(proposal.getOwnershipTypeId())
+				.otherOwnershipTypeId(proposal.getOtherOwnershipTypeId())
+				.registrationNo(proposal.getRegistrationNo()).companyName(proposal.getCompanyName())
+				.otherName(proposal.getOtherName()).otherAddress(proposal.getOtherAddress())
+				.promoterCitizenId(proposal.getPromoterCitizenId()).promoterName(proposal.getPromoterName())
+				.proposedInstituteName(proposal.getProposedInstituteName())
+				.statusId(proposal.getStatusId()).serviceId(proposal.getServiceId())
+				.createdBy(proposal.getCreatedBy()).createdAt(proposal.getCreatedAt())
+				.updatedBy(proposal.getUpdatedBy()).updatedAt(proposal.getUpdatedAt())
+				.auditedAt(now).build());
+
+		// current partners
+		List<InstituteProposalPartnership> currentPartners = proposal.getInstituteProposalPartnership() == null
+				? new ArrayList<>() : proposal.getInstituteProposalPartnership();
+		if (!currentPartners.isEmpty()) {
+			instituteProposalPartnershipAuditRepository.saveAll(currentPartners.stream()
+					.map(pp -> InstituteProposalPartnershipAudit.builder()
+							.partnershipId(pp.getId()).applicationNo(proposal.getApplicationNo())
+							.changeApplicationNo(change.getApplicationNo())
+							.typeOfOwnerId(pp.getTypeOfOwnerId()).partnerCidNo(pp.getPartnerCidNo())
+							.partnerName(pp.getPartnerName())
+							.partnerCompanyRegistrationNo(pp.getPartnerCompanyRegistrationNo())
+							.partnerCompanyName(pp.getPartnerCompanyName())
+							.auditedAt(now).build())
+					.toList());
+		}
+	}
+
+	/** Location / name change on the proposal (after auditing it). */
+	private void applyLocationOrNameToProposal(InstituteChangeDetails change, InstituteProposal proposal,
+			String type, Integer updatedBy, LocalDateTime now) {
+		auditProposal(proposal, change, now);
+		if ("location".equals(type)) {
+			if (change.getDzongkhagId() != null)
+				proposal.setDzongkhagId(change.getDzongkhagId());
+			if (change.getExactLocation() != null && !change.getExactLocation().isBlank())
+				proposal.setExactLocation(change.getExactLocation());
+		} else if ("name".equals(type)) {
+			if (change.getInstituteName() != null && !change.getInstituteName().isBlank())
+				proposal.setProposedInstituteName(change.getInstituteName());
+		}
+		proposal.setUpdatedBy(updatedBy);
+		proposal.setUpdatedAt(now);
+		instituteProposalRepository.save(proposal);
+	}
+
+	/** Ownership change: audit the proposal + partners, then write the new owners. */
+	private void applyOwnershipChange(InstituteChangeDetails change, InstituteProposal proposal,
+			Integer updatedBy, LocalDateTime now) {
+		auditProposal(proposal, change, now);
+
+		// new ownership details
+		proposal.setOwnershipTypeId(change.getOwnershipTypeId());
+		proposal.setOtherOwnershipTypeId(change.getOtherOwnershipTypeId());
+		proposal.setRegistrationNo(change.getRegistrationNo());
+		proposal.setCompanyName(change.getCompanyName());
+		proposal.setOtherName(change.getOtherName());
+		proposal.setOtherAddress(change.getOtherAddress());
+		proposal.setPromoterCitizenId(change.getPromoterCitizenId());
+		proposal.setPromoterName(change.getPromoterName());
+		proposal.setUpdatedBy(updatedBy);
+		proposal.setUpdatedAt(now);
+
+		// replace partners with the ones on the change request
+		List<InstituteProposalPartnership> partners = proposal.getInstituteProposalPartnership();
+		if (partners == null) {
+			partners = new ArrayList<>();
+			proposal.setInstituteProposalPartnership(partners);
+		}
+		partners.clear(); // orphanRemoval deletes the old rows
+		if (change.getInstituteChangePartnership() != null) {
+			for (InstituteChangePartnership cp : change.getInstituteChangePartnership()) {
+				partners.add(InstituteProposalPartnership.builder()
+						.typeOfOwnerId(cp.getTypeOfOwnerId()).partnerCidNo(cp.getPartnerCidNo())
+						.partnerName(cp.getPartnerName())
+						.partnerCompanyRegistrationNo(cp.getPartnerCompanyRegistrationNo())
+						.partnerCompanyName(cp.getPartnerCompanyName())
+						.parent(proposal).build());
+			}
+		}
+		instituteProposalRepository.save(proposal);
+	}
+
+	@Override
+	@Transactional
+	public ResponseEntity<?> verifyInstituteChange(
+			InstituteChangeVerifyDto request) {
+		try {
+			if (request.getApplicationNo() == null || request.getApplicationNo().isBlank())
+				throw new RecordNotFoundException("applicationNo is required");
+			if (request.getStatusId() == null)
+				throw new RecordNotFoundException("statusId is required");
+
+			int statusId = request.getStatusId();
+			// 56 = verify (role 7 -> forwards to role 22), 57 = approve (role 22, applies the change), 58 = reject
+			if (statusId != CHANGE_VERIFY_STATUS && statusId != CHANGE_APPROVED && statusId != CHANGE_REJECT_STATUS)
+				throw new RecordNotFoundException("Invalid statusId: " + statusId);
+
+			InstituteChangeDetails change = instituteChangeRepository.findByApplicationNo(request.getApplicationNo())
+					.orElseThrow(() -> new RecordNotFoundException(
+							"Institute change request not found: " + request.getApplicationNo()));
+
+			if (statusId == CHANGE_APPROVED) {
+				if (change.getInstituteId() == null)
+					throw new RecordNotFoundException("Institute id missing on the change request");
+
+				InstituteRegistrationDetails registration = instituteRegistrationDetailsRepository
+						.findById(change.getInstituteId().longValue())
+						.orElseThrow(() -> new RecordNotFoundException(
+								"Institute registration not found with institute id: " + change.getInstituteId()));
+
+				// validate before anything is written
+				String type = change.getChangeType() == null ? "" : change.getChangeType().trim().toLowerCase();
+				if (!List.of("location", "name", "ownership").contains(type))
+					throw new RecordNotFoundException("Unknown change type: " + change.getChangeType());
+
+				// the institute's proposal is updated for every change type
+				InstituteProposal proposal = findProposalOfInstitute(registration);
+				LocalDateTime now = LocalDateTime.now();
+
+				if ("ownership".equals(type)) {
+					// Ownership: tbl_institute_proposal + tbl_institute_proposal_partnership only
+					// (tbl_institute_registration_dtls is not changed)
+					applyOwnershipChange(change, proposal, request.getUpdatedBy(), now);
+				} else {
+					// Location / name: proposal (audited) ...
+					applyLocationOrNameToProposal(change, proposal, type, request.getUpdatedBy(), now);
+					// ... and registration (audited)
+					saveInstituteRegistrationAudit(registration);
+					if ("location".equals(type)) {
+						if (change.getDzongkhagId() != null)
+							registration.setDzongkhagId(String.valueOf(change.getDzongkhagId()));
+						if (change.getExactLocation() != null && !change.getExactLocation().isBlank())
+							registration.setExactLocation(change.getExactLocation());
+					} else {
+						if (change.getInstituteName() != null && !change.getInstituteName().isBlank())
+							registration.setProposedInstituteName(change.getInstituteName());
+					}
+					registration.setUpdatedAt(LocalDateTime.now());
+					registration.setUpdatedBy(request.getUpdatedBy());
+					instituteRegistrationDetailsRepository.save(registration);
+				}
+			}
+
+			// 3. status on the change request: 56 verified / 57 approved / 58 rejected
+			change.setStatusId(statusId);
+			change.setUpdatedBy(request.getUpdatedBy());
+			change.setUpdatedAt(LocalDateTime.now());
+			instituteChangeRepository.save(change);
+
+			// 4. workflow + task
+			if (statusId == CHANGE_VERIFY_STATUS) {
+				// verified by role 7 -> new unclaimed task for role 22 (approver)
+				Integer taskUnclaimed = dropdownManagementRepository.findChildById(18)
+						.orElseThrow(() -> new RecordNotFoundException("Unclaimed task status not found"));
+				workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId,
+						INSTITUTE_CHANGE_APPROVER_ROLE_ID, request.getUserId(), request.getRemarks(),
+						INSTITUTE_CHANGE_SERVICE_ID, request.getUpdatedBy());
+				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskUnclaimed,
+						INSTITUTE_CHANGE_APPROVER_ROLE_ID, null, request.getRemarks());
+			} else {
+				// approved or rejected -> task completed
+				Integer taskCompleted = dropdownManagementRepository.findChildById(20)
+						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
+				Integer actingRole = request.getCurrentRoleId() != null ? request.getCurrentRoleId()
+						: INSTITUTE_CHANGE_APPROVER_ROLE_ID;
+				workTaskFlowService.updateWorkflow(request.getApplicationNo(), statusId, actingRole,
+						request.getUserId(), request.getRemarks(), INSTITUTE_CHANGE_SERVICE_ID,
+						request.getUpdatedBy());
+				workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskCompleted, actingRole,
+						request.getUserId(), request.getRemarks());
+			}
+
+			String message = switch (statusId) {
+			case CHANGE_VERIFY_STATUS -> "Institute change verified and forwarded for approval";
+			case CHANGE_APPROVED -> "Institute change approved and applied";
+			default -> "Institute change rejected";
+			};
+			return ResponseEntity.ok(Map.of("applicationNo", request.getApplicationNo(), "status",
+					HttpStatus.OK.value(), "message", message));
+		} catch (RecordNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to verify institute change: " + e.getMessage(), e);
+		}
 	}
 
 	

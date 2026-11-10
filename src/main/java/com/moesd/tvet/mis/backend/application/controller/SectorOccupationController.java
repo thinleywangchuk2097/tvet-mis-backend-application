@@ -31,6 +31,13 @@ public class SectorOccupationController {
 		return ResponseEntity.ok(data);
 	}
 
+	// One sector with its occupations
+	@GetMapping("/get-sector-occupation-details/{sector_id}")
+	public ResponseEntity<List<ObjectNode>> getSectorOccupationListBySector(
+			@PathVariable("sector_id") Integer sectorId) {
+		return ResponseEntity.ok(sectorOccupationService.getSectorOccupationListBySector(sectorId));
+	}
+
 	@PostMapping("/update")
 	public ResponseEntity<?> updateSectorWithOccupations(@RequestBody SectorRequestDTO request) {
 		return sectorOccupationService.updateSectorWithOccupations(request);

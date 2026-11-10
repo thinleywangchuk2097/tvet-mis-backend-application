@@ -114,16 +114,18 @@ public interface ProgramMonitoringRepository extends JpaRepository<ProgramMonito
 	List<Tuple> getCourseService();
 	
 	@NativeQuery("SELECT "
-					+ "  c.id, "
-					+ "  c.programme_title AS course_name "
-					+ "FROM "
-					+ "  tbl_accredited_course_dtls a "
-					+ "  LEFT JOIN tbl_curriculum_development b "
-					+ "    ON a.curriculum_id = b.id "
-					+ "  LEFT JOIN tbl_ncs_app_dtls c "
-					+ "    ON c.id = b.programme_id "
-					+ "WHERE a.institute_id = ? "
-					+ "  AND a.status_id = 57")
+			+ "  c.id, "
+			+ "  c.programme_title AS course_name "
+			+ "FROM "
+			+ "  tbl_accredited_course_dtls a "
+			+ "  LEFT JOIN tbl_curriculum_development b "
+			+ "    ON a.curriculum_id IS NOT NULL "
+			+ "   AND a.curriculum_id = b.id "
+			+ "  LEFT JOIN tbl_ncs_app_dtls c "
+			+ "    ON (a.curriculum_id IS NOT NULL AND c.id = b.programme_id) "
+			+ "    OR (a.curriculum_id IS NULL     AND c.id = a.ncs_id) "
+			+ "WHERE a.institute_id = ? "
+			+ "  AND a.status_id = 57")
 	List<Tuple> getAccreditedCourse(Integer instituteId);
 	
 	@NativeQuery("SELECT "

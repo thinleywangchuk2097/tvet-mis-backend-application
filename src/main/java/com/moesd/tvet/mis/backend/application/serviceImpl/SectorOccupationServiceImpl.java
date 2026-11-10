@@ -69,6 +69,11 @@ public class SectorOccupationServiceImpl implements SectorOccupationService{
 	public List<ObjectNode> getSectorOccupationLists() {
 	    return objectTojson._toJson(sectorOccupationRepository.getSectorOccupationLists());
 	}
+
+	@Override
+	public List<ObjectNode> getSectorOccupationListBySector(Integer sectorId) {
+	    return objectTojson._toJson(sectorOccupationRepository.getSectorOccupationListBySector(sectorId));
+	}
 	
 	@Override
 	@Transactional

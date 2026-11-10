@@ -42,6 +42,7 @@ public class PublicTracerController {
                                 "timestamp", LocalDateTime.now()));
             }
             return ResponseEntity.ok(Map.of("success", true, "data", survey,
+                    "submitted", tracerQuestionGeneratorService.isSurveySubmitted(uniqueId),
                     "timestamp", LocalDateTime.now()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -98,6 +99,11 @@ public class PublicTracerController {
                 return notFound();
             }
 
+            // 1b. One submission per survey link
+            if (tracerQuestionGeneratorService.isSurveySubmitted(request.getUniqueId())) {
+                return alreadySubmitted();
+            }
+
             // 2. applicationNo must match the SEND transaction
             if (!survey.getApplicationNo().equals(request.getApplicationNo())) {
                 log.warn("AppNo mismatch: survey.sendAppNo={} reqAppNo={}",
@@ -149,11 +155,9 @@ public class PublicTracerController {
                     "message", "Survey responses submitted successfully",
                     "timestamp", LocalDateTime.now()));
 
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of(
-                            "message", "Already submitted",
-                            "timestamp", LocalDateTime.now()));
+        } catch (DataIntegrityViolationException | IllegalStateException e) {
+            // IllegalStateException = duplicate caught inside the save (e.g. double click)
+            return alreadySubmitted();
         } catch (Exception e) {
             log.error("Survey submission failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -169,6 +173,13 @@ public class PublicTracerController {
             return xff.split(",")[0].trim();
         }
         return request.getRemoteAddr();
+    }
+
+    private ResponseEntity<?> alreadySubmitted() {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "message", "This survey has already been submitted.",
+                        "timestamp", LocalDateTime.now()));
     }
 
     private ResponseEntity<?> notFound() {

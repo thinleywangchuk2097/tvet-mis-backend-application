@@ -208,4 +208,220 @@ public class RoleDashboardRepository {
 				ORDER BY value DESC
 				""", TASK_COMPLETED);
 	}
+
+	// ---------------- TTTRC dashboards (TOT + curriculum) ----------------
+
+	/** TOT announcements with applied / selected / certified counts (newest first). */
+	public List<Map<String, Object>> totAnnouncements() {
+		return jdbc.queryForList("""
+				SELECT a.id, a.application_no, p.program_name, p.program_code,
+				       a.application_start_date, a.application_end_date,
+				       a.program_start_date, a.program_end_date,
+				       a.max_participants, a.venue,
+				       (SELECT COUNT(*) FROM tbl_tot_program_trainer_applied_dtls x
+				         WHERE x.program_announcement_id = a.id) AS applied,
+				       (SELECT COUNT(*) FROM tbl_tot_program_trainer_applied_dtls x
+				         WHERE x.program_announcement_id = a.id AND x.is_selected = 1) AS selected,
+				       (SELECT COUNT(*) FROM tbl_tot_program_trainer_applied_dtls x
+				         WHERE x.program_announcement_id = a.id AND x.certificate_no IS NOT NULL) AS certified
+				FROM tbl_tot_announcement_dtls a
+				LEFT JOIN tbl_tot_program_dtls p ON p.id = a.program_id
+				ORDER BY a.program_start_date DESC, a.id DESC
+				LIMIT 200
+				""");
+	}
+
+	/** TOT trainers by result (Competent / Not Competent / not assessed yet). */
+	public List<Map<String, Object>> totResults() {
+		return jdbc.queryForList("""
+				SELECT COALESCE(NULLIF(result, ''), 'Not assessed') AS name, COUNT(*) AS value
+				FROM tbl_tot_program_trainer_applied_dtls
+				GROUP BY COALESCE(NULLIF(result, ''), 'Not assessed')
+				ORDER BY value DESC
+				""");
+	}
+
+	/** TOT trainers by grade (assessed only). */
+	public List<Map<String, Object>> totGrades() {
+		return jdbc.queryForList("""
+				SELECT grade AS name, COUNT(*) AS value
+				FROM tbl_tot_program_trainer_applied_dtls
+				WHERE grade IS NOT NULL AND grade <> ''
+				GROUP BY grade
+				ORDER BY grade
+				""");
+	}
+
+	/** Institutes sending the most trainers to TOT (top 8). */
+	public List<Map<String, Object>> totByInstitute() {
+		return jdbc.queryForList("""
+				SELECT COALESCE(ir.proposed_institute_name, 'Not specified') AS name, COUNT(*) AS value
+				FROM tbl_tot_program_trainer_applied_dtls x
+				LEFT JOIN tbl_institute_registration_dtls ir ON ir.institute_id = x.institute_id
+				GROUP BY ir.proposed_institute_name
+				ORDER BY value DESC
+				LIMIT 8
+				""");
+	}
+
+	public Map<String, Object> totTotals() {
+		return jdbc.queryForMap("""
+				SELECT (SELECT COUNT(*) FROM tbl_tot_program_dtls) AS programs,
+				       (SELECT COUNT(*) FROM tbl_tot_announcement_dtls) AS announcements,
+				       COUNT(*) AS applied,
+				       COUNT(DISTINCT trainer_id) AS trainers,
+				       COALESCE(SUM(CASE WHEN is_selected = 1 THEN 1 ELSE 0 END), 0) AS selected,
+				       COALESCE(SUM(CASE WHEN certificate_no IS NOT NULL THEN 1 ELSE 0 END), 0) AS certified
+				FROM tbl_tot_program_trainer_applied_dtls
+				""");
+	}
+
+	/** Curriculum applications grouped by a dropdown / service name. */
+	public List<Map<String, Object>> curriculumByStatus() {
+		return jdbc.queryForList("""
+				SELECT COALESCE(s.name, 'Pending') AS name, c.status_id AS id, COUNT(*) AS value
+				FROM tbl_curriculum_development c
+				LEFT JOIN tbl_dropdown_child_master s ON s.id = c.status_id
+				GROUP BY s.name, c.status_id
+				ORDER BY value DESC
+				""");
+	}
+
+	public List<Map<String, Object>> curriculumByType() {
+		return jdbc.queryForList("""
+				SELECT COALESCE(sm.service_name, 'Not specified') AS name, COUNT(*) AS value
+				FROM tbl_curriculum_development c
+				LEFT JOIN tbl_service_master sm ON sm.id = c.curriculum_type_id
+				GROUP BY sm.service_name
+				ORDER BY value DESC
+				""");
+	}
+
+	public List<Map<String, Object>> curriculumByLevel() {
+		return jdbc.queryForList("""
+				SELECT COALESCE(l.name, 'Not specified') AS name, COUNT(*) AS value
+				FROM tbl_curriculum_development c
+				LEFT JOIN tbl_dropdown_child_master l ON l.id = c.certificate_level_id
+				GROUP BY l.name
+				ORDER BY value DESC
+				""");
+	}
+
+	/** Latest curriculum applications. */
+	public List<Map<String, Object>> recentCurricula() {
+		return jdbc.queryForList("""
+				SELECT c.application_no, c.curriculum_title, c.status_id,
+				       sm.service_name AS curriculum_type, s.name AS status_name,
+				       ir.proposed_institute_name AS institute_name, c.created_at
+				FROM tbl_curriculum_development c
+				LEFT JOIN tbl_service_master sm ON sm.id = c.curriculum_type_id
+				LEFT JOIN tbl_dropdown_child_master s ON s.id = c.status_id
+				LEFT JOIN tbl_institute_registration_dtls ir ON ir.institute_id = c.institute_id
+				ORDER BY c.created_at DESC, c.id DESC
+				LIMIT 10
+				""");
+	}
+
+	// ---------------- CMFG monitoring (service 55) ----------------
+	// The CMFG table and the workflow table are queried separately and matched in Java,
+	// so no text join (collation mix) between them is needed.
+
+	private static final int CMFG_SERVICE_ID = 55;
+
+	/** CMFG monitoring applications by workflow status. */
+	public List<Map<String, Object>> cmfgByStatus() {
+		return jdbc.queryForList("""
+				SELECT COALESCE(st.name, 'Pending') AS name, COUNT(DISTINCT w.application_no) AS value
+				FROM tbl_workflow_dtls w
+				LEFT JOIN tbl_dropdown_child_master st ON st.id = w.status_id
+				WHERE w.service_id = ?
+				GROUP BY COALESCE(st.name, 'Pending')
+				ORDER BY value DESC
+				""", CMFG_SERVICE_ID);
+	}
+
+	/** Current workflow status of each CMFG monitoring application. */
+	public List<Map<String, Object>> cmfgStatuses() {
+		return jdbc.queryForList("""
+				SELECT w.application_no, w.status_id, st.name AS status_name
+				FROM tbl_workflow_dtls w
+				LEFT JOIN tbl_dropdown_child_master st ON st.id = w.status_id
+				WHERE w.service_id = ?
+				""", CMFG_SERVICE_ID);
+	}
+
+	/** One row per monitoring application: institute and Yes / No answers (newest first). */
+	public List<Map<String, Object>> cmfgApplications() {
+		return jdbc.queryForList("""
+				SELECT m.application_no, MIN(m.created_at) AS created_at,
+				       COUNT(*) AS total_items,
+				       SUM(CASE WHEN m.response_id = 'Y' THEN 1 ELSE 0 END) AS yes_count,
+				       SUM(CASE WHEN m.response_id = 'N' THEN 1 ELSE 0 END) AS no_count,
+				       ir.proposed_institute_name AS institute_name
+				FROM tbl_cmfg_monitoring_dtl m
+				LEFT JOIN tbl_institute_registration_dtls ir
+				       ON ir.institute_id = CAST(m.institute_id AS UNSIGNED)
+				GROUP BY m.application_no, ir.proposed_institute_name
+				ORDER BY created_at DESC
+				LIMIT 200
+				""");
+	}
+
+	// ---------------- Tracer surveys (DWPS 1 dashboard) ----------------
+	// Question sets and sends are queried separately and matched in Java (no text join).
+
+	/** One row per tracer survey (question set): title, tracer type and number of questions. */
+	public List<Map<String, Object>> tracerSurveys() {
+		return jdbc.queryForList("""
+				SELECT q.application_no, MAX(q.tracer_title) AS tracer_title,
+				       MAX(q.parent_tracer_type_id) AS parent_tracer_type_id,
+				       MAX(pt.name) AS tracer_type,
+				       MAX(st.name) AS sub_tracer_type,
+				       COUNT(*) AS questions,
+				       MIN(q.created_at) AS created_at
+				FROM tbl_tracer_question_dtls q
+				LEFT JOIN tbl_dropdown_child_master pt ON pt.id = q.parent_tracer_type_id
+				LEFT JOIN tbl_dropdown_child_master st ON st.id = q.sub_tracer_type_id
+				GROUP BY q.application_no
+				ORDER BY created_at DESC
+				""");
+	}
+
+	/** Sends per survey (question set): sent and responded (status 55 = survey submitted). */
+	public List<Map<String, Object>> tracerSendsBySurvey() {
+		return jdbc.queryForList("""
+				SELECT s.question_application_no AS application_no,
+				       COUNT(*) AS sent,
+				       SUM(CASE WHEN s.status_id = 55 THEN 1 ELSE 0 END) AS responded,
+				       MAX(s.created_at) AS last_sent
+				FROM tbl_tracer_survey_send_dtls s
+				GROUP BY s.question_application_no
+				""");
+	}
+
+	/** Sends and responses per month within [from, to]. */
+	public List<Map<String, Object>> tracerSendsByMonth(LocalDate from, LocalDate to) {
+		return jdbc.queryForList("""
+				SELECT DATE_FORMAT(s.created_at, '%Y-%m') AS ym,
+				       COUNT(*) AS value,
+				       SUM(CASE WHEN s.status_id = 55 THEN 1 ELSE 0 END) AS responded
+				FROM tbl_tracer_survey_send_dtls s
+				WHERE s.created_at >= ? AND s.created_at < ?
+				GROUP BY DATE_FORMAT(s.created_at, '%Y-%m')
+				ORDER BY ym
+				""", java.sql.Date.valueOf(from), java.sql.Date.valueOf(to.plusDays(1)));
+	}
+
+	/** Sends by tracer type (parent tracer type on the send record). */
+	public List<Map<String, Object>> tracerSendsByType() {
+		return jdbc.queryForList("""
+				SELECT COALESCE(pt.name, 'Not specified') AS name,
+				       COUNT(*) AS value,
+				       SUM(CASE WHEN s.status_id = 55 THEN 1 ELSE 0 END) AS responded
+				FROM tbl_tracer_survey_send_dtls s
+				LEFT JOIN tbl_dropdown_child_master pt ON pt.id = s.parent_tracer_type_id
+				GROUP BY COALESCE(pt.name, 'Not specified')
+				ORDER BY value DESC
+				""");
+	}
 }

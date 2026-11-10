@@ -45,9 +45,9 @@ public class SecurityConfiguration {
 						// User management — restricted to listed authorities
 						.requestMatchers("/api/v1/user/management/**")
 						.hasAnyAuthority("1", "2", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
-								"17", "28", "30", "29", "21", "23")
+								"17", "28", "30", "29", "21", "23","33")
 						.requestMatchers("/api/v1/private/birms/payment/**")
-						.hasAnyAuthority("1", "7", "9", "22", "23", "11", "12")
+						.hasAnyAuthority("1", "7", "9", "22", "23", "11", "12", "28","33")
 						// Password endpoints — admin only
 						.requestMatchers("/api/v1/user/password/**").hasAuthority("1")
 

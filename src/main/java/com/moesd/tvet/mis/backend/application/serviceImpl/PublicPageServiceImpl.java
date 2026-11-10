@@ -43,4 +43,29 @@ public class PublicPageServiceImpl implements PublicPageService {
 	public Map<String, Object> getHomeStats() {
 		return publicPageRepository.getHomeStats();
 	}
+
+	@Override
+	public List<Map<String, Object>> getNcsPublications() {
+		return publicPageRepository.getNcsPublications();
+	}
+
+	@Override
+	public List<Map<String, Object>> getCurriculumPublications() {
+		return publicPageRepository.getCurriculumPublications();
+	}
+
+	@Override
+	public List<Map<String, Object>> getAssessmentResultsByCid(String cidNo) {
+		return publicPageRepository.getAssessmentResultsByCid(cidNo);
+	}
+
+	@Override
+	public List<Map<String, Object>> getPublicTrainers() {
+		return publicPageRepository.getPublicTrainers();
+	}
+
+	@Override
+	public List<Map<String, Object>> getAccreditedCoursesWithInstitutes() {
+		return publicPageRepository.getAccreditedCoursesWithInstitutes();
+	}
 }

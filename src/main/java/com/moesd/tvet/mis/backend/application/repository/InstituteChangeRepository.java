@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
 import com.moesd.tvet.mis.backend.application.model.InstituteChangeDetails;
@@ -15,7 +16,8 @@ public interface InstituteChangeRepository extends JpaRepository<InstituteChange
 					+ "  c.reason_for_change, "
 					+ "  c.dzongkhag_id, "
 					+ "  c.exact_location, "
-					+ "  c.institute_name, "
+					// requested (new) name; "institute_name" below is the institute's current name
+					+ "  c.institute_name AS new_institute_name, "
 					+ "  c.ownership_type_id, "
 					+ "  c.promoter_citizen_id, "
 					+ "  c.promoter_name, "
@@ -68,4 +70,6 @@ public interface InstituteChangeRepository extends JpaRepository<InstituteChange
 					+ "ON c.institute_id = ir.institute_id "
 					+ "WHERE c.application_no = ?")
 		List<Tuple> getInstituteChangeByApplicationNo(String applicationNo);
+
+	Optional<InstituteChangeDetails> findByApplicationNo(String applicationNo);
 }

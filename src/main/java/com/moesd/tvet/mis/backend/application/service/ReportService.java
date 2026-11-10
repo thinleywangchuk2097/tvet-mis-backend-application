@@ -24,6 +24,14 @@ public interface ReportService {
 	List<Map<String, Object>> getRegistrationDetailsForCertificate(String registrationType, String applicationNo);
 	
 	List<Map<String, Object>> getTraineesDetailsForCertificate(String registrationNo, String applicationNo);
+
+	List<Map<String, Object>> getAllTraineesDetailsForCertificate();
+
+	List<Map<String, Object>> getAssessorAccreditorAuditorReport();
+
+	List<Map<String, Object>> getProgrammesReport();
+
+	List<Map<String, Object>> getInstituteAssessmentReport(String registrationNo);
 	
 	List<Map<String, Object>> getAccreditedProgrammeDetailsForCertificate(String registrationNo, String applicationNo);
 	

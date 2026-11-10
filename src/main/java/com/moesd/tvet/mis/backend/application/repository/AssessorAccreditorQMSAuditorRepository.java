@@ -139,6 +139,34 @@ public interface AssessorAccreditorQMSAuditorRepository extends JpaRepository<As
 						+ "  AND a.service_id = ?")
 		
 		List<Tuple> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo, String serviceId);
+
+		// Public list of approved (status 57) registrations for one service:
+		// 32 = Assessor, 5 = Accreditor, 3 = QMS Auditor. No contact details are returned.
+		@NativeQuery("SELECT "
+						+ "  a.id, "
+						+ "  a.registration_no, "
+						+ "  a.full_name, "
+						+ "  g.name AS gender, "
+						+ "  a.organization_name, "
+						+ "  a.designation, "
+						+ "  dz.dzongkhag_name, "
+						+ "  COALESCE(sec.sector_name, a.sector_name) AS sector_name, "
+						+ "  COALESCE(occ.occupation_name, a.occupation_name) AS occupation_name, "
+						+ "  COALESCE(lvl.name, a.certification_level_name) AS certification_level_name "
+						+ "FROM "
+						+ "  tbl_assessor_accreditor_auditor_registration a "
+						+ "  LEFT JOIN tbl_dropdown_child_master g "
+						+ "    ON g.id = a.gender_id "
+						+ "  LEFT JOIN tbl_dzongkhag_master dz "
+						+ "    ON dz.id = a.dzongkhag_id "
+						+ "  LEFT JOIN tbl_sector_master sec ON sec.id = a.sector_id "
+						+ "  LEFT JOIN tbl_occupation_master occ ON occ.id = a.occupation_id "
+						+ "  LEFT JOIN tbl_dropdown_child_master lvl ON lvl.id = a.certification_level_id "
+						+ "WHERE a.service_id = ? "
+						+ "  AND a.status_id = 57 "
+						+ "  AND a.registration_no IS NOT NULL "
+						+ "ORDER BY a.full_name")
+		List<Tuple> getRegisteredByServiceId(Integer serviceId);
 		
 		
 		

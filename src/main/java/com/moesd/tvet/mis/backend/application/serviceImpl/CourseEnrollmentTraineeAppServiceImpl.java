@@ -312,7 +312,8 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					if (dto.getTheoryAssessment() != null && dto.getPracticalAssessment() != null) {
 						trainee.setTheoryAssessment(String.valueOf(dto.getTheoryAssessment()));
 						trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
-						trainee.setRemarks(String.valueOf(dto.getRemarks()));
+						// keep NULL when there is no remark (String.valueOf(null) would store "null")
+						trainee.setRemarks(dto.getRemarks());
 						if (request.getCertificationLevelId() == 111 || request.getCertificationLevelId() == 112) {
 							if (dto.getTheoryAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
@@ -354,6 +355,7 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 					if (dto.getVivaAssessment() != null && dto.getPracticalAssessment() != null) {
 						trainee.setVivaAssessment(String.valueOf(dto.getVivaAssessment()));
 						trainee.setPracticalAssessment(String.valueOf(dto.getPracticalAssessment()));
+						trainee.setRemarks(dto.getRemarks());
 						if (request.getCertificationLevelId() == 111 || request.getCertificationLevelId() == 112) {
 							if (dto.getVivaAssessment() >= 10 && dto.getPracticalAssessment() >= 36 && dto.getInternalAssessment() >= 10) {
 								resultId = 94;
@@ -418,9 +420,9 @@ public class CourseEnrollmentTraineeAppServiceImpl implements CourseEnrollmentTr
 	}
 
 	@Override
-	public List<ObjectNode> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId) {
+	public List<ObjectNode> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId, Integer serviceId) {
 	    return objectTojson._toJson(
-	            courseEnrollmentTraineeAppRepository.getFailedTraineeDetails(userId, courseId, certificationLevelId));
+	            courseEnrollmentTraineeAppRepository.getFailedTraineeDetails(userId, courseId, certificationLevelId, serviceId));
 	}
 
 	@Override

@@ -80,6 +80,30 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	@Override
+	public List<Map<String, Object>> getAllTraineesDetailsForCertificate() {
+		return reportRepository.getAllTraineesDetailsForCertificate();
+	}
+
+	@Override
+	public List<Map<String, Object>> getAssessorAccreditorAuditorReport() {
+		return reportRepository.getAssessorAccreditorAuditorReport();
+	}
+
+	// BQF + RPL (accredited) and Non-BQF (non-accredited) programmes in one list.
+	// Two queries merged here instead of a SQL UNION (avoids collation mix between the tables).
+	@Override
+	public List<Map<String, Object>> getProgrammesReport() {
+		List<Map<String, Object>> all = new java.util.ArrayList<>(reportRepository.getAccreditedProgrammesReport());
+		all.addAll(reportRepository.getNonAccreditedProgrammesReport());
+		return all;
+	}
+
+	@Override
+	public List<Map<String, Object>> getInstituteAssessmentReport(String registrationNo) {
+		return reportRepository.getInstituteAssessmentReport(registrationNo);
+	}
+
+	@Override
 	public List<Map<String, Object>> getAccreditedProgrammeDetailsForCertificate(String registrationNo,
 			String applicationNo) {
 		return reportRepository.getAccreditedProgrammeDetailsForCertificate(registrationNo, applicationNo);

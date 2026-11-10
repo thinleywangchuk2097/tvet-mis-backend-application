@@ -104,4 +104,18 @@ public interface InstituteProposalRepository extends JpaRepository<InstituteProp
 	
 	  	Optional<InstituteProposal> findByApplicationNo(String applicationNo);
 
+		/**
+		 * Proposal application no of a registered institute:
+		 * tbl_institute_registration_dtls -> tbl_institute_registration_app -> tbl_institute_proposal
+		 * (same joins as the institute change details query).
+		 */
+		@NativeQuery("SELECT p.application_no "
+				+ "FROM tbl_institute_proposal p "
+				+ "  JOIN tbl_institute_registration_app rp ON p.application_no = rp.proposal_application_no "
+				+ "  JOIN tbl_institute_registration_dtls ipr ON ipr.application_no = rp.application_no "
+				+ "WHERE ipr.institute_id = ?1 "
+				+ "ORDER BY p.id DESC "
+				+ "LIMIT 1")
+		Optional<String> findProposalApplicationNoByInstituteId(Long instituteId);
+
 }

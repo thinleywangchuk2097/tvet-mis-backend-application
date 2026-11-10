@@ -8,6 +8,9 @@ import com.moesd.tvet.mis.backend.application.model.CourseEnrollmentTraineeApp;
 import jakarta.persistence.Tuple;
 
 public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<CourseEnrollmentTraineeApp, Long>{
+	// The announcement's programme_id is the approved accredited course: its NCS programme comes
+	// from the curriculum, or from ncs_id when the course has no curriculum.
+	// Older RPL / re-assessment rows stored the NCS id directly (d), so that is the fallback.
 	@NativeQuery("SELECT "
 			+ "  tp.*, "
 			+ "  a.ca_start_date, "
@@ -20,16 +23,16 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "    WHEN a.service_id = 38 "
 			+ "    THEN nc.programme_title "
 			+ "    WHEN a.service_id = 39 "
-			+ "    THEN d.programme_title "
+			+ "    THEN COALESCE(c.programme_title, d.programme_title) "
 			+ "  END AS course_name "
 			+ "FROM "
 			+ "  tbl_programme_announcement_dtls a "
+			+ "  LEFT JOIN tbl_accredited_course_dtls ac "
+			+ "    ON ac.id = a.programme_id "
 			+ "  LEFT JOIN tbl_curriculum_development cd "
-			+ "  ON cd.programme_id = a.programme_id "
-			+ "  LEFT JOIN tbl_accredited_course_dtls b "
-			+ "    ON cd.id = b.curriculum_id "
+			+ "    ON cd.id = ac.curriculum_id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls c "
-			+ "    ON c.id = a.programme_id "
+			+ "    ON c.id = COALESCE(cd.programme_id, ac.ncs_id) "
 			+ "  LEFT JOIN tbl_non_accredited_course_dtls nc "
 			+ "    ON a.programme_id = nc.id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls d "
@@ -41,6 +44,9 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 	List<Tuple> getCourseAppliedTraineesByApplicationNo(String applicationNo);
 	
 	
+	// The announcement's programme_id is the approved accredited course: its NCS programme comes
+	// from the curriculum, or from ncs_id when the course has no curriculum.
+	// Older RPL / re-assessment rows stored the NCS id directly (d), so that is the fallback.
 	@NativeQuery("SELECT "
 			+ "  tp.*, "
 			+ "  a.ca_start_date, "
@@ -51,19 +57,17 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "  a.course_end_date, "
 			+ "  a.certification_level_id, "
 			+ "  CASE "
-			+ "    WHEN a.service_id = 41 "
-			+ "    THEN c.programme_title "
-			+ "    WHEN a.service_id = 42 "
-			+ "    THEN d.programme_title "
+			+ "    WHEN a.service_id IN (41, 42) "
+			+ "    THEN COALESCE(c.programme_title, d.programme_title) "
 			+ "  END AS course_name "
 			+ "FROM "
 			+ "  tbl_programme_announcement_dtls a "
+			+ "  LEFT JOIN tbl_accredited_course_dtls ac "
+			+ "    ON ac.id = a.programme_id "
 			+ "  LEFT JOIN tbl_curriculum_development cd "
-			+ "    ON cd.programme_id = a.programme_id "
-			+ "  LEFT JOIN tbl_accredited_course_dtls b "
-			+ "    ON cd.id = b.curriculum_id "
+			+ "    ON cd.id = ac.curriculum_id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls c "
-			+ "    ON c.id = cd.programme_id "
+			+ "    ON c.id = COALESCE(cd.programme_id, ac.ncs_id) "
 			+ "  LEFT JOIN tbl_ncs_app_dtls d "
 			+ "    ON d.id = a.programme_id "
 			+ "  LEFT JOIN tbl_programme_trainee_enrollment_dtls tp "
@@ -81,6 +85,9 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 	List<CourseEnrollmentTraineeApp> findByApplicationNo(String application_no);
 	
 	
+	// The announcement's programme_id is the approved accredited course: its NCS programme comes
+	// from the curriculum, or from ncs_id when the course has no curriculum.
+	// Older RPL / re-assessment rows stored the NCS id directly (d), so that is the fallback.
 	@NativeQuery("SELECT "
 			+ "  tp.*, "
 			+ "  a.application_start_date, "
@@ -94,16 +101,16 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "    WHEN a.service_id = 38 "
 			+ "    THEN nc.programme_title "
 			+ "    WHEN a.service_id = 39 "
-			+ "    THEN d.programme_title "
+			+ "    THEN COALESCE(c.programme_title, d.programme_title) "
 			+ "  END AS course_name "
 			+ "FROM "
 			+ "  tbl_programme_announcement_dtls a "
+			+ "  LEFT JOIN tbl_accredited_course_dtls ac "
+			+ "    ON ac.id = a.programme_id "
 			+ "  LEFT JOIN tbl_curriculum_development cd "
-			+ "    ON cd.programme_id = a.programme_id "
-			+ "  LEFT JOIN tbl_accredited_course_dtls b "
-			+ "    ON cd.id = b.curriculum_id "
+			+ "    ON cd.id = ac.curriculum_id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls c "
-			+ "    ON c.id = cd.programme_id "
+			+ "    ON c.id = COALESCE(cd.programme_id, ac.ncs_id) "
 			+ "  LEFT JOIN tbl_non_accredited_course_dtls nc "
 			+ "    ON a.programme_id = nc.id "
 			+ "  LEFT JOIN tbl_ncs_app_dtls d "
@@ -117,9 +124,10 @@ public interface CourseEnrollmentTraineeAppRepository extends JpaRepository<Cour
 			+ "WHERE f.user_id = ? "
 			+ "  AND a.programme_id = ? "
 			+ "  AND a.certification_level_id = ? "
+			+ "  AND a.service_id = ? "
 			+ "  AND tp.result_status_id = 95 "
 			+ "  AND a.service_id IN (37, 38, 39)")
-	List<Tuple> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId);
+	List<Tuple> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId,Integer serviceId);
 	
 	@NativeQuery("SELECT "
 			+ "  a.* "

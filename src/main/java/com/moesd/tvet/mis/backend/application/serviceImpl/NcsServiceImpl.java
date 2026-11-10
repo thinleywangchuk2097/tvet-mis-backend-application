@@ -112,6 +112,11 @@ public class NcsServiceImpl implements NcsService {
 	}
 
 	@Override
+	public List<ObjectNode> getNcsDetailsBySector(Integer sectorId) {
+	    return objectTojson._toJson(ncsRepository.getNcsDetailsBySector(sectorId));
+	}
+
+	@Override
 	public List<ObjectNode> getAlreadyNcsDetailsExist(Integer sectorId, Integer occupationId, Integer certificationId) {
 	    return objectTojson._toJson(ncsRepository.getAlreadyNcsDetailsExist(sectorId, occupationId, certificationId));
 	}
@@ -124,5 +129,10 @@ public class NcsServiceImpl implements NcsService {
 	@Override
 	public List<ObjectNode> getAllNcsProgrammes() {
 	    return objectTojson._toJson(ncsRepository.getAllNcsProgrammes());
+	}
+
+	@Override
+	public List<ObjectNode> getAllCertificateLevelNcsProgrammes() {
+		return objectTojson._toJson(ncsRepository.getAllCertificateLevelNcsProgrammes());
 	}
 }

@@ -47,7 +47,8 @@ public class InstituteRegistrationDetailsAudit {
 	
 	private Integer serviceId;
 	
-	@Column(name = "registration_no", nullable = false, unique = true, length = 50)
+	// not unique: the audit table keeps one row per change of the same institute
+	@Column(name = "registration_no", nullable = false, length = 50)
 	private String registrationNo;
 
 	@Column(name = "website")

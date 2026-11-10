@@ -563,14 +563,15 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 
 			for (TraineeDTO trainee : request.getSelectedTrainees()) {
 				String UniqueId = generateTracerUniqueId.generateTracerUniqueId(applicationNo);
-				String tracerUrl = "http://localhost:5173/tracer/trainee-survey/" + UniqueId;
+				//String tracerUrl = "http://localhost:5173/tracer/trainee-survey/" + UniqueId;
+				String tracerUrl = "https://test-tvet.systems.gov.bt/tracer/trainee-survey/" + UniqueId;
 				TracerSurveySendDetails surveyDetail = TracerSurveySendDetails.builder()
 						.applicationNo(applicationNo)
 						.questionApplicationNo(request.getApplicationNo())
 						.applicationName(trainee.getName())
 						.mobileNo(trainee.getMobileNo())
 						.emailId(trainee.getEmail())
-						.statusId(1)
+						.statusId(null) // NULL = not submitted (55 once submitted)
 						.uniqueId(UniqueId)
 						.tracerUrl(tracerUrl)
 						.parentTracerTypeId(request.getParentTracerTypeId())
@@ -605,7 +606,8 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 
 			for (EmployerDTO employer : request.getSelectedEmployers()) {
 				String UniqueId = generateTracerUniqueId.generateTracerUniqueId(applicationNo);
-				String tracerUrl = "http://localhost:5173/tracer/employer-survey/" + UniqueId;
+				//String tracerUrl = "http://localhost:5173/tracer/employer-survey/" + UniqueId;
+				String tracerUrl = "https://test-tvet.systems.gov.bt/tracer/employer-survey/" + UniqueId;
 				TracerSurveySendDetails surveyDetail = TracerSurveySendDetails.builder()
 						.applicationNo(applicationNo)
 						.questionApplicationNo(request.getApplicationNo())
@@ -614,7 +616,7 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 						.emailId(employer.getEmail())
 						.uniqueId(UniqueId)
 						.tracerUrl(tracerUrl)
-						.statusId(1)
+						.statusId(null) // NULL = not submitted (55 once submitted)
 						.parentTracerTypeId(request.getParentTracerTypeId())
 						.subTracerTypeId(request.getSubTracerTypeId())
 						.createdAt(LocalDateTime.now())
@@ -641,6 +643,18 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 		return tracerSurveySendDetailsRepository.findByUniqueId(uniqueId).orElse(null);
 	}
 
+	// tbl_tracer_survey_send_dtls.status_id: NULL = not submitted, 55 = submitted
+	private static final int STATUS_SUBMITTED = 55;
+
+	@Override
+	public boolean isSurveySubmitted(String uniqueId) {
+		if (uniqueId == null || uniqueId.isBlank())
+			return false;
+		boolean statusSubmitted = tracerSurveySendDetailsRepository.findByUniqueId(uniqueId)
+				.map(s -> Integer.valueOf(STATUS_SUBMITTED).equals(s.getStatusId())).orElse(false);
+		return statusSubmitted || tracerSurveyResponseDetailsRepository.existsByUniqueId(uniqueId);
+	}
+
 	@Override
 	@Transactional
 	public List<TracerSurveyResponseDetails> saveSurveyResponses(
@@ -654,9 +668,13 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 	                            "Invalid survey link: " + uniqueId));
 
 	    // 2) Duplicate-submission guard — one submission per uniqueId
-	    boolean alreadySubmitted =
-	            tracerSurveyResponseDetailsRepository.existsByUniqueId(uniqueId);
-	    if (alreadySubmitted) {
+	    //    a) responses already saved for this link
+	    if (tracerSurveyResponseDetailsRepository.existsByUniqueId(uniqueId)) {
+	        throw new IllegalStateException(
+	                "Survey " + uniqueId + " has already been submitted.");
+	    }
+	    //    b) claim the link atomically (status NULL -> 55); a parallel / double-click submit gets 0
+	    if (tracerSurveySendDetailsRepository.markSubmitted(uniqueId, LocalDateTime.now()) == 0) {
 	        throw new IllegalStateException(
 	                "Survey " + uniqueId + " has already been submitted.");
 	    }
@@ -701,10 +719,6 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 
 	        savedResponses.add(tracerSurveyResponseDetailsRepository.save(entity));
 	    }
-
-	    // 4) Mark the send row as completed
-	    sendDetails.setStatusId(2); // 2 = submitted
-	    tracerSurveySendDetailsRepository.save(sendDetails);
 
 	    return savedResponses;
 	}

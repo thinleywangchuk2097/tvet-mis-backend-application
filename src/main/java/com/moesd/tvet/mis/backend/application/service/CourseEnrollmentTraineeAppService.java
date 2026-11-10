@@ -22,7 +22,7 @@ public interface CourseEnrollmentTraineeAppService {
 	
 	ResponseEntity<?> updateTraineeApplication(SelectedTraineedto request);
 
-	List<ObjectNode> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId);
+	List<ObjectNode> getFailedTraineeDetails(String userId, String courseId, Integer certificationLevelId, Integer serviceId);
 	
 	ResponseEntity<?> selectUnselectTrainee(SelectedTraineedto request);
 	

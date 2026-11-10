@@ -40,6 +40,10 @@ public class InstituteDashboardServiceImpl implements InstituteDashboardService 
 		Map<String, Object> out = new LinkedHashMap<>();
 		out.put("institute", institute);
 
+		// Self Assessment Report grade: shown only once the report is approved (57)
+		Map<String, Object> sar = safe("sarGrade", () -> repo.approvedSarGrade(instituteId), null);
+		out.put("sar", sar == null ? null : normalize(sar));
+
 		// ---- Trainers / staff / courses ----
 		List<Map<String, Object>> trainersByEmployment = safe("trainers",
 				() -> normalizeAll(repo.trainersByEmployment(instituteId)), List.of());
@@ -91,7 +95,7 @@ public class InstituteDashboardServiceImpl implements InstituteDashboardService 
 		Map<String, Object> tot = safe("tot", () -> normalize(repo.totSummary(instituteId)), Map.of());
 		out.put("tot", tot);
 
-		// ---- Recent applications (one row per application no, latest first) ----
+		// ---- Recent applications: last 3 days only (one row per application no, latest first) ----
 		List<String> appNos = new ArrayList<>(new LinkedHashSet<>(
 				safe("applicationNos", () -> repo.applicationNos(instituteId), List.<String>of())));
 		appNos.removeIf(a -> a == null || a.isBlank());

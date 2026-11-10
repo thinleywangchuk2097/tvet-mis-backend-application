@@ -59,12 +59,13 @@ public class CourseEnrollmentTraineeAppController {
 		return (courseEnrollmentTraineeAppService.updateTraineeApplication(request));
 	}
 
-	@GetMapping("/get-trainee-details/{user_id}/{course_id}/{certification_level_id}")
+	@GetMapping("/get-trainee-details/{user_id}/{course_id}/{certification_level_id}/{service_id}")
 	public ResponseEntity<List<ObjectNode>> getFailedTraineeDetails(@PathVariable("user_id") String userId,
 			@PathVariable("course_id") String courseId,
-			@PathVariable("certification_level_id") Integer certificationLevelId) {
+			@PathVariable("certification_level_id") Integer certificationLevelId,
+			@PathVariable("service_id") Integer serviceId) {
 		List<ObjectNode> details = courseEnrollmentTraineeAppService.getFailedTraineeDetails(userId, courseId,
-				certificationLevelId);
+				certificationLevelId, serviceId);
 		return ResponseEntity.ok(details);
 	}
 

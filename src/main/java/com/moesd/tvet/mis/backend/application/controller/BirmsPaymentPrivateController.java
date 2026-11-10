@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moesd.tvet.mis.backend.application.dto.BirmsPaymentRequestdto;
@@ -100,6 +101,14 @@ public class BirmsPaymentPrivateController {
 	@GetMapping("/get-payment-details-by-institute/{instituteId}")
 	public ResponseEntity<List<ObjectNode>> getPaymentDetailsByInstituteId(@PathVariable Integer instituteId) {
 		return ResponseEntity.ok(birmsPaymentService.getPaymentDetailsByInstituteId(instituteId));
+	}
+
+	// Institute payment page: own payments, filtered by Payment Advice No / Application No
+	@GetMapping("/search-institute-payments")
+	public ResponseEntity<List<ObjectNode>> searchInstitutePayments(
+			@RequestParam Integer instituteId,
+			@RequestParam(required = false) String query) {
+		return ResponseEntity.ok(birmsPaymentService.searchInstitutePayments(instituteId, query));
 	}
 
 	@GetMapping("/get-payment-by-user/{user_id}")

@@ -19,6 +19,7 @@ public class AccreditedCoursedto {
 	private String applicantName;
 	private Date registration_date;
 	private Integer curriculumId;
+	private Long ncsId;
 	private String validity_date;
 	private boolean isRenewal;
 	private String leadTrainerCidNo;
@@ -41,6 +42,8 @@ public class AccreditedCoursedto {
 	private String userId;
 	private Integer statusId;
 	private String remarks;
+	// REC stage: user id of the REC member who is acting (logged in user)
+	private String recMemberUserId;
 	// Documents
 	private Documentdto[] documents;
 }

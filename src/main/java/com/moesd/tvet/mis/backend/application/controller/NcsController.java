@@ -39,6 +39,12 @@ public class NcsController {
 		return ResponseEntity.ok(details);
 	}
 
+	// NCS list filtered by sector (used by the NCS page list)
+	@GetMapping("/get-ncs-details-by-sector/{sector_id}")
+	public ResponseEntity<List<ObjectNode>> getNcsDetailsBySector(@PathVariable("sector_id") Integer sectorId) {
+		return ResponseEntity.ok(ncsService.getNcsDetailsBySector(sectorId));
+	}
+
 	@GetMapping("/get-ncs-already-exist/{sector_id}/{occupation_id}/{certification_id}")
 	public ResponseEntity<List<ObjectNode>> getAlreadyNcsDetailsExist(@PathVariable("sector_id") Integer sectorId,
 			@PathVariable("occupation_id") Integer occupationId,
@@ -56,6 +62,12 @@ public class NcsController {
 	@GetMapping("/get-ncs-programmes")
 	public ResponseEntity<List<ObjectNode>> getAllNcsProgrammes() {
 		List<ObjectNode> ncsLists = ncsService.getAllNcsProgrammes();
+		return ResponseEntity.ok(ncsLists);
+	}
+	
+	@GetMapping("/get-ncs-certificate-level-programmes")
+	public ResponseEntity<List<ObjectNode>> getAllCertificateLevelNcsProgrammes() {
+		List<ObjectNode> ncsLists = ncsService.getAllCertificateLevelNcsProgrammes();
 		return ResponseEntity.ok(ncsLists);
 	}
 

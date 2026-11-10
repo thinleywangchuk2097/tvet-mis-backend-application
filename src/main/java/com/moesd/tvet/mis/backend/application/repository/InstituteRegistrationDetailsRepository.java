@@ -13,6 +13,48 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 	
 	@NativeQuery("SELECT * FROM tbl_institute_registration_dtls " + "WHERE registration_no = ?")
 	List<Tuple> getInstituteDetails(String registrationNo);
+
+	// Public report: registered institutes (status 57) with their accredited courses (status 57)
+	@NativeQuery("SELECT "
+			+ "  i.institute_id, "
+			+ "  i.registration_no, "
+			+ "  i.proposed_institute_name AS institute_name, "
+			+ "  i.service_id, "
+			+ "  sm.service_name AS registration_type, "
+			+ "  dz.dzongkhag_name, "
+			+ "  i.exact_location, "
+			+ "  COALESCE(NULLIF(i.mobile_no, ''), i.telephone_no) AS contact_no, "
+			+ "  i.email_id, "
+			+ "  i.website, "
+			+ "  own.name AS ownership, "
+			+ "  i.institute_renewal_date, "
+			+ "  i.validity_date, "
+			+ "  (SELECT IFNULL(JSON_ARRAYAGG(JSON_OBJECT( "
+			+ "      'id', ac.id, "
+			+ "      'title', ncs.programme_title, "
+			+ "      'theory', cd.total_theory_duration, "
+			+ "      'practical', cd.total_practical_duration, "
+			+ "      'ojt', cd.total_ojt_duration, "
+			+ "      'total', cd.total_program_duration, "
+			+ "      'feesPerHead', ac.fees_per_trainee, "
+			+ "      'enrollment', ac.enrolment_capacity, "
+			+ "      'certLevel', lvl.name "
+			+ "    )), JSON_ARRAY()) "
+			+ "   FROM tbl_accredited_course_dtls ac "
+			+ "   LEFT JOIN tbl_curriculum_development cd ON cd.id = ac.curriculum_id "
+			+ "   LEFT JOIN tbl_ncs_app_dtls ncs ON ncs.id = COALESCE(cd.programme_id, ac.ncs_id) "
+			+ "   LEFT JOIN tbl_dropdown_child_master lvl ON lvl.id = ncs.certification_id "
+			+ "   WHERE ac.institute_id = i.institute_id "
+			+ "     AND ac.status_id = 57) AS courses "
+			+ "FROM "
+			+ "  tbl_institute_registration_dtls i "
+			+ "  LEFT JOIN tbl_service_master sm ON sm.id = i.service_id "
+			+ "  LEFT JOIN tbl_dzongkhag_master dz ON dz.id = i.dzongkhag_id "
+			+ "  LEFT JOIN tbl_dropdown_child_master own ON own.id = i.ownership_type_id "
+			+ "WHERE i.status_id = 57 "
+			+ "  AND i.registration_no IS NOT NULL "
+			+ "ORDER BY i.proposed_institute_name")
+	List<Tuple> getRegisteredInstitutesWithCourses();
 	
 	@NativeQuery("SELECT "
 			+ "  ir.application_no, "

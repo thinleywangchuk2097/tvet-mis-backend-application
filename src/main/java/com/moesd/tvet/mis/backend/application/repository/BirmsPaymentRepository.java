@@ -31,6 +31,19 @@ public interface BirmsPaymentRepository extends JpaRepository<BirmsPayment, Long
     				 + "WHERE a.institute_id = ? "
     				 + "ORDER BY a.created_at DESC")
 	List<Tuple> getPaymentDetailsByInstituteId(Integer instituteId);
+
+    // Institute payment page search: the institute's own payments (institute_id),
+    // optionally matching an Application No / Payment Advice No.
+    @NativeQuery("SELECT "
+    				 + "  a.* "
+    				 + "FROM "
+    				 + "  tbl_birms_payment_details a "
+    				 + "WHERE a.institute_id = ?1 "
+    				 + "  AND (?2 IS NULL OR ?2 = '' "
+    				 + "       OR a.application_no LIKE CONCAT('%', ?2, '%') "
+    				 + "       OR a.payment_advice_no LIKE CONCAT('%', ?2, '%')) "
+    				 + "ORDER BY a.created_at DESC")
+	List<Tuple> searchInstitutePayments(Integer instituteId, String query);
     
     @NativeQuery("SELECT "
     				+ "  c.id AS course_id, "

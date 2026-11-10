@@ -49,4 +49,34 @@ public class PublicPageController {
 	public Map<String, Object> getHomeStats() {
 		return publicPageService.getHomeStats();
 	}
+
+	// Public NCS publication list
+	@GetMapping("/ncs-publications")
+	public List<Map<String, Object>> getNcsPublications() {
+		return publicPageService.getNcsPublications();
+	}
+
+	// Public curriculum publication list (Endorsed only)
+	@GetMapping("/curriculum-publications")
+	public List<Map<String, Object>> getCurriculumPublications() {
+		return publicPageService.getCurriculumPublications();
+	}
+
+	// Public assessment result lookup by CID / reference no
+	@GetMapping("/assessment-results/{cid_no}")
+	public List<Map<String, Object>> getAssessmentResultsByCid(@PathVariable("cid_no") String cidNo) {
+		return publicPageService.getAssessmentResultsByCid(cidNo == null ? "" : cidNo.trim());
+	}
+
+	// Public trainer report (trainers added through AddTrainer)
+	@GetMapping("/trainers")
+	public List<Map<String, Object>> getPublicTrainers() {
+		return publicPageService.getPublicTrainers();
+	}
+
+	// Public "Courses Accredited" report (approved accredited courses with institutes)
+	@GetMapping("/accredited-courses")
+	public List<Map<String, Object>> getAccreditedCoursesWithInstitutes() {
+		return publicPageService.getAccreditedCoursesWithInstitutes();
+	}
 }
