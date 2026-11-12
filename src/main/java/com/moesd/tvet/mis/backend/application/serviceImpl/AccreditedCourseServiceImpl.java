@@ -376,12 +376,6 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 		return objectTojson._toJson(listOfProgrammes);
 	}
 
-	/**
-	 * Marks the acting REC member's row in tbl_rec_member_task_assignment as done (remarks NULL = pending).
-	 * Returns a response while other REC members are still pending (this member is taken off
-	 * tbl_task_dtls.assigned_user_id and the course stays with REC); returns null when this was the last
-	 * pending member (or no individual REC assignment exists), so the normal flow forwards it.
-	 */
 	private ResponseEntity<?> recordRecCompletion(AccreditedCoursedto request) {
 		String applicationNo = request.getApplicationNo();
 		Long pending = recMemberTaskAssignmentRepository.getRECMemberCount(applicationNo);
