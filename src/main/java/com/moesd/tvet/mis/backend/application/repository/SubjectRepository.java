@@ -20,5 +20,19 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>{
 			+ "WHERE a.status_id = 1 "
 			+ "  AND a.institute_id = ?")
 	List<Tuple> getAllActiveSubjects(String instituteId);
+
+	Optional<Subject> findByApplicationNo(String applicationNo);
+
+	/** Add Subject application with the institute name (task list view). */
+	@NativeQuery("SELECT "
+			+ "  a.*, "
+			+ "  i.proposed_institute_name, "
+			+ "  i.registration_no "
+			+ "FROM "
+			+ "  tbl_subject_dtls a "
+			+ "  LEFT JOIN tbl_institute_registration_dtls i "
+			+ "    ON i.institute_id = a.institute_id "
+			+ "WHERE a.application_no = ?1")
+	List<Tuple> getSubjectByApplicationNo(String applicationNo);
 	
 }

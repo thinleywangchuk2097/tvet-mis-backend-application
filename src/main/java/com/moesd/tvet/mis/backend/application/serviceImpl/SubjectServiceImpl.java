@@ -1,5 +1,6 @@
 package com.moesd.tvet.mis.backend.application.serviceImpl;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,9 +11,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.SubjectDto;
+import com.moesd.tvet.mis.backend.application.dto.SubjectVerifyDto;
+import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
+import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.model.Subject;
+import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
+import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
+import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
 import com.moesd.tvet.mis.backend.application.repository.SubjectRepository;
 import com.moesd.tvet.mis.backend.application.service.SubjectService;
+import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
+import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
+import jakarta.transaction.Transactional;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +32,23 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SubjectServiceImpl implements SubjectService{
 	
+	// Add Subject workflow: submitted (55) -> role 7 verify (56) / reject (58) -> role 22 approve (57)
+	private static final int SUBJECT_SERVICE_ID = 56;
+	private static final int STATUS_SUBMITTED = 55;
+	private static final int FIRST_ROLE_ID = 7;
+	private static final int TASK_STATUS_INITIATED = 18;
+	private static final int TASK_STATUS_COMPLETED = 20;
+	private static final int LOCATION_ID = 14;
+
 	private final SubjectRepository subjectRepository;
 	private final ObjectToJson objectTojson;
+	private final GenerateApplicationNumber generateApplicationNumber;
+	private final WorkTaskFlowService workTaskFlowService;
+	private final DropdownManagementRepository dropdownManagementRepository;
+	private final RoleServiceRepository roleServiceRepository;
 	
 	@Override
+	@Transactional
 	public ResponseEntity<?> submitSubject(SubjectDto request) {
 		try {
 			log.info("Submitting new subject: {}", request.getSubjectName());
@@ -43,13 +66,14 @@ public class SubjectServiceImpl implements SubjectService{
 					.status(HttpStatus.CONFLICT)
 					.body(errorResponse);
 			}
-			// Create new subject entity
+			// Create new subject entity (goes to role 7 for verification)
+			String applicationNo = generateApplicationNumber.generateApplicationNumber(SUBJECT_SERVICE_ID);
 			Subject subject = Subject.builder()
-				.subjectCode(request.getSubjectCode())
+				.applicationNo(applicationNo)
+				.applicationStatusId(STATUS_SUBMITTED)
 				.subjectName(request.getSubjectName())
-				.creditHours(request.getCreditHours())
-				.theoryHours(request.getTheoryHours())
-				.practicalHours(request.getPracticalHours())
+				.classLevelId(request.getClassLevelId())
+				.totalDurationHours(request.getTotalDurationHours())
 				.instituteId(request.getInstituteId())
 				.statusId(request.getStatusId() != null ? request.getStatusId() : 1)
 				.description(request.getDescription())
@@ -59,10 +83,19 @@ public class SubjectServiceImpl implements SubjectService{
 			
 			// Save to database
 			Subject savedSubject = subjectRepository.save(subject);
+
+			// Workflow + task (role 7 task list)
+			Integer taskStatusId = dropdownManagementRepository.findChildById(TASK_STATUS_INITIATED)
+					.orElseThrow(() -> new RecordNotFoundException("Initiated task status not found"));
+			String remarks = "Subject submitted for verification";
+			WorkFlowList workflow = workTaskFlowService.createWorkflow(applicationNo, request.getSubjectName(),
+					SUBJECT_SERVICE_ID, STATUS_SUBMITTED, FIRST_ROLE_ID, remarks);
+			workTaskFlowService.createTaskFlow(applicationNo, taskStatusId, FIRST_ROLE_ID, null, workflow, remarks,
+					LOCATION_ID);
 			
 			// Prepare success response
 			Map<String, Object> successResponse = new HashMap<>();
-			successResponse.put("message", "Subject submitted successfully");
+			successResponse.put("message", "Subject submitted for verification. Application No: " + applicationNo);
 			successResponse.put("status", "SUCCESS");
 			successResponse.put("data", savedSubject);
 			
@@ -129,13 +162,12 @@ public class SubjectServiceImpl implements SubjectService{
 			}
 			
 			// Update subject entity
-			existingSubject.setSubjectCode(request.getSubjectCode());
 			existingSubject.setSubjectName(request.getSubjectName());
-			existingSubject.setCreditHours(request.getCreditHours());
-			existingSubject.setTheoryHours(request.getTheoryHours());
-			existingSubject.setPracticalHours(request.getPracticalHours());
+			existingSubject.setClassLevelId(request.getClassLevelId());
+			existingSubject.setTotalDurationHours(request.getTotalDurationHours());
 			existingSubject.setInstituteId(request.getInstituteId());
-			existingSubject.setStatusId(request.getStatusId());
+			if (request.getStatusId() != null)
+				existingSubject.setStatusId(request.getStatusId());
 			existingSubject.setDescription(request.getDescription());
 			existingSubject.setUpdatedBy(request.getUpdatedBy());
 			existingSubject.setUpdatedAt(new Date());
@@ -219,6 +251,68 @@ public class SubjectServiceImpl implements SubjectService{
 			return ResponseEntity
 				.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(errorResponse);
+		}
+	}
+
+	@Override
+	public List<ObjectNode> getSubjectByApplicationNo(String applicationNo) {
+		return objectTojson._toJson(subjectRepository.getSubjectByApplicationNo(applicationNo));
+	}
+
+	/** Role 7: verify (56) / reject (58); role 22: approve (57). Next role comes from tbl_role_service. */
+	@Override
+	@Transactional
+	public ResponseEntity<?> verifySubject(SubjectVerifyDto request) {
+		try {
+			if (request.getApplicationNo() == null || request.getApplicationNo().isBlank())
+				throw new RecordNotFoundException("applicationNo is required");
+			if (request.getStatusId() == null)
+				throw new RecordNotFoundException("statusId is required");
+			if (request.getAssignedRoleId() == null)
+				throw new RecordNotFoundException("assignedRoleId is required");
+
+			Subject subject = subjectRepository.findByApplicationNo(request.getApplicationNo())
+					.orElseThrow(() -> new RecordNotFoundException(
+							"Subject application not found: " + request.getApplicationNo()));
+
+			Optional<RoleService> next = roleServiceRepository.getNextAssignedRole(request.getAssignedRoleId(),
+					SUBJECT_SERVICE_ID, request.getStatusId());
+			boolean finalStep = next.isEmpty() || next.get().getNextRoleId() == null;
+			Integer nextRoleId = finalStep ? request.getAssignedRoleId() : next.get().getNextRoleId();
+
+			Integer taskStatusId = dropdownManagementRepository
+					.findChildById(finalStep ? TASK_STATUS_COMPLETED : TASK_STATUS_INITIATED)
+					.orElseThrow(() -> new RecordNotFoundException("Task status not found"));
+
+			String remarks = request.getRemarks() != null && !request.getRemarks().isBlank()
+					? request.getRemarks().trim()
+					: "Subject application processed";
+
+			subject.setApplicationStatusId(request.getStatusId());
+			subject.setUpdatedBy(request.getUpdatedBy());
+			subject.setUpdatedAt(new Date());
+			subjectRepository.save(subject);
+
+			workTaskFlowService.updateWorkflow(request.getApplicationNo(), request.getStatusId(),
+					request.getAssignedRoleId(), request.getUserId(), remarks, SUBJECT_SERVICE_ID,
+					request.getUpdatedBy());
+			workTaskFlowService.updateTaskFlow(request.getApplicationNo(), taskStatusId, nextRoleId,
+					request.getUserId(), remarks);
+
+			Map<String, Object> body = new HashMap<>();
+			body.put("status", HttpStatus.OK.value());
+			body.put("applicationNo", request.getApplicationNo());
+			body.put("message", "Subject application updated successfully");
+			return ResponseEntity.ok(body);
+
+		} catch (RecordNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
+		} catch (Exception e) {
+			log.error("Failed to verify subject application", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("message", "Failed to process subject application", "timestamp",
+							LocalDateTime.now()));
 		}
 	}
 
