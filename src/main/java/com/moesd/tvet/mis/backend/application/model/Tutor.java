@@ -1,12 +1,15 @@
 package com.moesd.tvet.mis.backend.application.model;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,31 +30,20 @@ public class Tutor {
 
 	private String citizenId;
 	
-	private String firstName;
+	private String name;
 	
-	private String middleName;
+	private Integer genderId;
 	
-	private String lastName;
+	/** Qualification Level: Academic Qualification (dropdown child of parent 18) */
+	private Integer qualificationId;
 	
 	private String email;
 	
 	private String mobileNo;
 	
-	private Integer qualificationId;
-	
 	private Integer instituteId;
 	
-	private Integer experienceYears;
-	
-	private String hourlyRate;
-	
 	private Integer statusId;
-	
-	private String specialization;
-	
-	private LocalDate joiningDate;
-	
-	private String description;
 	
 	private Integer createdBy;
 
@@ -60,4 +52,9 @@ public class Tutor {
 	private Integer updatedBy;
 
 	private Date updatedAt;
+
+	// Relationships - Using mappedBy to indicate the child owns the relationship
+	@Builder.Default
+	@OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<TutorSubject> subjects = new ArrayList<>();
 }

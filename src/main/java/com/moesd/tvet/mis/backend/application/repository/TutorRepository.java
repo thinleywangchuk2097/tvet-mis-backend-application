@@ -9,24 +9,14 @@ import jakarta.persistence.Tuple;
 public interface TutorRepository extends JpaRepository<Tutor, Long>{
 	
 	@NativeQuery("SELECT "
-			+ "  a.* "
+			+ "  a.*, "
+			+ "  (SELECT GROUP_CONCAT(ts.subject_id ORDER BY ts.id) "
+			+ "     FROM tbl_tutor_subject_dtls ts WHERE ts.tutor_id = a.id) AS subject_ids "
 			+ "FROM "
 			+ "  tbl_tutor_dtls a "
 			+ "WHERE a.status_id = 1 "
 			+ "  AND a.institute_id = ?")
 	List<Tuple> getAllActiveTutors(String institute_id);
-	
-	@NativeQuery("SELECT "
-			+ "  b.citizen_id, "
-			+ "  b.first_name, "
-			+ "  b.middle_name, "
-			+ "  b.last_name, "
-			+ "  a.tutor_id "
-			+ "FROM "
-			+ "  tbl_tuition_announcement_dtls a "
-			+ "  LEFT JOIN tbl_tutor_dtls b "
-			+ "    ON a.tutor_id = b.id "
-			+ "    WHERE a.institute_id =? AND a.subject_id=?")
-	List<Tuple> getTutorBySubjectId(Integer instituteId, Integer subjectId);
+
 	
 }

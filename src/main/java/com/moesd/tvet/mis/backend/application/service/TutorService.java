@@ -15,5 +15,4 @@ public interface TutorService {
 
 	ResponseEntity<?> softDeleteTutor(Long tutorId);
 	
-	List<ObjectNode> getTutorBySubjectId(Integer instituteId,Integer subjectId);
 }

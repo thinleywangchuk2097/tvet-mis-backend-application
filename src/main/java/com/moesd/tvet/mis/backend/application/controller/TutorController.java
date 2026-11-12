@@ -40,10 +40,4 @@ public class TutorController {
 	public ResponseEntity<?> softDeleteTutor(@PathVariable Long tutorId) {
 		return tutorService.softDeleteTutor(tutorId);
 	}
-
-	@GetMapping("/get-tutor/{institute_id}/{subject_id}")
-	public ResponseEntity<?> getTutorBySubjectId(@PathVariable("institute_id") Integer instituteId, @PathVariable("subject_id") Integer subjectId) {
-		List<ObjectNode> tutor = tutorService.getTutorBySubjectId(instituteId, subjectId);
-		return ResponseEntity.ok(tutor);
-	}
 }
