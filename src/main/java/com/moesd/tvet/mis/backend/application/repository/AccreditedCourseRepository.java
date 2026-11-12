@@ -134,6 +134,7 @@ public interface AccreditedCourseRepository extends JpaRepository<AccreditedCour
 				+ "  a.id, "
 				+ "  a.fees_per_trainee, "
 				+ "  a.enrolment_capacity, "
+				+ "  a.validity_date, "
 				+ "  COALESCE(b.certificate_level_id, ncs.certification_id) AS certificate_level_id, "
 				+ "  ncs.programme_title "
 				+ "FROM "
