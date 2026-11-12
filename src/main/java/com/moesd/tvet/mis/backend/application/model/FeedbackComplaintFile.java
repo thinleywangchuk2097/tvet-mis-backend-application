@@ -1,6 +1,5 @@
 package com.moesd.tvet.mis.backend.application.model;
 
-import java.time.LocalDate;
 import java.util.Date;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,34 +12,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Downloadable documents shown on the public site: Publications and Forms.
- * Managed (create / edit / delete) by the TVET QC role (22).
- */
+/** Supporting documents attached to a complaint (tbl_feedback_complaint). */
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_publication_forms")
-public class TvetDocument {
+@Table(name = "tbl_feedback_complaint_file")
+public class FeedbackComplaintFile {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	/** PUBLICATION or FORM */
-	@Column(name = "category", nullable = false, length = 20)
-	private String category;
-
-	@Column(name = "title", nullable = false, length = 500)
-	private String title;
-
-	@Column(name = "published_date")
-	private LocalDate publishedDate;
-
-	@Column(name = "remarks", columnDefinition = "TEXT")
-	private String remarks;
+	@Column(name = "complaint_id", nullable = false)
+	private Long complaintId;
 
 	@Column(name = "file_name", length = 500)
 	private String fileName;
@@ -54,15 +40,6 @@ public class TvetDocument {
 	@Column(name = "upload_url", length = 1000)
 	private String uploadUrl;
 
-	@Column(name = "created_by", length = 100)
-	private String createdBy;
-
 	@Column(name = "created_at")
 	private Date createdAt;
-
-	@Column(name = "updated_by", length = 100)
-	private String updatedBy;
-
-	@Column(name = "updated_at")
-	private Date updatedAt;
 }

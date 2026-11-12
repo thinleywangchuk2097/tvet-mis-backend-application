@@ -21,17 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import com.moesd.tvet.mis.backend.application.dto.Documentdto;
 import com.moesd.tvet.mis.backend.application.dto.FileDownloaddto;
-import com.moesd.tvet.mis.backend.application.dto.TvetDocumentdto;
-import com.moesd.tvet.mis.backend.application.model.TvetDocument;
-import com.moesd.tvet.mis.backend.application.repository.TvetDocumentRepository;
-import com.moesd.tvet.mis.backend.application.service.TvetDocumentService;
+import com.moesd.tvet.mis.backend.application.dto.PublicationFormdto;
+import com.moesd.tvet.mis.backend.application.model.PublicationForm;
+import com.moesd.tvet.mis.backend.application.repository.PublicationFormRepository;
+import com.moesd.tvet.mis.backend.application.service.PublicationFormService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TvetDocumentServiceImpl implements TvetDocumentService {
+public class PublicationFormServiceImpl implements PublicationFormService {
 
 	public static final Set<String> CATEGORIES = Set.of("PUBLICATION", "FORM");
 
@@ -40,7 +40,7 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 
 	private static final long MAX_FILE_BYTES = 20L * 1024 * 1024; // 20 MB
 
-	private final TvetDocumentRepository repository;
+	private final PublicationFormRepository repository;
 
 	@Value("${file.store.path}")
 	private String fileStorePath;
@@ -48,7 +48,7 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 	// ── Read ────────────────────────────────────────────────────────────
 	@Override
 	public List<Map<String, Object>> getDocuments(String category) {
-		List<TvetDocument> rows = (category == null || category.isBlank())
+		List<PublicationForm> rows = (category == null || category.isBlank())
 				? repository.findAllByOrderByPublishedDateDescIdDesc()
 				: repository.findByCategoryOrderByPublishedDateDescIdDesc(normaliseCategory(category));
 		return rows.stream().map(this::toMap).toList();
@@ -56,7 +56,7 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 
 	@Override
 	public FileDownloaddto download(Long id) {
-		TvetDocument doc = find(id);
+		PublicationForm doc = find(id);
 		if (doc.getUploadUrl() == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No file attached");
 		}
@@ -80,9 +80,9 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 	// ── Write (TVET QC) ─────────────────────────────────────────────────
 	@Override
 	@Transactional
-	public Map<String, Object> create(TvetDocumentdto request, String userId) {
+	public Map<String, Object> create(PublicationFormdto request, String userId) {
 		validate(request, true);
-		TvetDocument doc = TvetDocument.builder()
+		PublicationForm doc = PublicationForm.builder()
 				.category(normaliseCategory(request.getCategory()))
 				.title(request.getTitle().trim())
 				.publishedDate(parseDate(request.getPublishedDate()))
@@ -96,8 +96,8 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 
 	@Override
 	@Transactional
-	public Map<String, Object> update(Long id, TvetDocumentdto request, String userId) {
-		TvetDocument doc = find(id);
+	public Map<String, Object> update(Long id, PublicationFormdto request, String userId) {
+		PublicationForm doc = find(id);
 		validate(request, false);
 		doc.setCategory(normaliseCategory(request.getCategory()));
 		doc.setTitle(request.getTitle().trim());
@@ -116,18 +116,18 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 	@Override
 	@Transactional
 	public void delete(Long id) {
-		TvetDocument doc = find(id);
+		PublicationForm doc = find(id);
 		repository.delete(doc);
 		deleteQuietly(doc.getUploadUrl());
 	}
 
 	// ── Helpers ─────────────────────────────────────────────────────────
-	private TvetDocument find(Long id) {
+	private PublicationForm find(Long id) {
 		return repository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Document not found"));
 	}
 
-	private void validate(TvetDocumentdto request, boolean fileRequired) {
+	private void validate(PublicationFormdto request, boolean fileRequired) {
 		if (request == null) {
 			throw bad("Request body is required");
 		}
@@ -154,10 +154,10 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 		}
 	}
 
-	private void storeFile(TvetDocument doc, Documentdto file) {
+	private void storeFile(PublicationForm doc, Documentdto file) {
 		String name = cleanFileName(file.getName());
 		String uuid = UUID.randomUUID().toString().replace("-", "");
-		File dir = Paths.get(fileStorePath, "tvet-documents", doc.getCategory().toLowerCase(Locale.ROOT)).toFile();
+		File dir = Paths.get(fileStorePath, "publication-forms", doc.getCategory().toLowerCase(Locale.ROOT)).toFile();
 		if (!dir.exists() && !dir.mkdirs()) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not create upload folder");
 		}
@@ -230,7 +230,7 @@ public class TvetDocumentServiceImpl implements TvetDocumentService {
 		return new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
 	}
 
-	private Map<String, Object> toMap(TvetDocument d) {
+	private Map<String, Object> toMap(PublicationForm d) {
 		Map<String, Object> m = new LinkedHashMap<>();
 		m.put("id", d.getId());
 		m.put("category", d.getCategory());

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TvetDocumentdto {
+public class PublicationFormdto {
 	private String category;
 	/** yyyy-MM-dd */
 	private String publishedDate;
