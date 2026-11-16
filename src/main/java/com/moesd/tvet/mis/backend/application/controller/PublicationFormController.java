@@ -18,29 +18,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.moesd.tvet.mis.backend.application.dto.FileDownloaddto;
-import com.moesd.tvet.mis.backend.application.dto.TvetDocumentdto;
-import com.moesd.tvet.mis.backend.application.service.TvetDocumentService;
+import com.moesd.tvet.mis.backend.application.dto.PublicationFormdto;
+import com.moesd.tvet.mis.backend.application.service.PublicationFormService;
 import lombok.RequiredArgsConstructor;
 
 /**
  * Publications and Forms.
- * Public:  GET /api/v1/public/documents?category=PUBLICATION|FORM
- *          GET /api/v1/public/documents/{id}/download
- * TVET QC: /api/v1/tvetqc/documents (list, create, update, delete) - role 22 only.
+ * Public:  GET /api/v1/public/publication-forms?category=PUBLICATION|FORM
+ *          GET /api/v1/public/publication-forms/{id}/download
+ * TVET QC: /api/v1/tvetqc/publication-forms (list, create, update, delete) - role 22 only.
  */
 @RestController
 @RequiredArgsConstructor
-public class TvetDocumentController {
+public class PublicationFormController {
 
-	private final TvetDocumentService service;
+	private final PublicationFormService service;
 
 	// ── Public ──────────────────────────────────────────────────────────
-	@GetMapping("/api/v1/public/documents")
+	@GetMapping("/api/v1/public/publication-forms")
 	public ResponseEntity<List<Map<String, Object>>> list(@RequestParam(required = false) String category) {
 		return ResponseEntity.ok(service.getDocuments(category));
 	}
 
-	@GetMapping("/api/v1/public/documents/{id}/download")
+	@GetMapping("/api/v1/public/publication-forms/{id}/download")
 	public ResponseEntity<byte[]> download(@PathVariable Long id) {
 		FileDownloaddto file = service.download(id);
 		MediaType type;
@@ -58,27 +58,27 @@ public class TvetDocumentController {
 	}
 
 	// ── TVET QC (role 22) ───────────────────────────────────────────────
-	@GetMapping("/api/v1/tvetqc/documents")
+	@GetMapping("/api/v1/tvetqc/publication-forms")
 	@PreAuthorize("hasAuthority('22')")
 	public ResponseEntity<List<Map<String, Object>>> manageList(@RequestParam(required = false) String category) {
 		return ResponseEntity.ok(service.getDocuments(category));
 	}
 
-	@PostMapping("/api/v1/tvetqc/documents")
+	@PostMapping("/api/v1/tvetqc/publication-forms")
 	@PreAuthorize("hasAuthority('22')")
-	public ResponseEntity<Map<String, Object>> create(@RequestBody TvetDocumentdto request,
+	public ResponseEntity<Map<String, Object>> create(@RequestBody PublicationFormdto request,
 			Authentication authentication) {
 		return ResponseEntity.ok(service.create(request, authentication.getName()));
 	}
 
-	@PutMapping("/api/v1/tvetqc/documents/{id}")
+	@PutMapping("/api/v1/tvetqc/publication-forms/{id}")
 	@PreAuthorize("hasAuthority('22')")
-	public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody TvetDocumentdto request,
+	public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @RequestBody PublicationFormdto request,
 			Authentication authentication) {
 		return ResponseEntity.ok(service.update(id, request, authentication.getName()));
 	}
 
-	@DeleteMapping("/api/v1/tvetqc/documents/{id}")
+	@DeleteMapping("/api/v1/tvetqc/publication-forms/{id}")
 	@PreAuthorize("hasAuthority('22')")
 	public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
 		service.delete(id);
