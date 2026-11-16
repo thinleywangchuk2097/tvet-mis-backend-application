@@ -28,6 +28,12 @@ public class Tutor {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	/** Add Tutor application (service 57) */
+	private String applicationNo;
+
+	/** workflow status: 55 submitted, 56 verified, 58 rejected, 57 approved (null = before the workflow) */
+	private Integer applicationStatusId;
+
 	private String citizenId;
 	
 	private String name;

@@ -33,6 +33,13 @@ public interface InstituteChangeRepository extends JpaRepository<InstituteChange
 					+ "  c.updated_by, "
 					+ "  c.updated_at, "
 					+ "  ir.proposed_institute_name AS institute_name, "
+					// current institute details (tbl_institute_registration_dtls by institute_id)
+					+ "  ir.registration_no AS current_registration_no, "
+					+ "  ir.dzongkhag_id AS current_dzongkhag_id, "
+					+ "  ir.exact_location AS current_exact_location, "
+					+ "  ir.email_id AS current_email_id, "
+					+ "  ir.mobile_no AS current_mobile_no, "
+					+ "  ir.ownership_type_id AS current_ownership_type_id, "
 					+ "  (SELECT "
 					+ "    JSON_ARRAYAGG( "
 					+ "      JSON_OBJECT( "

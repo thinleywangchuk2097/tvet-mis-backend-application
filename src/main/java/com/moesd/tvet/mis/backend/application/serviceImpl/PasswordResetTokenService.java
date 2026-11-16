@@ -10,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import com.moesd.tvet.mis.backend.application.model.User;
 import com.moesd.tvet.mis.backend.application.repository.UserRepository;
+import com.moesd.tvet.mis.backend.application.utility.SmsSender;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -23,6 +24,7 @@ public class PasswordResetTokenService {
 	
 	private final UserRepository userRepository;
     private final JavaMailSender mailSender;
+    private final SmsSender smsSender;
     
     @Value("${app.password-reset.token-expiration}")
     private long expiration;
@@ -63,6 +65,12 @@ public class PasswordResetTokenService {
        
         mailSender.send(message);
         System.out.println("inside the message");
+
+        // same link by SMS to the user's registered mobile (an SMS failure does not stop the email)
+        smsSender.send(user.getMobileNo(), """
+            TVET-MIS: Reset your password using this link: %s
+            It expires in %d minutes. Ignore if you did not request it.
+            """.formatted(resetLink, TimeUnit.MILLISECONDS.toMinutes(expiration)).trim());
         return true;
     }
     

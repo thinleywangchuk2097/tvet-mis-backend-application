@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.TutorDto;
+import com.moesd.tvet.mis.backend.application.dto.TutorVerifyDto;
 import com.moesd.tvet.mis.backend.application.service.TutorService;
 import lombok.RequiredArgsConstructor;
 
@@ -39,5 +40,17 @@ public class TutorController {
 	@PostMapping("/delete/{tutorId}")
 	public ResponseEntity<?> softDeleteTutor(@PathVariable Long tutorId) {
 		return tutorService.softDeleteTutor(tutorId);
+	}
+
+	// Add Tutor workflow (service 57)
+	@GetMapping("/get-tutor-by-application-no/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getTutorByApplicationNo(
+			@PathVariable("application_no") String applicationNo) {
+		return ResponseEntity.ok(tutorService.getTutorByApplicationNo(applicationNo));
+	}
+
+	@PostMapping("/verify-tutor")
+	public ResponseEntity<?> verifyTutor(@RequestBody TutorVerifyDto request) {
+		return tutorService.verifyTutor(request);
 	}
 }
