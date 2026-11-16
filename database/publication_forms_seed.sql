@@ -2,7 +2,7 @@
 -- PublicationIndex.jsx into tbl_publication_forms, WITHOUT files.
 -- They appear on the public page as 'No file' until TVET QC opens each
 -- one (Edit) and attaches the file. Skip this script to start empty.
--- Run after tvet_documents_setup.sql. Safe to re-run (skips existing titles).
+-- Run after publication_forms_setup.sql. Safe to re-run (skips existing titles).
 
 INSERT INTO tbl_publication_forms (category, title, published_date, remarks, created_by, created_at)
 SELECT x.category, x.title, x.published_date, x.remarks, 'migration', NOW(6) FROM (

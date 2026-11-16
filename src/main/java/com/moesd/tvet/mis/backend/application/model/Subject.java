@@ -22,17 +22,20 @@ public class Subject {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String subjectCode;
+	/** Add Subject application (service 56) */
+	private String applicationNo;
+
+	/** workflow status: 55 submitted, 56 verified, 58 rejected, 57 approved (null = before the workflow) */
+	private Integer applicationStatusId;
 
 	private String subjectName;
 
-	private String creditHours;
+	/** Academic Qualification (dropdown child of parent 18) */
+	private Integer classLevelId;
 
-	private String theoryHours;
-	
+	private Integer totalDurationHours;
+
 	private Integer instituteId;
-
-	private String practicalHours;
 
 	private Integer statusId;
 

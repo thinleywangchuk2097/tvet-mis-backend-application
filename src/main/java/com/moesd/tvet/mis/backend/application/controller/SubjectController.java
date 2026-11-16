@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.SubjectDto;
+import com.moesd.tvet.mis.backend.application.dto.SubjectVerifyDto;
 import com.moesd.tvet.mis.backend.application.service.SubjectService;
 import lombok.RequiredArgsConstructor;
 
@@ -39,5 +40,17 @@ public class SubjectController {
 	@PostMapping("/delete/{subjectId}")
 	public ResponseEntity<?> softDeleteSubject(@PathVariable Integer subjectId) {
 		return subjectService.softDeleteSubject(subjectId);
+	}
+
+	// Add Subject workflow (service 56)
+	@GetMapping("/get-subject-by-application-no/{application_no}")
+	public ResponseEntity<List<ObjectNode>> getSubjectByApplicationNo(
+			@PathVariable("application_no") String applicationNo) {
+		return ResponseEntity.ok(subjectService.getSubjectByApplicationNo(applicationNo));
+	}
+
+	@PostMapping("/verify-subject")
+	public ResponseEntity<?> verifySubject(@RequestBody SubjectVerifyDto request) {
+		return subjectService.verifySubject(request);
 	}
 }

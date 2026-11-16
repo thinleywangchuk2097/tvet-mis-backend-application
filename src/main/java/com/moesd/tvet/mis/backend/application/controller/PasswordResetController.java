@@ -24,7 +24,7 @@ public class PasswordResetController {
         try {
         	boolean emailSent = tokenService.sendPasswordResetToken(request.getEmail());
         	if (emailSent) {
-            return ResponseEntity.ok("Password reset link sent to your email");
+            return ResponseEntity.ok("Password reset link sent to your email and registered mobile number");
         	}
         }catch (Exception e) {
             return ResponseEntity.badRequest().body("We couldn’t find an account associated with the email address you provided.");

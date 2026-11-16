@@ -12,17 +12,15 @@ import lombok.NoArgsConstructor;
 public class SubjectDto {
 	private Long id;
 
-	private String subjectCode;
+	private String applicationNo;
 
 	private String subjectName;
 
-	private String creditHours;
+	private Integer classLevelId;
 
-	private String theoryHours;
+	private Integer totalDurationHours;
 
 	private Integer instituteId;
-
-	private String practicalHours;
 
 	private Integer statusId;
 

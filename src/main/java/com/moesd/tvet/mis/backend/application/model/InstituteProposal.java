@@ -52,8 +52,6 @@ public class InstituteProposal {
 
 	private String sectorId;
 	
-	private String courseId;
-
 	private String activityLevelId;
 
 	private String otherOwnershipTypeId;

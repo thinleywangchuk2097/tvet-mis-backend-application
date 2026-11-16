@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.dto;
 
-import java.time.LocalDate;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,40 +12,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TutorDto {
-	
 	private Long id;
 
 	private String citizenId;
-	
-	private String firstName;
-	
-	private String middleName;
-	
-	private String lastName;
-	
-	private String email;
-	
-	private String mobileNo;
-	
+
+	private String name;
+
+	private Integer genderId;
+
 	private Integer qualificationId;
-	
+
+	/** ids of approved subjects (multi-select) */
+	private List<Long> subjectIds;
+
+	private String email;
+
+	private String mobileNo;
+
 	private Integer instituteId;
-	
-	private Integer experienceYears;
-	
-	private String hourlyRate;
-	
+
 	private Integer statusId;
-	
-	private String specialization;
-	
-	private LocalDate joiningDate;
-	
-	private String description;
-	
+
 	private Integer createdBy;
 
 	private Integer updatedBy;
-
-	
 }

@@ -3,9 +3,9 @@
 -- Run once on db_tvet_mis. Safe to re-run.
 --   1. Creates tbl_publication_forms (dev profile also auto-creates it via
 --      ddl-auto=update; prod uses validate, so run this there).
---   2. Adds the sidebar menu "Publications & Forms" -> /tvetqc/documents
+--   2. Adds the sidebar menu "Publications & Forms" -> /publication-forms
 --      and assigns it to role 22 (TVET QC) only.
--- Files are stored under ${file.store.path}/tvet-documents/<category>/
+-- Files are stored under ${file.store.path}/publication-forms/<category>/
 -- =====================================================================
 
 -- 1. Table
@@ -28,14 +28,18 @@ CREATE TABLE IF NOT EXISTS tbl_publication_forms (
 );
 
 -- 2. Menu (top-level) for TVET QC
+-- (older installs used /tvetqc/documents; point that row at the new route)
+UPDATE tbl_privilege SET route_name = '/publication-forms'
+WHERE route_name = '/tvetqc/documents';
+
 INSERT INTO tbl_privilege (privilege_name, route_name, dis_play_order, is_display, menu_icon, description, parent_id)
-SELECT 'Publications & Forms', '/tvetqc/documents', 90, 1, 'LibraryBooks',
+SELECT 'Publications & Forms', '/publication-forms', 90, 1, 'LibraryBooks',
        'Create, edit and delete public Publications and Forms', 0
-WHERE NOT EXISTS (SELECT 1 FROM tbl_privilege WHERE route_name = '/tvetqc/documents');
+WHERE NOT EXISTS (SELECT 1 FROM tbl_privilege WHERE route_name = '/publication-forms');
 
 INSERT INTO tbl_role_privilege (role_id, privilege_id)
 SELECT 22, p.id
 FROM tbl_privilege p
-WHERE p.route_name = '/tvetqc/documents'
+WHERE p.route_name = '/publication-forms'
   AND NOT EXISTS (SELECT 1 FROM tbl_role_privilege rp
                   WHERE rp.role_id = 22 AND rp.privilege_id = p.id);

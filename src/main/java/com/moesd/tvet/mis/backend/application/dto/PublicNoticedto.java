@@ -5,14 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/** Create / update a public notice. showUntil is yyyy-MM-dd (shown to the end of that day). */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentSubjectDto {
-	
-	private Integer tutorId;
-	private Integer subjectId;
-	private Integer studentId;
-
+public class PublicNoticedto {
+	private String title;
+	private String textMessage;
+	private String showUntil;
 }

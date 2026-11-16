@@ -191,6 +191,7 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 	
 	@NativeQuery("SELECT "
 			+ "  p.id, "
+			+ "  ipr.institute_id, "
 			+ "  p.service_id, "
 			+ "  p.application_no, "
 			+ "  p.ownership_type_id, "

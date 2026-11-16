@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.serviceImpl;
 
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -65,6 +66,9 @@ import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.GenerateLicenseNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
+import com.moesd.tvet.mis.backend.application.utility.SmsSender;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -89,6 +93,7 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 	private final RoleRepository roleRepository;
 	private final UserRoleRepository userRoleRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final SmsSender smsSender;
 	private final InstituteRegistrationDetailsRepository instituteRegistrationDetailsRepository;
     private final RecMemberTaskAssignmentRepository recMemberTaskAssignmentRepository;
     private final AccreditorTaskAssignmentRepository accreditorTaskAssignmentRepository;
@@ -415,7 +420,9 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 					userRoles.add(userRole);
 					// Set user properties
 					user.setUserId(licenseNo);
-					user.setPassword(passwordEncoder.encode("password"));
+					// initial password: institute name (spaces removed) + current year + "#", e.g. ABCInstitute2026#
+					String plainPassword = initialPassword(request.getInstituteName());
+					user.setPassword(passwordEncoder.encode(plainPassword));
 					user.setFirstName(request.getInstituteName());
 					user.setMiddleName("");
 					user.setLastName("");
@@ -432,6 +439,9 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 					userRoleRepository.saveAll(userRoles);
 					user.setUserRoles(userRoles);
 					userRepository.save(user);
+
+					// SMS the login credentials once the approval is committed
+					sendCredentialsSms(request.getMobileNo(), request.getInstituteName(), licenseNo, plainPassword);
 				}
 				
 				
@@ -583,6 +593,29 @@ public class InstituteRegistrationServiceImpl implements InstituteRegistrationSe
 			instituteRegistrationRepository.save(application);
 		}
 		return regNo;
+	}
+
+	/** Sends the new institute's User ID and password by SMS after the transaction commits. */
+	private void sendCredentialsSms(String mobileNo, String instituteName, String userId, String password) {
+		String message = "TVET-MIS: " + (instituteName == null ? "Your institute" : instituteName)
+				+ " registration is approved. User ID: " + userId + ", Password: " + password
+				+ ". Please change your password after first login.";
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					smsSender.send(mobileNo, message);
+				}
+			});
+		} else {
+			smsSender.send(mobileNo, message);
+		}
+	}
+
+	/** Initial login password of a newly registered institute: name without spaces + current year + "#". */
+	private String initialPassword(String instituteName) {
+		String name = instituteName == null ? "" : instituteName.replaceAll("\\s+", "");
+		return name + Year.now().getValue() + "#";
 	}
 
 	private Integer getRoleIdByServiceId(Integer serviceId) {

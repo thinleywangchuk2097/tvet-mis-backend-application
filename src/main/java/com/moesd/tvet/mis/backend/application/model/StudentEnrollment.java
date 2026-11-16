@@ -1,6 +1,5 @@
 package com.moesd.tvet.mis.backend.application.model;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 import jakarta.persistence.Entity;
@@ -13,52 +12,36 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/** Student enrolled by an SES centre in one of its approved subjects. */
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tbl_tuition_announcement_dtls")
-public class TuitionAnnouncement {
-	
+@Table(name = "tbl_student_enrollment_dtls")
+public class StudentEnrollment {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	private String title;
-	
-	private Integer subjectId;
-	
-	private Integer tutorId;
-	
-	private LocalDate startDate;
-	
-	private LocalDate endDate;
-	
-	private String description;
-	
+
+	private String name;
+
+	private Integer genderId;
+
+	/** School Level: Academic Qualification (dropdown child of parent 18) */
+	private Integer schoolLevelId;
+
+	/** approved subject of tbl_subject_dtls */
+	private Long subjectId;
+
+	private Integer enrollmentYear;
+
 	private Integer instituteId;
-	
-	private String startTime;
-	
-	private String endTime;
-	
-	private String venue;
-	
-	private Integer maxStudents;
-	
-	private String fee;
-	
-	private String materials;
-	
-	private String requirements;
-	
-	private String contactPerson;
-	
-	private String contactPhone;
-	
-	private String statusId;
-	
+
+	/** 1 active, 0 deleted */
+	private Integer statusId;
+
 	private Integer createdBy;
 
 	private Date createdAt;
