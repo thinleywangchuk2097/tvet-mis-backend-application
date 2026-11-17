@@ -28,6 +28,11 @@ import tools.jackson.databind.node.ObjectNode;
 @RequestMapping("/api/v1/public/tracer")
 public class PublicTracerController {
 
+    private static final String MESSAGE = "message";
+    private static final String TIMESTAMP = "timestamp";
+    private static final String SUCCESS = "success";
+    private static final String DATA = "data";
+
     private final TracerQuestionGeneratorService tracerQuestionGeneratorService;
     private final TracerSubmitRateLimiter tracerSubmitRateLimiter;
 
@@ -38,12 +43,12 @@ public class PublicTracerController {
                     tracerQuestionGeneratorService.getSurveyByUniqueId(uniqueId);
             if (survey == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("message", "Survey not found",
-                                "timestamp", LocalDateTime.now()));
+                        .body(Map.of(MESSAGE, "Survey not found",
+                                TIMESTAMP, LocalDateTime.now()));
             }
-            return ResponseEntity.ok(Map.of("success", true, "data", survey,
+            return ResponseEntity.ok(Map.of(SUCCESS, true, DATA, survey,
                     "submitted", tracerQuestionGeneratorService.isSurveySubmitted(uniqueId),
-                    "timestamp", LocalDateTime.now()));
+                    TIMESTAMP, LocalDateTime.now()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch survey");
@@ -56,7 +61,7 @@ public class PublicTracerController {
         try {
             List<ObjectNode> tracerDetails = tracerQuestionGeneratorService
                     .getTracerDetailsByApplicationNo(applicationNo);
-            return ResponseEntity.ok(Map.of("success", true, "data", tracerDetails));
+            return ResponseEntity.ok(Map.of(SUCCESS, true, DATA, tracerDetails));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch tracer details");
@@ -68,7 +73,7 @@ public class PublicTracerController {
         try {
             List<ObjectNode> data =
                     tracerQuestionGeneratorService.getTracerQuestionDropdownType();
-            return ResponseEntity.ok(Map.of("success", true, "data", data));
+            return ResponseEntity.ok(Map.of(SUCCESS, true, DATA, data));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to fetch dropdown data");
@@ -87,8 +92,8 @@ public class PublicTracerController {
                 return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                         .header("Retry-After", "60")
                         .body(Map.of(
-                                "message", "Too many submissions. Please try again later.",
-                                "timestamp", LocalDateTime.now()));
+                                MESSAGE, "Too many submissions. Please try again later.",
+                                TIMESTAMP, LocalDateTime.now()));
             }
 
             // 1. Survey must exist
@@ -141,8 +146,8 @@ public class PublicTracerController {
                             r.getQuestionId(), tracerApplicationNo);
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(Map.of(
-                                    "message", "Invalid question: " + r.getQuestionId(),
-                                    "timestamp", LocalDateTime.now()));
+                                    MESSAGE, "Invalid question: " + r.getQuestionId(),
+                                    TIMESTAMP, LocalDateTime.now()));
                 }
             }
 
@@ -151,9 +156,9 @@ public class PublicTracerController {
                     request.getUniqueId(), request.getResponses());
 
             return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "message", "Survey responses submitted successfully",
-                    "timestamp", LocalDateTime.now()));
+                    SUCCESS, true,
+                    MESSAGE, "Survey responses submitted successfully",
+                    TIMESTAMP, LocalDateTime.now()));
 
         } catch (DataIntegrityViolationException | IllegalStateException e) {
             // IllegalStateException = duplicate caught inside the save (e.g. double click)
@@ -162,8 +167,8 @@ public class PublicTracerController {
             log.error("Survey submission failed", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(
-                            "message", "Failed to submit survey responses",
-                            "timestamp", LocalDateTime.now()));
+                            MESSAGE, "Failed to submit survey responses",
+                            TIMESTAMP, LocalDateTime.now()));
         }
     }
 
@@ -178,14 +183,14 @@ public class PublicTracerController {
     private ResponseEntity<?> alreadySubmitted() {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of(
-                        "message", "This survey has already been submitted.",
-                        "timestamp", LocalDateTime.now()));
+                        MESSAGE, "This survey has already been submitted.",
+                        TIMESTAMP, LocalDateTime.now()));
     }
 
     private ResponseEntity<?> notFound() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of(
-                        "message", "Survey not found",
-                        "timestamp", LocalDateTime.now()));
+                        MESSAGE, "Survey not found",
+                        TIMESTAMP, LocalDateTime.now()));
     }
 }

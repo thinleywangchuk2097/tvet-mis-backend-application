@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.moesd.tvet.mis.backend.application.dto.ResetPasswordRequest;
-import com.moesd.tvet.mis.backend.application.serviceImpl.PasswordResetTokenService;
-import com.moesd.tvet.mis.backend.application.serviceImpl.UserServiceImpl;
+import com.moesd.tvet.mis.backend.application.serviceimpl.PasswordResetTokenService;
+import com.moesd.tvet.mis.backend.application.serviceimpl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,7 +20,6 @@ public class PasswordResetController {
     
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ResetPasswordRequest request) {
-    	//System.out.println(request.getEmail());
         try {
         	boolean emailSent = tokenService.sendPasswordResetToken(request.getEmail());
         	if (emailSent) {

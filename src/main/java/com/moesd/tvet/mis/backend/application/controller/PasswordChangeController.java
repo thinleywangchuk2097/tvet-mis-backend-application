@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.moesd.tvet.mis.backend.application.dto.ChangePasswordRequest;
 import com.moesd.tvet.mis.backend.application.dto.ChangePasswordResponse;
-import com.moesd.tvet.mis.backend.application.serviceImpl.UserServiceImpl;
+import com.moesd.tvet.mis.backend.application.serviceimpl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 
 @RestController

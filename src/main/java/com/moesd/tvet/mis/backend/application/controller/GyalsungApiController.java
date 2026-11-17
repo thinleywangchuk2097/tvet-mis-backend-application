@@ -56,7 +56,7 @@ public class GyalsungApiController {
 
             // 3. Correct API format (QUERY PARAM, not path variable)
             //    .../getGyalsungDetails?cid=XXXXXXXXXXX  (no trailing "/" before "?")
-            String base = gyalsungDataUrl.trim().replaceAll("/+$", "");
+            String base = stripTrailingSlashes(gyalsungDataUrl.trim());
             String url = UriComponentsBuilder.fromUriString(base)
                     .queryParam("cid", citizenshipNo)
                     .toUriString();
@@ -102,5 +102,14 @@ public class GyalsungApiController {
 
 		// Extract token
 		return (String) response.getBody().get("access_token");
+	}
+
+	// removes trailing "/" characters with a simple loop (no regex, so no backtracking)
+	private static String stripTrailingSlashes(String url) {
+		int end = url.length();
+		while (end > 0 && url.charAt(end - 1) == '/') {
+			end--;
+		}
+		return url.substring(0, end);
 	}
 }

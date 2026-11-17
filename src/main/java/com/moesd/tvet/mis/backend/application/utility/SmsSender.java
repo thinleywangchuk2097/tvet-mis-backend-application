@@ -1,86 +1,74 @@
 package com.moesd.tvet.mis.backend.application.utility;
 
-import java.net.URI;
-import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.moesd.tvet.mis.backend.application.model.SmsNotification;
+import com.moesd.tvet.mis.backend.application.repository.SmsNotificationRepository;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Sends SMS through the G2C SMS gateway:
- * GET {app.sms.url}?mobile=<mobile>&message=<text>
- * Failures are logged and reported as false; they never throw, so an SMS problem
- * cannot break the action that triggered it.
+ * Queues an SMS in tbl_sms_notification_dtls; SmsDispatchJob sends it and retries on failure.
+ * Called inside a transaction, the SMS is only queued if that transaction commits
+ * (e.g. credentials are only sent when the approval is really saved).
+ * Never throws, so an SMS problem cannot break the action that triggered it.
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SmsSender {
 
-	@Value("${app.sms.url}")
-	private String smsUrl;
+	public static final String TYPE_GENERAL = "GENERAL";
 
-	@Value("${app.sms.enabled:true}")
-	private boolean enabled;
+	private final SmsNotificationRepository smsNotificationRepository;
 
-	private final HttpClient httpClient = HttpClient.newBuilder()
-			.connectTimeout(Duration.ofSeconds(5))
-			.build();
-
-	/** @return true when the gateway accepted the request (HTTP 2xx) */
+	/** Queues a general SMS. @return true when it was queued */
 	public boolean send(String mobileNo, String message) {
-		String mobile = normalize(mobileNo);
-		if (!enabled) {
-			log.info("SMS disabled; not sending to {}", mobile);
-			return false;
-		}
-		if (mobile == null) {
-			log.warn("SMS not sent: invalid mobile number '{}'", mobileNo);
-			return false;
-		}
-		if (message == null || message.isBlank()) {
-			log.warn("SMS not sent to {}: empty message", mobile);
-			return false;
-		}
-		try {
-			String url = smsUrl
-					+ "?mobile=" + URLEncoder.encode(mobile, StandardCharsets.UTF_8)
-					+ "&message=" + URLEncoder.encode(message, StandardCharsets.UTF_8);
-			HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-					.timeout(Duration.ofSeconds(10))
-					.GET()
-					.build();
-			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-			boolean ok = response.statusCode() >= 200 && response.statusCode() < 300;
-			if (ok) {
-				log.info("SMS sent to {} (gateway response: {})", mobile, response.body());
-			} else {
-				log.warn("SMS gateway returned {} for {}: {}", response.statusCode(), mobile, response.body());
-			}
-			return ok;
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			log.error("SMS to {} interrupted", mobile, e);
-			return false;
-		} catch (Exception e) {
-			log.error("Failed to send SMS to {}", mobile, e);
-			return false;
-		}
+		return send(mobileNo, message, TYPE_GENERAL, null);
 	}
 
-	/** Keeps digits only; Bhutan numbers are 8 digits (a leading 975 country code is dropped). */
-	private String normalize(String mobileNo) {
-		if (mobileNo == null)
-			return null;
-		String digits = mobileNo.replaceAll("\\D", "");
-		if (digits.length() == 11 && digits.startsWith("975"))
-			digits = digits.substring(3);
-		return digits.length() == 8 ? digits : null;
+	/**
+	 * Queues an SMS.
+	 * @param smsType     e.g. CREDENTIALS, PASSWORD_RESET
+	 * @param referenceNo application no / user id it belongs to (optional)
+	 * @return true when it was queued (false for an invalid number or empty message)
+	 */
+	public boolean send(String mobileNo, String message, String smsType, String referenceNo) {
+		try {
+			String mobile = SmsGatewayClient.normalizeMobile(mobileNo);
+			LocalDateTime now = LocalDateTime.now();
+			SmsNotification sms = SmsNotification.builder()
+					.mobileNo(mobile != null ? mobile : mobileNo)
+					.message(message)
+					.smsType(smsType == null ? TYPE_GENERAL : smsType)
+					.referenceNo(referenceNo)
+					.attempts(0)
+					.createdAt(now)
+					.nextAttemptAt(now)
+					.build();
+
+			// kept as FAILED (with the reason) so it is visible, but never sent
+			String invalid = mobile == null ? "Invalid mobile number: " + mobileNo
+					: (message == null || message.isBlank()) ? "Empty message" : null;
+			if (invalid != null) {
+				sms.setStatus(SmsNotification.FAILED);
+				sms.setGatewayResponse(invalid);
+				sms.setMessage(NotificationMasker.mask(message));
+				smsNotificationRepository.save(sms);
+				log.warn("SMS not queued ({}): {}", smsType, invalid);
+				return false;
+			}
+
+			sms.setStatus(SmsNotification.PENDING);
+			smsNotificationRepository.save(sms);
+			log.info("SMS queued ({}) for {}", sms.getSmsType(), mobile);
+			return true;
+		} catch (Exception e) {
+			log.error("Failed to queue SMS ({}) for {}", smsType, mobileNo, e);
+			return false;
+		}
 	}
 }

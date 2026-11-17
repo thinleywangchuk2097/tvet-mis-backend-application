@@ -29,6 +29,7 @@ public class InstituteRegistrationController {
 
 	private final InstituteRegistrationService instituteRegistrationService;
 	private static final String MESSAGE_KEY = "Your application is already submitted for Registration";
+	private static final String MESSAGE_FIELD = "message";
 
 	@PostMapping("/submit")
 	public ResponseEntity<?> registerInstitute(@RequestBody InstituteRegistrationdto request) {
@@ -54,14 +55,14 @@ public class InstituteRegistrationController {
 			StatusResult result = resolveStatus(proposalStatusId, registrationStatusId, applicationNo);
 
 			response.put("data", dataMap);
-			response.put("message", result.message());
+			response.put(MESSAGE_FIELD, result.message());
 			response.put("alreadySubmitted", result.alreadySubmitted());
 
 			return ResponseEntity.ok(response);
 		}
 
 		Map<String, String> errorResponse = new HashMap<>();
-		errorResponse.put("message", "No application found for application number: " + applicationNo);
+		errorResponse.put(MESSAGE_FIELD, "No application found for application number: " + applicationNo);
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 	}
 
@@ -157,7 +158,7 @@ public class InstituteRegistrationController {
 		try {
 			return ResponseEntity.ok(instituteRegistrationService.getRenewalValidity(registrationNo, serviceId));
 		} catch (RecordNotFoundException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(MESSAGE_FIELD, e.getMessage()));
 		}
 	}
 

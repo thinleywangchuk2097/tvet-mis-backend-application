@@ -49,9 +49,11 @@ public class AccreditedCourseAudit {
 
 	private String enrolmentCapacity;
 
-	private Date registration_date;
+	@Column(name = "registration_date")
+	private Date registrationDate;
 
-	private String validity_date;
+	@Column(name = "validity_date")
+	private String validityDate;
 
 	private Integer statusId;
 

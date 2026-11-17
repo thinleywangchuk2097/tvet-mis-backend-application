@@ -101,7 +101,7 @@ public class ForeignWorkerEmployerJobseekerController {
 		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
 	}
 
-	// MoHCA immigration: /immigrantdetail/{workerid}
+	// Immigrant details of a foreign worker from the MoHCA immigration API
 	@GetMapping("/immigrant-details/{workerId}")
 	public ResponseEntity<Object> getImmigrantDetails(@PathVariable String workerId) throws ParseException {
 
@@ -118,7 +118,7 @@ public class ForeignWorkerEmployerJobseekerController {
 		return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
 	}
 
-	// RCSC ZESt: /employeeFullDetailsByCID/{cid}
+	// Civil servant details by CID from the RCSC ZESt API
 	@GetMapping("/civil-servant-details/{cid}")
 	public ResponseEntity<Object> getCivilServantDetails(@PathVariable String cid) throws ParseException {
 
