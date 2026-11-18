@@ -3,6 +3,7 @@ package com.moesd.tvet.mis.backend.application.serviceimpl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,7 +80,7 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                                 .resignationDate(empDto.getResignationDate())
                                 .Staff(staff)
                                 .build())
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toCollection(ArrayList::new));
                 staff.setStaffemploymenthistory(employmentHistories);
             }
 
@@ -96,7 +97,7 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                                 .trainingCost(trainDto.getTrainingCost())
                                 .Staff(staff)
                                 .build())
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toCollection(ArrayList::new));
                 staff.setStafftraininghistory(trainingHistories);
             }
 

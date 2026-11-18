@@ -66,75 +66,25 @@ public class QualityStandardCheckListServiceImpl implements QualityStandardCheck
 	@Transactional
 	public ResponseEntity<?> save(QualityStandardCheckListDto r) {
 		try {
-			if (r == null) throw new RecordNotFoundException("Request is required");
-			if (r.getServiceId() == null) throw new RecordNotFoundException("serviceId is required");
-			if (r.getDropdownName() == null || r.getDropdownName().isBlank())
-				throw new RecordNotFoundException("Title is required");
-			String type = r.getItemType() == null ? "" : r.getItemType().trim().toUpperCase();
-			if (!Set.of(PARENT, SUB_PARENT, CHECKLIST).contains(type))
-				throw new RecordNotFoundException("Type must be PARENT, SUB_PARENT or CHECKLIST");
+			String type = validateAndGetType(r);
+			Integer parentId = resolveParentId(r, type);
 
-			Integer parentId = nz(r.getParentId()) == 0 ? 0 : r.getParentId();
+			InstituteRegistrationQualityStandard item = r.getId() != null
+					? existingItem(r.getId(), type, parentId)
+					: InstituteRegistrationQualityStandard.builder()
+							.serviceId(r.getServiceId())
+							.createdAt(LocalDateTime.now())
+							.build();
 
-			// ---- parent rules ----
-			if (PARENT.equals(type)) {
-				parentId = 0;
-			} else {
-				if (parentId == 0)
-					throw new RecordNotFoundException(
-							SUB_PARENT.equals(type) ? "Select the parent" : "Select the parent or sub parent");
-				InstituteRegistrationQualityStandard parent = qualityStandardRepository.findById(parentId)
-						.orElseThrow(() -> new RecordNotFoundException("Selected parent does not exist"));
-				if (!r.getServiceId().equals(parent.getServiceId()))
-					throw new RecordNotFoundException("Parent belongs to a different service");
-				String parentType = typeOf(parent);
-				if (SUB_PARENT.equals(type) && !PARENT.equals(parentType))
-					throw new RecordNotFoundException("A sub parent must be placed under a parent");
-				if (CHECKLIST.equals(type) && !(PARENT.equals(parentType) || SUB_PARENT.equals(parentType)))
-					throw new RecordNotFoundException("A checklist item must be under a parent or sub parent");
-			}
-
-			InstituteRegistrationQualityStandard item;
-			if (r.getId() != null) {
-				item = qualityStandardRepository.findById(r.getId())
-						.orElseThrow(() -> new RecordNotFoundException("Item not found: " + r.getId()));
-				if (r.getId().equals(parentId)) throw new RecordNotFoundException("An item cannot be its own parent");
-				if (isDescendant(r.getId(), parentId))
-					throw new RecordNotFoundException("Cannot move an item under its own sub item");
-
-				List<InstituteRegistrationQualityStandard> children = qualityStandardRepository.findByParentId(r.getId());
-				if (!children.isEmpty()) {
-					if (CHECKLIST.equals(type))
-						throw new RecordNotFoundException("This item has sub items, so it cannot be a checklist item");
-					if (SUB_PARENT.equals(type)
-							&& children.stream().anyMatch(c -> !CHECKLIST.equals(typeOf(c))))
-						throw new RecordNotFoundException("A sub parent can only contain checklist items");
-				}
-			} else {
-				item = InstituteRegistrationQualityStandard.builder()
-						.serviceId(r.getServiceId())
-						.createdAt(LocalDateTime.now())
-						.build();
-			}
-
-			item.setParentId(parentId);
-			item.setItemType(type);
-			item.setDropdownName(r.getDropdownName().trim());
-			item.setDescription(r.getDescription() == null || r.getDescription().isBlank()
-					? null : r.getDescription().trim());
-			item.setIsActive(r.getIsActive() == null ? 1 : (r.getIsActive() == 0 ? 0 : 1));
-			item.setUpdatedBy(r.getUpdatedBy());
-			item.setDisplayOrder(r.getDisplayOrder() == null || r.getDisplayOrder().isBlank()
-					? String.valueOf(nextOrder(r.getServiceId(), parentId, item.getId()))
-					: r.getDisplayOrder().trim());
-
+			applyFields(item, r, type, parentId);
 			InstituteRegistrationQualityStandard saved = qualityStandardRepository.save(item);
 
+			boolean created = r.getId() == null;
 			Map<String, Object> body = new LinkedHashMap<>();
-			body.put("status", r.getId() == null ? 201 : 200);
-			body.put("message", r.getId() == null ? "Item created successfully" : "Item updated successfully");
+			body.put("status", created ? 201 : 200);
+			body.put("message", created ? "Item created successfully" : "Item updated successfully");
 			body.put("data", saved);
-			return ResponseEntity.status(r.getId() == null ? HttpStatus.CREATED : HttpStatus.OK).body(body);
+			return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK).body(body);
 
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.badRequest().body(Map.of("status", 400, "message", e.getMessage()));
@@ -143,6 +93,72 @@ public class QualityStandardCheckListServiceImpl implements QualityStandardCheck
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("status", 500, "message", "Failed to save item"));
 		}
+	}
+
+	/** Required fields; returns the item type (PARENT, SUB_PARENT or CHECKLIST). */
+	private static String validateAndGetType(QualityStandardCheckListDto r) {
+		if (r == null) throw new RecordNotFoundException("Request is required");
+		if (r.getServiceId() == null) throw new RecordNotFoundException("serviceId is required");
+		if (r.getDropdownName() == null || r.getDropdownName().isBlank())
+			throw new RecordNotFoundException("Title is required");
+		String type = r.getItemType() == null ? "" : r.getItemType().trim().toUpperCase();
+		if (!Set.of(PARENT, SUB_PARENT, CHECKLIST).contains(type))
+			throw new RecordNotFoundException("Type must be PARENT, SUB_PARENT or CHECKLIST");
+		return type;
+	}
+
+	/**
+	 * Parent rules: a PARENT is top level (0); a SUB_PARENT goes under a parent; a CHECKLIST item
+	 * under a parent or sub parent, of the same service.
+	 */
+	private Integer resolveParentId(QualityStandardCheckListDto r, String type) {
+		if (PARENT.equals(type)) return 0;
+		Integer parentId = nz(r.getParentId()) == 0 ? 0 : r.getParentId();
+		if (parentId == 0)
+			throw new RecordNotFoundException(
+					SUB_PARENT.equals(type) ? "Select the parent" : "Select the parent or sub parent");
+		InstituteRegistrationQualityStandard parent = qualityStandardRepository.findById(parentId)
+				.orElseThrow(() -> new RecordNotFoundException("Selected parent does not exist"));
+		if (!r.getServiceId().equals(parent.getServiceId()))
+			throw new RecordNotFoundException("Parent belongs to a different service");
+		String parentType = typeOf(parent);
+		if (SUB_PARENT.equals(type) && !PARENT.equals(parentType))
+			throw new RecordNotFoundException("A sub parent must be placed under a parent");
+		if (CHECKLIST.equals(type) && !(PARENT.equals(parentType) || SUB_PARENT.equals(parentType)))
+			throw new RecordNotFoundException("A checklist item must be under a parent or sub parent");
+		return parentId;
+	}
+
+	/** Item being edited; it cannot move under itself, and its sub items must still fit the new type. */
+	private InstituteRegistrationQualityStandard existingItem(Integer id, String type, Integer parentId) {
+		InstituteRegistrationQualityStandard item = qualityStandardRepository.findById(id)
+				.orElseThrow(() -> new RecordNotFoundException("Item not found: " + id));
+		if (id.equals(parentId)) throw new RecordNotFoundException("An item cannot be its own parent");
+		if (isDescendant(id, parentId))
+			throw new RecordNotFoundException("Cannot move an item under its own sub item");
+
+		List<InstituteRegistrationQualityStandard> children = qualityStandardRepository.findByParentId(id);
+		if (children.isEmpty()) return item;
+		if (CHECKLIST.equals(type))
+			throw new RecordNotFoundException("This item has sub items, so it cannot be a checklist item");
+		if (SUB_PARENT.equals(type) && children.stream().anyMatch(c -> !CHECKLIST.equals(typeOf(c))))
+			throw new RecordNotFoundException("A sub parent can only contain checklist items");
+		return item;
+	}
+
+	private void applyFields(InstituteRegistrationQualityStandard item, QualityStandardCheckListDto r,
+			String type, Integer parentId) {
+		item.setParentId(parentId);
+		item.setItemType(type);
+		item.setDropdownName(r.getDropdownName().trim());
+		item.setDescription(r.getDescription() == null || r.getDescription().isBlank()
+				? null : r.getDescription().trim());
+		// active unless 0 is sent explicitly
+		item.setIsActive(Integer.valueOf(0).equals(r.getIsActive()) ? 0 : 1);
+		item.setUpdatedBy(r.getUpdatedBy());
+		item.setDisplayOrder(r.getDisplayOrder() == null || r.getDisplayOrder().isBlank()
+				? String.valueOf(nextOrder(r.getServiceId(), parentId, item.getId()))
+				: r.getDisplayOrder().trim());
 	}
 
 	// ---------------------------------------------------------------- delete

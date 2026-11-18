@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -121,7 +120,7 @@ public class AddTrainerServiceImpl implements AddTrainerService {
         return addTrainerRepository.findAll().stream()
             .filter(t -> (hasCid && request.getCitizenId().equals(t.getCitizenId()))
                       || (hasWp && request.getWorkPermitNo().equals(t.getWorkPermitNo())))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static String duplicateMessage(AddTrainerDto request, AddTrainer dup) {
@@ -153,7 +152,7 @@ public class AddTrainerServiceImpl implements AddTrainerService {
                 .courseTypeId(courseDto.getCourseTypeId())
                 .trainer(trainer)
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static boolean hasText(String value) {

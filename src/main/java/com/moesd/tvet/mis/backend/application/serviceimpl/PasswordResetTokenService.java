@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.moesd.tvet.mis.backend.application.model.User;
 import com.moesd.tvet.mis.backend.application.repository.UserRepository;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService;
+import com.moesd.tvet.mis.backend.application.utility.NotificationService.Recipient;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -28,6 +29,10 @@ public class PasswordResetTokenService {
     
     @Value("${app.secret-hex}")
     private String secretHex;
+
+    /** Frontend base URL for the reset link (APP_FRONTEND_URL in the ConfigMap) */
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
     
     private SecretKey jwtSecretKey;
     
@@ -46,10 +51,9 @@ public class PasswordResetTokenService {
         
         String token = generateToken(user);
        
-        String resetLink = "http://localhost:5173/auth/reset-password?token=" + token;
-        System.out.println("resetLink"+ " " + resetLink);
+        String resetLink = frontendUrl + "/auth/reset-password?token=" + token;
         // reset link by SMS and email (queued; sent and retried by the dispatch jobs)
-        notificationService.sendLink(user.getMobileNo(), user.getEmailId(), user.getFirstName(),
+        notificationService.sendLink(new Recipient(user.getMobileNo(), user.getEmailId(), user.getFirstName()),
             "Password Reset Request", "use this link to reset your TVET-MIS password", resetLink,
             "This link will expire in %d minutes. If you didn't request this, please ignore it."
                 .formatted(TimeUnit.MILLISECONDS.toMinutes(expiration)),

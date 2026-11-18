@@ -1,6 +1,7 @@
 package com.moesd.tvet.mis.backend.application.serviceimpl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,13 +166,7 @@ public class CMFGMonitoringServiceImpl implements CMFGMonitoringService {
 	@Transactional
 	public ResponseEntity<?> verifyMonitoring(CMFGVerifyDto request) {
 		try {
-			if (request.getApplicationNo() == null || request.getApplicationNo().isBlank())
-				throw new RecordNotFoundException("applicationNo is required");
-			if (request.getStatusId() == null)
-				throw new RecordNotFoundException("statusId is required");
-			if (request.getAssignedRoleId() == null)
-				throw new RecordNotFoundException("assignedRoleId is required");
-
+			validateVerifyRequest(request);
 			String applicationNo = request.getApplicationNo();
 			Integer serviceId = request.getServiceId() != null ? request.getServiceId() : CMFG_SERVICE_ID;
 
@@ -180,79 +175,24 @@ public class CMFGMonitoringServiceImpl implements CMFGMonitoringService {
 				throw new RecordNotFoundException("Monitoring application not found: " + applicationNo);
 			}
 
-			Optional<RoleService> next = roleServiceRepository.getNextAssignedRole(request.getAssignedRoleId(),
-					serviceId, request.getStatusId());
-			boolean finalStep = next.isEmpty() || next.get().getNextRoleId() == null;
-			Integer nextRoleId = finalStep ? request.getAssignedRoleId() : next.get().getNextRoleId();
-
+			NextStep step = resolveNextStep(request, serviceId);
 			Integer taskStatusId = dropdownManagementRepository
-					.findChildById(finalStep ? TASK_STATUS_COMPLETED : TASK_STATUS_INITIATED)
+					.findChildById(step.finalStep() ? TASK_STATUS_COMPLETED : TASK_STATUS_INITIATED)
 					.orElseThrow(() -> new RecordNotFoundException("Task status not found"));
 
 			String remarks = request.getRemarks() != null && !request.getRemarks().isBlank()
 					? request.getRemarks()
 					: "CMFG monitoring verified";
 
-			// ---- reviewer edits: audit the old values first, then update ----
-			LocalDateTime now = LocalDateTime.now();
-			Map<Long, QualityStandardsdto> edits = new HashMap<>();
-			if (request.getQualityStandards() != null) {
-				for (QualityStandardsdto q : request.getQualityStandards()) {
-					if (q != null && q.getStandardId() != null) edits.put(q.getStandardId(), q);
-				}
-			}
-			List<CMFGMonitoringAudit> audits = new java.util.ArrayList<>();
-			int changed = 0;
-			for (CMFGMonitoring row : rows) {
-				QualityStandardsdto q = edits.get(row.getStandardId());
-				if (q != null) {
-					String newResponse = q.getResponseId() == null || q.getResponseId().isBlank()
-							? row.getResponseId() : q.getResponseId();
-					String newRemarks = q.getRemarks() == null || q.getRemarks().isBlank() ? null : q.getRemarks().trim();
-					boolean differs = !Objects.equals(row.getResponseId(), newResponse)
-							|| !Objects.equals(blankToNull(row.getRemarks()), newRemarks);
-					if (differs) {
-						// snapshot of the data BEFORE the change
-						audits.add(CMFGMonitoringAudit.builder()
-								.applicationNo(row.getApplicationNo())
-								.standardId(row.getStandardId())
-								.responseId(row.getResponseId())
-								.remarks(row.getRemarks())
-								.instituteId(row.getInstituteId())
-								.createdBy(row.getCreatedBy())
-								.createdAt(row.getCreatedAt())
-								.updatedBy(row.getUpdatedBy())
-								.updatedAt(row.getUpdatedAt())
-								.cmfgMonitoring(row)
-								.build());
-						row.setResponseId(newResponse);
-						row.setRemarks(newRemarks);
-						changed++;
-					}
-				}
-				row.setUpdatedBy(request.getUpdatedBy());
-				row.setUpdatedAt(now);
-			}
-			if (!audits.isEmpty()) {
-				cmfgMonitoringAuditRepository.saveAll(audits); // old values first
-			}
-			cmfgMonitoringRepository.saveAll(rows);
+			int changed = applyReviewerEdits(rows, request);
 
 			workTaskFlowService.updateWorkflow(applicationNo, request.getStatusId(), request.getAssignedRoleId(),
 					request.getUserId(), remarks, serviceId, request.getUpdatedBy());
 			// next role picks it up from its group task list (no user assigned yet)
-			workTaskFlowService.updateTaskFlow(applicationNo, taskStatusId, nextRoleId,
-					finalStep ? request.getUserId() : null, remarks);
+			workTaskFlowService.updateTaskFlow(applicationNo, taskStatusId, step.nextRoleId(),
+					step.finalStep() ? request.getUserId() : null, remarks);
 
-			Map<String, Object> body = new LinkedHashMap<>();
-			body.put("status", 200);
-			body.put("applicationNo", applicationNo);
-			body.put("completed", finalStep);
-			body.put("nextRoleId", finalStep ? null : nextRoleId);
-			body.put("changedItems", changed);
-			body.put("message", finalStep ? "CMFG monitoring verified and completed"
-					: "CMFG monitoring verified and forwarded");
-			return ResponseEntity.ok(body);
+			return ResponseEntity.ok(verifyResponse(applicationNo, step, changed));
 
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -264,6 +204,103 @@ public class CMFGMonitoringServiceImpl implements CMFGMonitoringService {
 		}
 	}
 
+	/** Where the application goes next; no next role configured = final step (task completed). */
+	private record NextStep(boolean finalStep, Integer nextRoleId) {
+	}
+
+	private static void validateVerifyRequest(CMFGVerifyDto request) {
+		if (request.getApplicationNo() == null || request.getApplicationNo().isBlank())
+			throw new RecordNotFoundException("applicationNo is required");
+		if (request.getStatusId() == null)
+			throw new RecordNotFoundException("statusId is required");
+		if (request.getAssignedRoleId() == null)
+			throw new RecordNotFoundException("assignedRoleId is required");
+	}
+
+	private NextStep resolveNextStep(CMFGVerifyDto request, Integer serviceId) {
+		Optional<RoleService> next = roleServiceRepository.getNextAssignedRole(request.getAssignedRoleId(),
+				serviceId, request.getStatusId());
+		boolean finalStep = next.isEmpty() || next.get().getNextRoleId() == null;
+		return new NextStep(finalStep, finalStep ? request.getAssignedRoleId() : next.get().getNextRoleId());
+	}
+
+	/**
+	 * Reviewer edits: for every changed answer the old values are audited first, then updated.
+	 * All rows get the reviewer as updatedBy. Returns the number of changed answers.
+	 */
+	private int applyReviewerEdits(List<CMFGMonitoring> rows, CMFGVerifyDto request) {
+		Map<Long, QualityStandardsdto> edits = editsByStandard(request.getQualityStandards());
+		LocalDateTime now = LocalDateTime.now();
+		List<CMFGMonitoringAudit> audits = new ArrayList<>();
+		for (CMFGMonitoring row : rows) {
+			QualityStandardsdto q = edits.get(row.getStandardId());
+			CMFGMonitoringAudit before = q == null ? null : applyEdit(row, q);
+			if (before != null) {
+				audits.add(before);
+			}
+			row.setUpdatedBy(request.getUpdatedBy());
+			row.setUpdatedAt(now);
+		}
+		if (!audits.isEmpty()) {
+			cmfgMonitoringAuditRepository.saveAll(audits); // old values first
+		}
+		cmfgMonitoringRepository.saveAll(rows);
+		return audits.size();
+	}
+
+	private static Map<Long, QualityStandardsdto> editsByStandard(List<QualityStandardsdto> standards) {
+		Map<Long, QualityStandardsdto> edits = new HashMap<>();
+		if (standards != null) {
+			standards.stream()
+					.filter(q -> q != null && q.getStandardId() != null)
+					.forEach(q -> edits.put(q.getStandardId(), q));
+		}
+		return edits;
+	}
+
+	/** Applies the reviewer's answer / remarks; returns the old values (for the audit) when they differ, else null. */
+	private static CMFGMonitoringAudit applyEdit(CMFGMonitoring row, QualityStandardsdto q) {
+		String newResponse = q.getResponseId() == null || q.getResponseId().isBlank()
+				? row.getResponseId() : q.getResponseId();
+		String newRemarks = blankToNull(q.getRemarks());
+		boolean differs = !Objects.equals(row.getResponseId(), newResponse)
+				|| !Objects.equals(blankToNull(row.getRemarks()), newRemarks);
+		if (!differs) {
+			return null;
+		}
+		CMFGMonitoringAudit before = auditOf(row);
+		row.setResponseId(newResponse);
+		row.setRemarks(newRemarks);
+		return before;
+	}
+
+	/** Snapshot of a monitoring row BEFORE it is changed */
+	private static CMFGMonitoringAudit auditOf(CMFGMonitoring row) {
+		return CMFGMonitoringAudit.builder()
+				.applicationNo(row.getApplicationNo())
+				.standardId(row.getStandardId())
+				.responseId(row.getResponseId())
+				.remarks(row.getRemarks())
+				.instituteId(row.getInstituteId())
+				.createdBy(row.getCreatedBy())
+				.createdAt(row.getCreatedAt())
+				.updatedBy(row.getUpdatedBy())
+				.updatedAt(row.getUpdatedAt())
+				.cmfgMonitoring(row)
+				.build();
+	}
+
+	private static Map<String, Object> verifyResponse(String applicationNo, NextStep step, int changed) {
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("status", 200);
+		body.put("applicationNo", applicationNo);
+		body.put("completed", step.finalStep());
+		body.put("nextRoleId", step.finalStep() ? null : step.nextRoleId());
+		body.put("changedItems", changed);
+		body.put("message", step.finalStep() ? "CMFG monitoring verified and completed"
+				: "CMFG monitoring verified and forwarded");
+		return body;
+	}
 
 	private static String blankToNull(String v) {
 		return v == null || v.isBlank() ? null : v.trim();

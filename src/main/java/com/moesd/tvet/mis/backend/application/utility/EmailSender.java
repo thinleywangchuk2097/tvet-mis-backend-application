@@ -23,7 +23,8 @@ public class EmailSender {
 
 	public static final String TYPE_GENERAL = "GENERAL";
 
-	private static final Pattern EMAIL = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+	// local@domain.tld - domain labels exclude "." so the regex cannot backtrack (no ReDoS)
+	private static final Pattern EMAIL = Pattern.compile("^[^\\s@]+@[^\\s@.]+(?:\\.[^\\s@.]+)+$");
 
 	private final EmailNotificationRepository emailNotificationRepository;
 
@@ -61,9 +62,7 @@ public class EmailSender {
 					.build();
 
 			// kept as FAILED (with the reason) so it is visible, but never sent
-			String invalid = (recipient == null || !EMAIL.matcher(recipient).matches())
-					? "Invalid email address: " + to
-					: (body == null || body.isBlank()) ? "Empty body" : null;
+			String invalid = invalidReason(recipient, to, body);
 			if (invalid != null) {
 				email.setStatus(EmailNotification.FAILED);
 				email.setLastError(invalid);
@@ -81,5 +80,14 @@ public class EmailSender {
 			log.error("Failed to queue email ({}) for {}", emailType, to, e);
 			return false;
 		}
+	}
+
+	/** Why the email cannot be sent (bad address or empty body), or null when it is fine. */
+	private static String invalidReason(String recipient, String to, String body) {
+		if (recipient == null || !EMAIL.matcher(recipient).matches())
+			return "Invalid email address: " + to;
+		if (body == null || body.isBlank())
+			return "Empty body";
+		return null;
 	}
 }

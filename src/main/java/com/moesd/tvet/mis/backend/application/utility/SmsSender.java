@@ -51,8 +51,7 @@ public class SmsSender {
 					.build();
 
 			// kept as FAILED (with the reason) so it is visible, but never sent
-			String invalid = mobile == null ? "Invalid mobile number: " + mobileNo
-					: (message == null || message.isBlank()) ? "Empty message" : null;
+			String invalid = invalidReason(mobile, mobileNo, message);
 			if (invalid != null) {
 				sms.setStatus(SmsNotification.FAILED);
 				sms.setGatewayResponse(invalid);
@@ -70,5 +69,14 @@ public class SmsSender {
 			log.error("Failed to queue SMS ({}) for {}", smsType, mobileNo, e);
 			return false;
 		}
+	}
+
+	/** Why the SMS cannot be sent (bad number or empty message), or null when it is fine. */
+	private static String invalidReason(String mobile, String mobileNo, String message) {
+		if (mobile == null)
+			return "Invalid mobile number: " + mobileNo;
+		if (message == null || message.isBlank())
+			return "Empty message";
+		return null;
 	}
 }

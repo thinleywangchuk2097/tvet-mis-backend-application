@@ -3,6 +3,8 @@ package com.moesd.tvet.mis.backend.application.serviceimpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +50,7 @@ public class SectorOccupationServiceImpl implements SectorOccupationService{
 	                                .isActive(occupationDto.getIsActive())
 	                                .sector(sector)  // Set the relationship
 	                                .build())
-	                        .collect(Collectors.toList());
+	                        .collect(Collectors.toCollection(ArrayList::new)); // entity collection: must stay modifiable
 	                sector.setChild(occupations);
 	            }
 	            // Save (cascade handles children)
@@ -86,15 +88,12 @@ public class SectorOccupationServiceImpl implements SectorOccupationService{
 	    existingSector.setSectorName(request.getSectorName());
 	    existingSector.setIsActive(request.getIsActive());
 	    
-	    // Get requested IDs from front end
-	    List<Integer> requestedIds = new ArrayList<>();
-	    if (request.getChild() != null) {
-	        for (OccupationRequestDTO dto : request.getChild()) {
-	            if (dto.getId() != null) {
-	                requestedIds.add(dto.getId());
-	            }
-	        }
-	    }
+	    // IDs of the occupations the front end kept
+	    Set<Integer> requestedIds = request.getChild() == null ? Set.of()
+	            : request.getChild().stream()
+	                    .map(OccupationRequestDTO::getId)
+	                    .filter(Objects::nonNull)
+	                    .collect(Collectors.toSet());
 	    
 	    // Initialize child list if null (safety check)
 	    if (existingSector.getChild() == null) {

@@ -81,7 +81,7 @@ public class FeedbackComplaintServiceImpl implements FeedbackComplaintService {
 		if (!anonymous) {
 			e.setName(limit(required(r.getName(), "Name"), 200, "Name"));
 			String email = limit(required(r.getEmail(), "Email"), 200, "Email");
-			if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+			if (!email.matches("^[^@\\s]+@[^@\\s.]+(?:\\.[^@\\s.]+)+$")) {
 				throw bad("Enter a valid email");
 			}
 			e.setEmail(email);

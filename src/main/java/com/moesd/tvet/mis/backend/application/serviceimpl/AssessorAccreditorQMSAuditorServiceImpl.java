@@ -34,6 +34,7 @@ import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.GenerateLicenseNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService;
+import com.moesd.tvet.mis.backend.application.utility.NotificationService.Recipient;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 	@Transactional
 	public ResponseEntity<?> registerAssessorAccreditorQMSAuditor(AssessorAccreditorQMSAuditordto request) {
 		try {
-			System.out.println("request" + request);// Validate required fields
+			// Validate required fields
 			if (request.getServiceId() == null)
 				throw new RecordNotFoundException("serviceId is required");
 
@@ -330,7 +331,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			notificationService.sendCredentials(mobile, email, name, title, applicant.getApplicationNo(), loginId,
 					password);
 		} else {
-			notificationService.sendStatus(mobile, email, name, title, applicant.getApplicationNo(), "Rejected",
+			notificationService.sendStatus(new Recipient(mobile, email, name), title, applicant.getApplicationNo(), "Rejected",
 					remarks == null || remarks.isBlank() ? "Not specified" : remarks,
 					"You may contact the TVET Quality Assurance office for more information.",
 					"REGISTRATION_REJECTED");

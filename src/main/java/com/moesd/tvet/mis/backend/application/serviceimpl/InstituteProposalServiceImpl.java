@@ -25,6 +25,7 @@ import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService;
+import com.moesd.tvet.mis.backend.application.utility.NotificationService.Recipient;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -221,7 +222,7 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 		String name = proposal.getProposedInstituteName() == null || proposal.getProposedInstituteName().isBlank()
 				? "your institute"
 				: proposal.getProposedInstituteName();
-		notificationService.sendStatus(proposal.getMobileNo(), proposal.getEmailId(), null,
+		notificationService.sendStatus(new Recipient(proposal.getMobileNo(), proposal.getEmailId(), null),
 				"proposal for " + name, proposal.getApplicationNo(), approved ? "Approved" : "Rejected",
 				approved ? null : remarks,
 				approved ? "You may now proceed with the institute registration in TVET-MIS."

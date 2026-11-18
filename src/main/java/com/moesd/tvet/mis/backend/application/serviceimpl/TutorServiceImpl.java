@@ -42,6 +42,13 @@ public class TutorServiceImpl implements TutorService{
 	private static final int TASK_STATUS_COMPLETED = 20;
 	private static final int LOCATION_ID = 14;
 
+	// response body keys and status values
+	private static final String MESSAGE = "message";
+	private static final String STATUS = "status";
+	private static final String DATA = "data";
+	private static final String SUCCESS = "SUCCESS";
+	private static final String ERROR = "ERROR";
+
 	private final TutorRepository tutorRepository;
 	private final ObjectToJson objectTojson;
 	private final GenerateApplicationNumber generateApplicationNumber;
@@ -86,10 +93,7 @@ public class TutorServiceImpl implements TutorService{
 					LOCATION_ID);
 			
 			// Prepare success response
-			Map<String, Object> successResponse = new HashMap<>();
-			successResponse.put("message", "Tutor submitted for verification. Application No: " + applicationNo);
-			successResponse.put("status", "SUCCESS");
-			successResponse.put("data", savedTutor);
+			Map<String, Object> successResponse = responseBody("Tutor submitted for verification. Application No: " + applicationNo, SUCCESS, savedTutor);
 			
 			log.info("Tutor submitted successfully with ID: {}", savedTutor.getId());
 			return ResponseEntity
@@ -100,10 +104,7 @@ public class TutorServiceImpl implements TutorService{
 			log.error("Error submitting tutor: {}", e.getMessage(), e);
 			
 			// Prepare error response
-			Map<String, Object> errorResponse = new HashMap<>();
-			errorResponse.put("message", "Failed to submit tutor: " + e.getMessage());
-			errorResponse.put("status", "ERROR");
-			errorResponse.put("data", null);
+			Map<String, Object> errorResponse = responseBody("Failed to submit tutor: " + e.getMessage(), ERROR, null);
 			
 			return ResponseEntity
 				.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -125,10 +126,7 @@ public class TutorServiceImpl implements TutorService{
 			Optional<Tutor> existingTutorOpt = tutorRepository.findById(request.getId());
 			if (existingTutorOpt.isEmpty()) {
 				// Prepare error response
-				Map<String, Object> errorResponse = new HashMap<>();
-				errorResponse.put("message", "Tutor not found with ID: " + request.getId());
-				errorResponse.put("status", "ERROR");
-				errorResponse.put("data", null);
+				Map<String, Object> errorResponse = responseBody("Tutor not found with ID: " + request.getId(), ERROR, null);
 				
 				return ResponseEntity
 					.status(HttpStatus.NOT_FOUND)
@@ -155,10 +153,7 @@ public class TutorServiceImpl implements TutorService{
 			Tutor updatedTutor = tutorRepository.save(existingTutor);
 			
 			// Prepare success response
-			Map<String, Object> successResponse = new HashMap<>();
-			successResponse.put("message", "Tutor updated successfully");
-			successResponse.put("status", "SUCCESS");
-			successResponse.put("data", updatedTutor);
+			Map<String, Object> successResponse = responseBody("Tutor updated successfully", SUCCESS, updatedTutor);
 			
 			log.info("Tutor updated successfully with ID: {}", updatedTutor.getId());
 			return ResponseEntity
@@ -169,10 +164,7 @@ public class TutorServiceImpl implements TutorService{
 			log.error("Error updating tutor: {}", e.getMessage(), e);
 			
 			// Prepare error response
-			Map<String, Object> errorResponse = new HashMap<>();
-			errorResponse.put("message", "Failed to update tutor: " + e.getMessage());
-			errorResponse.put("status", "ERROR");
-			errorResponse.put("data", null);
+			Map<String, Object> errorResponse = responseBody("Failed to update tutor: " + e.getMessage(), ERROR, null);
 			
 			return ResponseEntity
 				.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -189,10 +181,7 @@ public class TutorServiceImpl implements TutorService{
 			Optional<Tutor> existingTutorOpt = tutorRepository.findById(tutorId);
 			if (existingTutorOpt.isEmpty()) {
 				// Prepare error response
-				Map<String, Object> errorResponse = new HashMap<>();
-				errorResponse.put("message", "Tutor not found with ID: " + tutorId);
-				errorResponse.put("status", "ERROR");
-				errorResponse.put("data", null);
+				Map<String, Object> errorResponse = responseBody("Tutor not found with ID: " + tutorId, ERROR, null);
 				
 				return ResponseEntity
 					.status(HttpStatus.NOT_FOUND)
@@ -208,10 +197,7 @@ public class TutorServiceImpl implements TutorService{
 			Tutor deletedTutor = tutorRepository.save(tutor);
 			
 			// Prepare success response
-			Map<String, Object> successResponse = new HashMap<>();
-			successResponse.put("message", "Tutor deleted successfully");
-			successResponse.put("status", "SUCCESS");
-			successResponse.put("data", deletedTutor);
+			Map<String, Object> successResponse = responseBody("Tutor deleted successfully", SUCCESS, deletedTutor);
 			
 			log.info("Tutor soft deleted successfully with ID: {}", tutorId);
 			return ResponseEntity
@@ -222,10 +208,7 @@ public class TutorServiceImpl implements TutorService{
 			log.error("Error deleting tutor: {}", e.getMessage(), e);
 			
 			// Prepare error response
-			Map<String, Object> errorResponse = new HashMap<>();
-			errorResponse.put("message", "Failed to delete tutor: " + e.getMessage());
-			errorResponse.put("status", "ERROR");
-			errorResponse.put("data", null);
+			Map<String, Object> errorResponse = responseBody("Failed to delete tutor: " + e.getMessage(), ERROR, null);
 			
 			return ResponseEntity
 				.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -281,18 +264,18 @@ public class TutorServiceImpl implements TutorService{
 					request.getUserId(), remarks);
 
 			Map<String, Object> body = new HashMap<>();
-			body.put("status", HttpStatus.OK.value());
+			body.put(STATUS, HttpStatus.OK.value());
 			body.put("applicationNo", request.getApplicationNo());
-			body.put("message", "Tutor application updated successfully");
+			body.put(MESSAGE, "Tutor application updated successfully");
 			return ResponseEntity.ok(body);
 
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
+					.body(Map.of(MESSAGE, e.getMessage(), "timestamp", LocalDateTime.now()));
 		} catch (Exception e) {
 			log.error("Failed to verify tutor application", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("message", "Failed to process tutor application", "timestamp",
+					.body(Map.of(MESSAGE, "Failed to process tutor application", "timestamp",
 							LocalDateTime.now()));
 		}
 	}
@@ -305,5 +288,14 @@ public class TutorServiceImpl implements TutorService{
 		subjectIds.stream().filter(Objects::nonNull).distinct()
 				.forEach(subjectId -> tutor.getSubjects()
 						.add(TutorSubject.builder().subjectId(subjectId).tutor(tutor).build()));
+	}
+
+	// {message, status, data}; HashMap (not Map.of) because data can be null
+	private static Map<String, Object> responseBody(String message, String status, Object data) {
+		Map<String, Object> response = new HashMap<>();
+		response.put(MESSAGE, message);
+		response.put(STATUS, status);
+		response.put(DATA, data);
+		return response;
 	}
 }

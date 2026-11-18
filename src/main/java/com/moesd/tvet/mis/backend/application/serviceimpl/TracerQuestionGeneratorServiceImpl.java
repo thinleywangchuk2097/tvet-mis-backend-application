@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
 import com.moesd.tvet.mis.backend.application.utility.GenerateTracerUniqueId;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService;
+import com.moesd.tvet.mis.backend.application.utility.NotificationService.Recipient;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +60,10 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 	private final TracerSurveyResponseDetailsRepository tracerSurveyResponseDetailsRepository;
 	private final TracerQuestionGeneratorRepository tracerQuestionGeneratorRepository;
 	private final NotificationService notificationService;
+
+	/** Frontend base URL for the survey links (APP_FRONTEND_URL in the ConfigMap) */
+	@Value("${app.frontend-url}")
+	private String frontendUrl;
 
 	@Override
 	public List<ObjectNode> getTracerQuestionDropdownType() {
@@ -540,9 +546,7 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 		return joined.isEmpty() ? null : joined;
 	}
 
-	// ─────────────────────────────────────────────────────────────────────
-	// Remaining service methods (unchanged)
-	// ─────────────────────────────────────────────────────────────────────
+	
 	@Override
 	public List<ObjectNode> getTracerDetailsByApplicationNo(String applicationNo) {
 		return objectTojson._toJson(repository.getTracerDetailsByApplicationNo(applicationNo));
@@ -566,7 +570,7 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 
 			for (TraineeDTO trainee : request.getSelectedTrainees()) {
 				String UniqueId = generateTracerUniqueId.generateTracerUniqueId(applicationNo);
-				String tracerUrl = "https://test-tvet.systems.gov.bt/tracer/trainee-survey/" + UniqueId;
+				String tracerUrl = frontendUrl + "/tracer/trainee-survey/" + UniqueId;
 				TracerSurveySendDetails surveyDetail = TracerSurveySendDetails.builder()
 						.applicationNo(applicationNo)
 						.questionApplicationNo(request.getApplicationNo())
@@ -614,7 +618,7 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 
 			for (EmployerDTO employer : request.getSelectedEmployers()) {
 				String UniqueId = generateTracerUniqueId.generateTracerUniqueId(applicationNo);
-				String tracerUrl = "https://test-tvet.systems.gov.bt/tracer/employer-survey/" + UniqueId;
+				String tracerUrl = frontendUrl + "/tracer/employer-survey/" + UniqueId;
 				TracerSurveySendDetails surveyDetail = TracerSurveySendDetails.builder()
 						.applicationNo(applicationNo)
 						.questionApplicationNo(request.getApplicationNo())
@@ -658,7 +662,7 @@ public class TracerQuestionGeneratorServiceImpl implements TracerQuestionGenerat
 			String uniqueId, int[] counts) {
 		boolean employer = "TRACER_EMPLOYER".equals(type);
 		String who = employer ? "employer" : "graduate";
-		notificationService.sendLink(mobileNo, email, name,
+		notificationService.sendLink(new Recipient(mobileNo, email, name),
 				employer ? "TVET Employer Tracer Survey" : "TVET Graduate Tracer Survey",
 				"please take a few minutes to complete the TVET " + who + " tracer survey", tracerUrl,
 				"This link is for you only and can be submitted once. Thank you.", type, uniqueId);

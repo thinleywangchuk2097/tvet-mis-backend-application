@@ -83,6 +83,7 @@ public class TotServiceImpl implements TotService {
 	private static final int STATUS_ACTIVE = 122;
 	private static final int STATUS_DELETED = 123;
 	private static final BigDecimal HUNDRED = new BigDecimal("100");
+	private static final String PROGRAM_NOT_FOUND = "TOT Program not found with id: ";
 
 	// response keys
 	private static final String STATUS = "status";
@@ -134,7 +135,7 @@ public class TotServiceImpl implements TotService {
 
 	private void updateProgram(TotProgramDto request) {
 		TOTProgram program = totProgramRepository.findById(request.getId()).orElseThrow(
-				() -> new RecordNotFoundException("TOT Program not found with id: " + request.getId()));
+				() -> new RecordNotFoundException(PROGRAM_NOT_FOUND + request.getId()));
 
 		program.setProgramName(request.getProgramName());
 		program.setProgramCode(request.getProgramCode());
@@ -245,7 +246,7 @@ public class TotServiceImpl implements TotService {
 	@Override
 	public ResponseEntity<?> deleteToTPrograms(Long id) {
 		TOTProgram program = totProgramRepository.findById(id)
-				.orElseThrow(() -> new RecordNotFoundException("TOT Program not found with id: " + id));
+				.orElseThrow(() -> new RecordNotFoundException(PROGRAM_NOT_FOUND + id));
 		// Soft delete
 		program.setStatusId(STATUS_DELETED);
 		totProgramRepository.save(program);
@@ -281,7 +282,7 @@ public class TotServiceImpl implements TotService {
 
 			// Create new announcement
 			TOTProgram program = totProgramRepository.findById(request.getProgramId()).orElseThrow(
-					() -> new RecordNotFoundException("TOT Program not found with id: " + request.getProgramId()));
+					() -> new RecordNotFoundException(PROGRAM_NOT_FOUND + request.getProgramId()));
 
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(24);
 
