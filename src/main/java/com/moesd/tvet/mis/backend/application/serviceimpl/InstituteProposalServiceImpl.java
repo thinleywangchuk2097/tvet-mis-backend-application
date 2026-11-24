@@ -27,8 +27,10 @@ import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService.Recipient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class InstituteProposalServiceImpl implements InstituteProposalService {
 
@@ -55,6 +57,12 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 
 			if (dto.getStatusId() == null)
 				throw new RecordNotFoundException("statusId is required");
+
+			// the proposed institute name must not be used by another proposal (rejected ones excepted)
+			String duplicate = checkDuplicateName(dto.getProposedInstituteName());
+			if (duplicate != null)
+				return ResponseEntity.status(HttpStatus.CONFLICT)
+						.body(Map.of("message", duplicate, "timestamp", LocalDateTime.now()));
 
 			Integer serviceId = dto.getServiceId();
 			Integer assignedRoleId = dto.getAssignedRoleId();
@@ -120,7 +128,10 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 						serviceId, userId, null);
 			}
 
-			// 11. Return response
+			// 11. Acknowledge the submission to the applicant by SMS and email
+			notifyProposalSubmitted(proposal);
+
+			// 12. Return response
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.body(Map.of("applicationNo", applicationNo, "status", HttpStatus.CREATED.value()));
 
@@ -128,6 +139,16 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
 					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
 		}
+	}
+
+	@Override
+	public String checkDuplicateName(String proposedInstituteName) {
+		if (proposedInstituteName == null || proposedInstituteName.isBlank())
+			return null;
+		String name = proposedInstituteName.trim();
+		return instituteProposalRepository.countActiveByProposedInstituteName(name) > 0
+				? "The name \"" + name + "\" is already used by another proposal. Please choose a different name."
+				: null;
 	}
 
 	@Override
@@ -217,13 +238,30 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 	private static final int STATUS_APPROVED = 57;
 	private static final int STATUS_REJECTED = 58;
 
-	/** Proposal result by SMS and email: proposed institute name, application no and status. */
-	private void notifyProposalDecision(InstituteProposal proposal, boolean approved, String remarks) {
-		String name = proposal.getProposedInstituteName() == null || proposal.getProposedInstituteName().isBlank()
+	/** Submission acknowledgement by SMS and email; a failure here never fails the submission. */
+	private void notifyProposalSubmitted(InstituteProposal proposal) {
+		try {
+			notificationService.sendStatus(
+					new Recipient(proposal.getMobileNo(), proposal.getEmailId(), proposal.getPromoterName()),
+					"proposal for " + proposalName(proposal), proposal.getApplicationNo(), "Submitted", null,
+					"It will now be reviewed by TVET Quality Assurance. You will be informed of the result by SMS and email.",
+					"PROPOSAL_SUBMITTED");
+		} catch (Exception e) {
+			log.warn("Proposal {} saved but the submission SMS/email failed: {}", proposal.getApplicationNo(),
+					e.getMessage());
+		}
+	}
+
+	private static String proposalName(InstituteProposal proposal) {
+		return proposal.getProposedInstituteName() == null || proposal.getProposedInstituteName().isBlank()
 				? "your institute"
 				: proposal.getProposedInstituteName();
+	}
+
+	/** Proposal result by SMS and email: proposed institute name, application no and status. */
+	private void notifyProposalDecision(InstituteProposal proposal, boolean approved, String remarks) {
 		notificationService.sendStatus(new Recipient(proposal.getMobileNo(), proposal.getEmailId(), null),
-				"proposal for " + name, proposal.getApplicationNo(), approved ? "Approved" : "Rejected",
+				"proposal for " + proposalName(proposal), proposal.getApplicationNo(), approved ? "Approved" : "Rejected",
 				approved ? null : remarks,
 				approved ? "You may now proceed with the institute registration in TVET-MIS."
 						: "You may contact the TVET Quality Assurance office for more information.",

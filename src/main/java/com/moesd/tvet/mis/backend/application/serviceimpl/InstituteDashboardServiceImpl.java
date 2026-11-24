@@ -27,6 +27,7 @@ public class InstituteDashboardServiceImpl implements InstituteDashboardService 
 	private final InstituteDashboardRepository repo;
 
 	private static final DateTimeFormatter MONTH_LABEL = DateTimeFormatter.ofPattern("MMM yy", Locale.ENGLISH);
+	private static final DateTimeFormatter DAY_LABEL = DateTimeFormatter.ofPattern("dd MMM", Locale.ENGLISH);
 
 	@Override
 	public Map<String, Object> getInstituteDashboard(String registrationNo) {
@@ -88,6 +89,8 @@ public class InstituteDashboardServiceImpl implements InstituteDashboardService 
 				safe("gender", () -> normalizeAll(repo.traineesByGender(instituteId)), List.of()));
 		out.put("monthlyEnrollments",
 				fillMonths(safe("monthlyEnrollments", () -> repo.monthlyEnrollments(instituteId), List.of())));
+		out.put("dailyEnrollments",
+				fillDays(safe("dailyEnrollments", () -> repo.dailyEnrollments(instituteId), List.of())));
 		out.put("programmesPerMonth",
 				fillMonths(safe("programmesPerMonth", () -> repo.programmesPerMonth(instituteId), List.of())));
 		out.put("programmeList", programmes);
@@ -139,6 +142,25 @@ public class InstituteDashboardServiceImpl implements InstituteDashboardService 
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	/** Turns [{d:"2026-11-03", value:4}] into the last 30 days with zeros filled in. */
+	private List<Map<String, Object>> fillDays(List<Map<String, Object>> rows) {
+		Map<String, Long> byDay = new HashMap<>();
+		for (Map<String, Object> r : rows) {
+			byDay.put(String.valueOf(r.get("d")), toLong(r.get("value")));
+		}
+		List<Map<String, Object>> out = new ArrayList<>();
+		LocalDate today = LocalDate.now();
+		for (int i = 29; i >= 0; i--) {
+			LocalDate day = today.minusDays(i);
+			Map<String, Object> m = new LinkedHashMap<>();
+			m.put("date", day.toString());
+			m.put("label", day.format(DAY_LABEL));
+			m.put("value", byDay.getOrDefault(day.toString(), 0L));
+			out.add(m);
+		}
+		return out;
 	}
 
 	/** Turns [{ym:"2026-03", value:4}] into the last 12 months with zeros filled in. */

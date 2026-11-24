@@ -73,6 +73,29 @@ public interface AssessorAccreditorQMSAuditorRepository extends JpaRepository<As
 		List<Tuple> getApplicationDetailByApplicationNo(String applicationNo);
 	
 		Optional<AssessorAccreditorQMSAuditor> findByApplicationNo(String applicationNo);
+
+		// duplicate check: an application of this person for this service that is not rejected
+		boolean existsByServiceIdAndCitizenIdAndStatusIdNot(Integer serviceId, String citizenId, Integer statusId);
+
+		boolean existsByServiceIdAndReferenceNoAndStatusIdNot(Integer serviceId, String referenceNo, Integer statusId);
+
+		// renewal: only an application that is still in process (not approved / rejected) blocks
+		boolean existsByServiceIdAndCitizenIdAndStatusIdNotIn(Integer serviceId, String citizenId, List<Integer> statusIds);
+
+		boolean existsByServiceIdAndReferenceNoAndStatusIdNotIn(Integer serviceId, String referenceNo, List<Integer> statusIds);
+
+		// this person's other approved registrations for the same service (replaced when a renewal is approved)
+		List<AssessorAccreditorQMSAuditor> findByServiceIdAndCitizenIdAndStatusIdAndApplicationNoNot(Integer serviceId,
+				String citizenId, Integer statusId, String applicationNo);
+
+		List<AssessorAccreditorQMSAuditor> findByServiceIdAndReferenceNoAndStatusIdAndApplicationNoNot(Integer serviceId,
+				String referenceNo, Integer statusId, String applicationNo);
+
+		// registration numbers (= login user ids) of this person's approved registrations, any service
+		@NativeQuery("SELECT registration_no FROM tbl_assessor_accreditor_auditor_registration "
+				+ "WHERE status_id = 57 AND registration_no IS NOT NULL "
+				+ "AND ((?1 IS NOT NULL AND citizen_id = ?1) OR (?2 IS NOT NULL AND reference_no = ?2))")
+		List<String> findApprovedRegistrationNos(String citizenId, String referenceNo);
 		
 		
 		@NativeQuery("SELECT "

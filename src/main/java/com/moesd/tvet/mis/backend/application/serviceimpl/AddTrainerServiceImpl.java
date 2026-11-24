@@ -1,5 +1,6 @@
 package com.moesd.tvet.mis.backend.application.serviceimpl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.moesd.tvet.mis.backend.application.dto.AddTrainerDto;
 import com.moesd.tvet.mis.backend.application.model.AddTrainer;
 import com.moesd.tvet.mis.backend.application.model.TrainerCourse;
 import com.moesd.tvet.mis.backend.application.repository.AddTrainerRepository;
+import com.moesd.tvet.mis.backend.application.repository.InstituteRegistrationDetailsRepository;
 import com.moesd.tvet.mis.backend.application.repository.TrainerCourseRepository;
 import com.moesd.tvet.mis.backend.application.service.AddTrainerService;
 import com.moesd.tvet.mis.backend.application.utility.ObjectToJson;
@@ -39,6 +41,9 @@ public class AddTrainerServiceImpl implements AddTrainerService {
     private final AddTrainerRepository addTrainerRepository;
     private final TrainerCourseRepository trainerCourseRepository;
     private final ObjectToJson objectTojson;
+    private final InstituteRegistrationDetailsRepository instituteRegistrationDetailsRepository;
+
+    private static final int STATUS_ACTIVE_RECORD = 1; // 0 = deleted
 
     @Override
     @Transactional
@@ -46,24 +51,20 @@ public class AddTrainerServiceImpl implements AddTrainerService {
         try {
             log.info("Submitting new trainer: {}", request.getName());
 
-            // Look for an existing trainer with the same CID / work permit no
-            List<AddTrainer> matches = findMatchingTrainers(request);
-
-            // Active trainer with the same CID / work permit -> duplicate
-            Optional<AddTrainer> active = matches.stream()
-                .filter(t -> Integer.valueOf(1).equals(t.getStatusId()))
-                .findFirst();
-            if (active.isPresent()) {
-                AddTrainer dup = active.get();
-                String message = duplicateMessage(request, dup);
-                log.warn("Duplicate trainer rejected: {} (existing trainer id {}, institute {})",
-                    message, dup.getId(), dup.getInstituteId());
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(body(message, ERROR, null));
+            // Already in this institute, or still active at another institute -> not allowed
+            String conflict = checkTrainerConflict(request.getCitizenId(), request.getWorkPermitNo(),
+                request.getInstituteId(), null);
+            if (conflict != null) {
+                log.warn("Trainer not added: {}", conflict);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(body(conflict, ERROR, null));
             }
 
-            // Previously deleted (soft-deleted) trainer -> reactivate with the new details
-            if (!matches.isEmpty()) {
-                return reactivateTrainer(request, matches.get(0));
+            // Previously deleted (soft-deleted) record -> reactivate it with the new details
+            Optional<AddTrainer> deleted = findMatchingTrainers(request).stream()
+                .filter(t -> !Integer.valueOf(STATUS_ACTIVE_RECORD).equals(t.getStatusId()))
+                .findFirst();
+            if (deleted.isPresent()) {
+                return reactivateTrainer(request, deleted.get());
             }
 
             // Create new trainer entity
@@ -81,6 +82,7 @@ public class AddTrainerServiceImpl implements AddTrainerService {
                 .instituteId(request.getInstituteId())
                 .joiningDate(request.getJoiningDate())
                 .statusId(request.getStatusId() != null ? request.getStatusId() : 1)
+                .active(activeFlag(request.getActive(), "Y"))
                 .description(request.getDescription())
                 .createdBy(request.getCreatedBy())
                 .createdAt(new Date())
@@ -110,24 +112,82 @@ public class AddTrainerServiceImpl implements AddTrainerService {
         }
     }
 
-    /** Trainers (active or soft-deleted) with the same CID or work permit no. */
+    /** Trainer records (any institute, active or soft-deleted) with the same CID or work permit no. */
     private List<AddTrainer> findMatchingTrainers(AddTrainerDto request) {
-        boolean hasCid = hasText(request.getCitizenId());
-        boolean hasWp = hasText(request.getWorkPermitNo());
-        if (!hasCid && !hasWp) {
-            return List.of();
-        }
-        return addTrainerRepository.findAll().stream()
-            .filter(t -> (hasCid && request.getCitizenId().equals(t.getCitizenId()))
-                      || (hasWp && request.getWorkPermitNo().equals(t.getWorkPermitNo())))
-            .toList();
+        return findMatchingTrainers(request.getCitizenId(), request.getWorkPermitNo());
     }
 
-    private static String duplicateMessage(AddTrainerDto request, AddTrainer dup) {
-        if (hasText(request.getCitizenId()) && request.getCitizenId().equals(dup.getCitizenId())) {
-            return "Trainer with Citizen ID " + request.getCitizenId() + " already exists";
+    private List<AddTrainer> findMatchingTrainers(String citizenId, String workPermitNo) {
+        List<AddTrainer> matches = new ArrayList<>();
+        if (hasText(citizenId)) {
+            matches.addAll(addTrainerRepository.findAllByCitizenId(citizenId.trim()));
         }
-        return "Trainer with Work Permit No " + request.getWorkPermitNo() + " already exists";
+        if (hasText(workPermitNo)) {
+            addTrainerRepository.findAllByWorkPermitNo(workPermitNo.trim()).stream()
+                .filter(t -> matches.stream().noneMatch(m -> m.getId().equals(t.getId())))
+                .forEach(matches::add);
+        }
+        return matches;
+    }
+
+    /**
+     * Not allowed when the same CID / work permit no is already registered (not deleted) in this institute,
+     * or is active (is_active not 'N') at another institute. Inactive or deleted records elsewhere are fine.
+     */
+    @Override
+    public Map<String, Object> findInstituteTrainer(String citizenId, Integer instituteId) {
+        String cid = citizenId == null ? "" : citizenId.trim();
+        List<AddTrainer> registered = addTrainerRepository.findAllByCitizenId(cid).stream()
+            .filter(t -> Integer.valueOf(STATUS_ACTIVE_RECORD).equals(t.getStatusId()))
+            .filter(t -> instituteId != null && instituteId.equals(t.getInstituteId()))
+            .toList();
+        Optional<AddTrainer> active = registered.stream().filter(t -> !"N".equals(t.getActive())).findFirst();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("found", active.isPresent());
+        if (active.isPresent()) {
+            AddTrainer t = active.get();
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", t.getName());
+            data.put("genderId", t.getGenderId());
+            data.put("qualificationId", t.getQualificationId());
+            data.put("workExperience", t.getWorkExperience());
+            result.put(DATA, data);
+        } else if (!registered.isEmpty()) {
+            result.put(MESSAGE, "Trainer with CID " + cid + " is marked Inactive in your institute.");
+        } else {
+            result.put(MESSAGE, "CID " + cid + " is not registered as a trainer in your institute. Add the trainer first.");
+        }
+        return result;
+    }
+
+    @Override
+    public String checkTrainerConflict(String citizenId, String workPermitNo, Integer instituteId, Long excludeId) {
+        String idLabel = hasText(citizenId) ? "Citizen ID " + citizenId.trim() : "Work Permit No " + workPermitNo;
+        List<AddTrainer> current = findMatchingTrainers(citizenId, workPermitNo).stream()
+            .filter(t -> Integer.valueOf(STATUS_ACTIVE_RECORD).equals(t.getStatusId()))
+            .filter(t -> excludeId == null || !excludeId.equals(t.getId()))
+            .toList();
+
+        if (current.stream().anyMatch(t -> instituteId != null && instituteId.equals(t.getInstituteId()))) {
+            return "Trainer with " + idLabel + " is already registered in your institute.";
+        }
+        return current.stream()
+            .filter(t -> !"N".equalsIgnoreCase(t.getActive()))
+            .findFirst()
+            .map(t -> "Trainer with " + idLabel + " is currently active at " + instituteName(t.getInstituteId())
+                + ". The trainer must be made inactive there before being added to your institute.")
+            .orElse(null);
+    }
+
+    private String instituteName(Integer instituteId) {
+        if (instituteId == null) {
+            return "another institute";
+        }
+        return instituteRegistrationDetailsRepository.findById(instituteId.longValue())
+            .map(r -> r.getProposedInstituteName())
+            .filter(AddTrainerServiceImpl::hasText)
+            .orElse("another institute");
     }
 
     /** Restores a soft-deleted trainer with the newly submitted details. */
@@ -153,6 +213,14 @@ public class AddTrainerServiceImpl implements AddTrainerService {
                 .trainer(trainer)
                 .build())
             .toList();
+    }
+
+    /** "Y" or "N" from the request; anything else keeps the current value (new trainers default to Y). */
+    private static String activeFlag(String requested, String current) {
+        if ("Y".equalsIgnoreCase(requested) || "N".equalsIgnoreCase(requested)) {
+            return requested.toUpperCase();
+        }
+        return current != null ? current : "Y";
     }
 
     private static boolean hasText(String value) {
@@ -201,6 +269,12 @@ public class AddTrainerServiceImpl implements AddTrainerService {
 
             AddTrainer existingTrainer = existingTrainerOpt.get();
 
+            String conflict = checkTrainerConflict(request.getCitizenId(), request.getWorkPermitNo(),
+                request.getInstituteId(), request.getId());
+            if (conflict != null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(body(conflict, ERROR, null));
+            }
+
             // Update trainer entity
             existingTrainer.setCitizenId(request.getCitizenId());
             existingTrainer.setWorkPermitNo(request.getWorkPermitNo());
@@ -215,6 +289,7 @@ public class AddTrainerServiceImpl implements AddTrainerService {
             existingTrainer.setInstituteId(request.getInstituteId());
             existingTrainer.setJoiningDate(request.getJoiningDate());
             existingTrainer.setStatusId(1);
+            existingTrainer.setActive(activeFlag(request.getActive(), existingTrainer.getActive()));
             existingTrainer.setDescription(request.getDescription());
             existingTrainer.setUpdatedBy(request.getUpdatedBy());
             existingTrainer.setUpdatedAt(new Date());

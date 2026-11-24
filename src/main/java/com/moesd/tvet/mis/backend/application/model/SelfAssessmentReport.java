@@ -1,5 +1,6 @@
 package com.moesd.tvet.mis.backend.application.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +46,10 @@ public class SelfAssessmentReport {
 	private Double totalScore;
 
 	private String grade;
+
+	// Next TVET provider accreditation renewal, set on approval: A+ 5 years, A 4, B 3, C 2
+	@Column(name = "renewal_date")
+	private LocalDate renewalDate;
 
 	private Date submittedDate;
 

@@ -18,5 +18,11 @@ public interface AssessorAccreditorQMSAuditorService {
 	List<ObjectNode> getApplicationByCitizenIdOrReferenceNo(String citizenId, String referenceNo, String serviceId);
 
 	List<ObjectNode> getRegisteredByServiceId(Integer serviceId);
+
+	/**
+	 * Message when this CID / reference no already has a (not rejected) application for the service; null if none.
+	 * renewal = true: only an application still in process blocks (an approved registration may renew).
+	 */
+	String checkDuplicateApplication(Integer serviceId, String citizenId, String referenceNo, boolean renewal);
 	
 }

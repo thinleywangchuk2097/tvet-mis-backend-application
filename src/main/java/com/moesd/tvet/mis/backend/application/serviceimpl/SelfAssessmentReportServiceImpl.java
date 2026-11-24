@@ -2,6 +2,7 @@ package com.moesd.tvet.mis.backend.application.serviceimpl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -248,6 +249,8 @@ public class SelfAssessmentReportServiceImpl implements SelfAssessmentReportServ
 			report.setStatusId(statusId);
 			report.setUpdatedAt(new java.util.Date());
 			report.setUpdatedBy(request.getUpdatedBy());
+			if (statusId == STATUS_APPROVED)
+				setRenewalDate(report);
 			SelfAssessmentReport saved = selfAssessmentReportRepository.save(report);
 
 			// actor = logged in user; next task goes to the next role group (or a specific user if sent)
@@ -330,6 +333,18 @@ public class SelfAssessmentReportServiceImpl implements SelfAssessmentReportServ
 	 * On verification the endorsement task goes to the assigned REC members (their user ids from
 	 * tbl_rec_member_task_assignment, comma separated, like accredited courses); otherwise the user sent.
 	 */
+	/**
+	 * Approved SAR: next accreditation renewal date from the final grade (A+ 5 years, A 4, B 3, C 2).
+	 * Not Accredited / no grade: no renewal date.
+	 */
+	private void setRenewalDate(SelfAssessmentReport report) {
+		String grade = report.getGrade();
+		int years = InstituteRegistrationServiceImpl.renewalYearsForGrade(grade);
+		report.setRenewalDate(years > 1 ? LocalDate.now().plusYears(years) : null);
+		log.info("SAR {} approved with grade {}: renewal date {}", report.getApplicationNo(), grade,
+				report.getRenewalDate());
+	}
+
 	private static String nextAssignedUserId(SelfAssessmentReportdto request, Integer statusId,
 			List<String> recUserIds) {
 		if (statusId == STATUS_VERIFIED && !recUserIds.isEmpty())

@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import com.moesd.tvet.mis.backend.application.model.InstituteProposal;
 
 import jakarta.persistence.Tuple;
@@ -101,6 +103,12 @@ public interface InstituteProposalRepository extends JpaRepository<InstituteProp
 		List<Tuple> getApplicantDetails(String applicationNo);
 	
 	  	Optional<InstituteProposal> findByApplicationNo(String applicationNo);
+
+		// proposals (any service) with this name, ignoring case and outer spaces; rejected (58) ones don't count
+		@Query("SELECT COUNT(p) FROM InstituteProposal p "
+				+ "WHERE LOWER(TRIM(p.proposedInstituteName)) = LOWER(TRIM(:name)) "
+				+ "AND (p.statusId IS NULL OR p.statusId <> 58)")
+		long countActiveByProposedInstituteName(@Param("name") String name);
 
 		/**
 		 * Proposal application no of a registered institute:

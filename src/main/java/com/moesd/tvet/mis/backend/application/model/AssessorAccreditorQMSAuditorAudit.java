@@ -1,8 +1,6 @@
 package com.moesd.tvet.mis.backend.application.model;
 
 import java.time.LocalDateTime;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+/** Snapshot of an approved registration taken when its renewal is approved (the old row is then removed). */
 @Table(name = "tbl_assessor_accreditor_auditor_registration_audit")
 public class AssessorAccreditorQMSAuditorAudit {
 	@Id
@@ -34,7 +33,8 @@ public class AssessorAccreditorQMSAuditorAudit {
     @Column(name = "service_id")
     private Integer serviceId; 
     
-    @Column(name = "registration_no", unique = true)
+    // not unique: a renewal keeps the registration no, so several snapshots can have it
+    @Column(name = "registration_no")
 	private String RegistrationNo;
     
     @Column(name = "reference_no")
@@ -101,15 +101,13 @@ public class AssessorAccreditorQMSAuditorAudit {
     @Column(name = "status_id")
     private Integer statusId;
 
-    // Audit fields
-    @CreationTimestamp
+    // Audit fields (copied from the original row)
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "created_by")
     private String createdBy;
 
-    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -119,6 +117,7 @@ public class AssessorAccreditorQMSAuditorAudit {
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
     
+	// the renewed (current) registration this snapshot belongs to
 	@ManyToOne
 	@JoinColumn(name = "parent_id")
 	private AssessorAccreditorQMSAuditor assessorAccreditorQMSAuditor;

@@ -14,6 +14,10 @@ import jakarta.transaction.Transactional;
 public interface UserRoleRepository extends JpaRepository<UserRole, Long>{
 	@Query("SELECT ur FROM UserRole ur WHERE ur.user.id = :userId")
     List<UserRole> findByUserId(@Param("userId") Long userId);
+
+	// true when the user already has this role (tbl_user_role)
+	@Query("SELECT COUNT(ur) > 0 FROM UserRole ur WHERE ur.user.id = :userId AND ur.role.id = :roleId")
+	boolean existsByUserIdAndRoleId(@Param("userId") Long userId, @Param("roleId") Integer roleId);
 	
 	@Modifying
 	@Transactional

@@ -16,4 +16,7 @@ public interface InstituteProposalService {
 	ResponseEntity<?> verifyInstituteProposal(InstituteProposaldto request);
 	
 	List<ObjectNode> getApplicantDetails(String applicationNo);
+
+	/** Message when a (not rejected) proposal already uses this institute name; null when the name is free */
+	String checkDuplicateName(String proposedInstituteName);
 }

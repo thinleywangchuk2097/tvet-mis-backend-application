@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -52,6 +53,10 @@ public class AddTrainer {
 	private LocalDate joiningDate;
 	
 	private Integer statusId;
+
+	/** Y = active, N = inactive (set from the edit form; separate from statusId 0 = deleted) */
+	@Column(name = "is_active", length = 1)
+	private String active;
 	
 	private String description;
 

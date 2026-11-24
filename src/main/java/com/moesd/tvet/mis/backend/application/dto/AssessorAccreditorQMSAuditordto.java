@@ -50,6 +50,8 @@ public class AssessorAccreditorQMSAuditordto {
 	private String userId; 
 	private Integer statusId; 
 	private String remarks;
+	// true when sent from the renewal page (an approved registration may renew)
+	private Boolean renewal;
 	// Documents
 	private Documentdto[] documents;
 }

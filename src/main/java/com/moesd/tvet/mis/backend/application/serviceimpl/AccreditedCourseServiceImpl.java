@@ -33,6 +33,7 @@ import com.moesd.tvet.mis.backend.application.repository.SelfAssessmentReportRep
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.repository.TaskFlowListRepository;
 import com.moesd.tvet.mis.backend.application.service.AccreditedCourseService;
+import com.moesd.tvet.mis.backend.application.service.AddTrainerService;
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
 import com.moesd.tvet.mis.backend.application.utility.DocumentFileUploadService;
 import com.moesd.tvet.mis.backend.application.utility.GenerateApplicationNumber;
@@ -60,6 +61,7 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	private final TaskFlowListRepository taskFlowListRepository;
 	private final SelfAssessmentReportRepository selfAssessmentReportRepository;
 	private final AccreditedCourseAuditRepository accreditedCourseAuditRepository;
+	private final AddTrainerService addTrainerService;
 
 	private static final int ROLE_REC = 23;
 
@@ -89,6 +91,14 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 
 			// Validate service
 			serviceMasterRepository.findById(serviceId).orElseThrow(() -> new RuntimeException("Service Id not found"));
+
+			// Lead trainer must be one of the institute's own active trainers
+			Map<String, Object> leadTrainer = addTrainerService.findInstituteTrainer(request.getLeadTrainerCidNo(),
+					request.getInstituteId());
+			if (!Boolean.TRUE.equals(leadTrainer.get("found"))) {
+				return ResponseEntity.status(HttpStatus.CONFLICT)
+						.body(Map.of(STATUS, "ERROR", MESSAGE, leadTrainer.get(MESSAGE)));
+			}
 
 			// Generate application number
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(serviceId);

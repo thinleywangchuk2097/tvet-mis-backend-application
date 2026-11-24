@@ -126,6 +126,16 @@ public class InstituteDashboardRepository {
 				""", String.valueOf(instituteId));
 	}
 
+	/** Trainee enrolments per day (yyyy-MM-dd) for the last 30 days, today included. */
+	public List<Map<String, Object>> dailyEnrollments(Long instituteId) {
+		return jdbc.queryForList("""
+				SELECT DATE_FORMAT(tr.created_at, '%Y-%m-%d') AS d, COUNT(*) AS value
+				""" + TRAINEE_FROM + """
+				  AND tr.created_at >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)
+				GROUP BY d
+				""", String.valueOf(instituteId));
+	}
+
 	/** Programmes starting per month (yyyy-MM) for the last 12 months. */
 	public List<Map<String, Object>> programmesPerMonth(Long instituteId) {
 		return jdbc.queryForList("""

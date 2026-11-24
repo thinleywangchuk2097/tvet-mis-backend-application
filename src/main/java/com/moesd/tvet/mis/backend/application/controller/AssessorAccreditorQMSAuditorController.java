@@ -1,12 +1,15 @@
 package com.moesd.tvet.mis.backend.application.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AssessorAccreditorQMSAuditordto;
@@ -44,6 +47,19 @@ public class AssessorAccreditorQMSAuditorController {
 		List<ObjectNode> instituteDetails = assessorAccreditorQMSAuditorService
 				.getApplicationByCitizenIdOrReferenceNo(citizenId, referenceNo, serviceId);
 		return ResponseEntity.ok(instituteDetails);
+	}
+
+	// Before the citizen lookup: does this CID / reference no already have an application for the service?
+	@GetMapping("/check-duplicate")
+	public ResponseEntity<Map<String, Object>> checkDuplicateApplication(@RequestParam Integer serviceId,
+			@RequestParam(required = false) String citizenId, @RequestParam(required = false) String referenceNo,
+			@RequestParam(defaultValue = "false") boolean renewal) {
+		String message = assessorAccreditorQMSAuditorService.checkDuplicateApplication(serviceId, citizenId,
+				referenceNo, renewal);
+		Map<String, Object> body = new HashMap<>();
+		body.put("exists", message != null);
+		body.put("message", message);
+		return ResponseEntity.ok(body);
 	}
 
 	// Public report: approved registrations for a service (32 Assessor, 5 Accreditor, 3 QMS Auditor)

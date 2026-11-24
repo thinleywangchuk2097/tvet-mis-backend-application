@@ -41,6 +41,9 @@ public class AddTrainerDto {
 
 	private Integer statusId;
 
+	/** Y = active, N = inactive */
+	private String active;
+
 	private String description;
 
 	private Integer createdBy;

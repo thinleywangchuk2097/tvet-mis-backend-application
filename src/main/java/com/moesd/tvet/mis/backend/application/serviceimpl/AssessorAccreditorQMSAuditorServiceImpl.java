@@ -2,26 +2,33 @@ package com.moesd.tvet.mis.backend.application.serviceimpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.AssessorAccreditorQMSAuditordto;
 import com.moesd.tvet.mis.backend.application.exception.RecordNotFoundException;
 import com.moesd.tvet.mis.backend.application.model.AssessorAccreditorQMSAuditor;
+import com.moesd.tvet.mis.backend.application.model.AssessorAccreditorQMSAuditorAudit;
+import com.moesd.tvet.mis.backend.application.model.AuditorWorkExperienceAudit;
 import com.moesd.tvet.mis.backend.application.model.AuditorWorkExperience;
 import com.moesd.tvet.mis.backend.application.model.Role;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.model.User;
 import com.moesd.tvet.mis.backend.application.model.UserRole;
 import com.moesd.tvet.mis.backend.application.model.WorkFlowList;
+import com.moesd.tvet.mis.backend.application.repository.AssessorAccreditorQMSAuditorAuditRepository;
 import com.moesd.tvet.mis.backend.application.repository.AssessorAccreditorQMSAuditorRepository;
+import com.moesd.tvet.mis.backend.application.repository.AuditorWorkExperienceAuditRepository;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
 import com.moesd.tvet.mis.backend.application.repository.RoleRepository;
 import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
@@ -57,6 +64,13 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 	private final UserRoleRepository userRoleRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final NotificationService notificationService;
+	private final AssessorAccreditorQMSAuditorAuditRepository assessorAccreditorQMSAuditorAuditRepository;
+	private final AuditorWorkExperienceAuditRepository auditorWorkExperienceAuditRepository;
+
+	/** workflow status "Rejected": a rejected applicant may apply again */
+	private static final int STATUS_REJECTED = 58;
+	/** workflow status "Approved" */
+	private static final int STATUS_APPROVED = 57;
 
 	@Override
 	@Transactional
@@ -72,18 +86,18 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			if (request.getStatusId() == null)
 				throw new RecordNotFoundException("statusId is required");
 
+			// one application per person per registration type (a rejected one may apply again)
+			String duplicate = checkDuplicateApplication(request.getServiceId(), request.getCitizenId(),
+					request.getReferenceNo(), Boolean.TRUE.equals(request.getRenewal()));
+			if (duplicate != null)
+				return ResponseEntity.status(HttpStatus.CONFLICT)
+						.body(Map.of("message", duplicate, "timestamp", LocalDateTime.now()));
+
 			String userId = request.getUserId();
 			Integer serviceId = request.getServiceId();
 			Integer assignedRoleId = request.getAssignedRoleId();
 			Integer statusId = request.getStatusId();
 			Integer locationId = 14; // default
-
-			// Fetch next role
-			// RoleService roleService =
-			// roleServiceRepository.getNextAssignedRole(assignedRoleId, serviceId,
-			// statusId)
-			// .orElseThrow(() -> new RecordNotFoundException("Next assigned role not
-			// found"));
 
 			// Generate application number
 			String applicationNo = generateApplicationNumber.generateApplicationNumber(serviceId);
@@ -110,8 +124,8 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 								.organizationName(workExpDto.getOrganizationName())
 								.designation(workExpDto.getDesignation()).year(workExpDto.getYear())
 								.responsibility(workExpDto.getResponsibility()).createdAt(LocalDateTime.now())
-								.updatedAt(LocalDateTime.now()).assessorAccreditorQMSAuditor(registration) // Set the
-																											// parent
+								.updatedAt(LocalDateTime.now()).assessorAccreditorQMSAuditor(registration) 
+																											
 								.build())
 						.collect(Collectors.toList());
 
@@ -156,6 +170,55 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 		}
 	}
 
+	/**
+	 * Message when this CID (or reference no for applicants without CID) already has an application
+	 * for the same service; null when there is none.
+	 * New registration: any application that is not rejected blocks (in process or approved).
+	 * Renewal: only an application still in process blocks (the approved registration is what is renewed).
+	 */
+	@Override
+	public String checkDuplicateApplication(Integer serviceId, String rawCitizenId, String rawReferenceNo,
+			boolean renewal) {
+		String citizenId = trimToNull(rawCitizenId);
+		String referenceNo = trimToNull(rawReferenceNo);
+		if (citizenId == null && referenceNo == null)
+			return null;
+
+		String idLabel = citizenId != null ? "CID " + citizenId : "Reference No " + referenceNo;
+		boolean exists = renewal ? hasApplicationInProcess(serviceId, citizenId, referenceNo)
+				: hasActiveApplication(serviceId, citizenId, referenceNo);
+		if (!exists)
+			return null;
+		return renewal
+				? "An application for " + registrationTypeName(serviceId) + " with " + idLabel
+						+ " is already in process. Please wait for it to be approved or rejected."
+				: "An application for " + registrationTypeName(serviceId) + " with " + idLabel
+						+ " is already submitted or approved. Duplicate applications are not allowed.";
+	}
+
+	// in process or approved (anything but rejected)
+	private boolean hasActiveApplication(Integer serviceId, String citizenId, String referenceNo) {
+		return citizenId != null
+				? assessorAccreditorQMSAuditorRepository.existsByServiceIdAndCitizenIdAndStatusIdNot(serviceId,
+						citizenId, STATUS_REJECTED)
+				: assessorAccreditorQMSAuditorRepository.existsByServiceIdAndReferenceNoAndStatusIdNot(serviceId,
+						referenceNo, STATUS_REJECTED);
+	}
+
+	// still in process (not approved, not rejected)
+	private boolean hasApplicationInProcess(Integer serviceId, String citizenId, String referenceNo) {
+		List<Integer> closed = List.of(STATUS_APPROVED, STATUS_REJECTED);
+		return citizenId != null
+				? assessorAccreditorQMSAuditorRepository.existsByServiceIdAndCitizenIdAndStatusIdNotIn(serviceId,
+						citizenId, closed)
+				: assessorAccreditorQMSAuditorRepository.existsByServiceIdAndReferenceNoAndStatusIdNotIn(serviceId,
+						referenceNo, closed);
+	}
+
+	private static String trimToNull(String value) {
+		return value == null || value.isBlank() ? null : value.trim();
+	}
+
 	@Override
 	public List<ObjectNode> getApplicationDetails(String applicationNo) {
 		return objectTojson
@@ -163,6 +226,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 	}
 
 	@Override
+	@Transactional
 	public ResponseEntity<?> verifyAssessorAccreditorQMSAuditor(AssessorAccreditorQMSAuditordto request) {
 		try {
 			// 1. Validate required fields
@@ -202,8 +266,14 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			if (statusId == 57) {
 				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
-				// Generate application number
-				String licenseNo = generateLicenseNumber.generateLicenseNumber(serviceId);
+				// Renewal: the person's earlier approved registration for this service is copied to the
+				// audit tables and removed; the renewed registration keeps its registration no (= login id)
+				List<AssessorAccreditorQMSAuditor> previous = previousApprovedRegistrations(
+						existingAssessorAccreditorQMSAuditor);
+				String licenseNo = previous.stream().map(AssessorAccreditorQMSAuditor::getRegistrationNo)
+						.filter(no -> no != null && !no.isBlank()).findFirst()
+						.orElseGet(() -> generateLicenseNumber.generateLicenseNumber(serviceId));
+				archivePreviousRegistrations(previous, existingAssessorAccreditorQMSAuditor);
 				// Find existing registration by applicationNo
 				AssessorAccreditorQMSAuditor editAssessorAccreditorQMSAuditor = assessorAccreditorQMSAuditorRepository
 						.findByApplicationNo(request.getApplicationNo()) // Returns Optional
@@ -214,60 +284,30 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 				// update
 				assessorAccreditorQMSAuditorRepository.save(editAssessorAccreditorQMSAuditor);
 
-				// create user
-				// Check if user ID already exists
-				if (userRepository.findByUserId(licenseNo).isPresent()) {
-					return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", HttpStatus.CONFLICT.value(),
-							"error", "Conflict", "message", "User ID " + request.getUserId() + " already exists"));
-				}
-
-				// Create new User
-				User user = new User();
-				// Get roleId from method
+				// Role for this registration type (32 Assessor, 5 Accreditor, 3 QMS Auditor)
 				final Integer roleId = getRoleIdByServiceId(serviceId);
-				// Validate role mapping
 				if (roleId == null) {
 					throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
 				}
-				// Fetch the role
 				Role role = roleRepository.findById(roleId)
 						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
 								"Role with ID " + roleId + " does not exist"));
-				// Assign the single role
-				List<UserRole> userRoles = new ArrayList<>();
-				UserRole userRole = new UserRole();
-				userRole.setUser(user);
-				userRole.setRole(role);
-				userRoles.add(userRole);
-				// Set user properties
-				user.setUserId(licenseNo);
-				// initial password: full name (spaces removed) + current year + "#", e.g. KarmaDorji2026#
-				String plainPassword = initialPassword(
-						request.getFullName() != null ? request.getFullName()
-								: existingAssessorAccreditorQMSAuditor.getFullName());
-				user.setPassword(passwordEncoder.encode(plainPassword));
-				user.setFirstName(request.getFullName());
-				user.setMiddleName("");
-				user.setLastName("");
-				user.setLocationId(request.getDzongkhagId());
-				user.setGenderId(request.getGenderId());
-				user.setDoB(request.getDateOfBirth());
-				user.setMobileNo(request.getMobileNo());
-				user.setEmailId(request.getEmail());
-				user.setCurrentRole(roleId);
-				user.setStatusId("1");
-				user.setLocationId(request.getDzongkhagId());
-				user.setCreatedAt(new Date());
-				user.setCreatedBy(null);
-				user = userRepository.save(user);
-				// Save user role
-				userRoleRepository.saveAll(userRoles);
-				user.setUserRoles(userRoles);
-				userRepository.save(user);
 
-				// approved: login credentials by SMS and email
-				notifyDecision(existingAssessorAccreditorQMSAuditor, request, serviceId, true, licenseNo,
-						plainPassword, null);
+				User existingUser = findExistingUser(licenseNo, existingAssessorAccreditorQMSAuditor);
+				if (existingUser != null) {
+					// already has a login: no new user, only add this role if it is not there yet
+					addRoleIfMissing(existingUser, role);
+					notifyRoleAdded(existingAssessorAccreditorQMSAuditor, request, serviceId,
+							existingUser.getUserId());
+				} else {
+					String plainPassword = initialPassword(
+							request.getFullName() != null ? request.getFullName()
+									: existingAssessorAccreditorQMSAuditor.getFullName());
+					createUser(request, licenseNo, plainPassword, role);
+					// approved: login credentials by SMS and email
+					notifyDecision(existingAssessorAccreditorQMSAuditor, request, serviceId, true, licenseNo,
+							plainPassword, null);
+				}
 			} else {
 				taskStatusId = dropdownManagementRepository.findChildById(18) // task unclaimed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
@@ -297,9 +337,150 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 					HttpStatus.OK.value(), "message", "Application verified successfully"));
 
 		} catch (Exception e) {
+			// undo everything (status, renewal archive, user / role) so nothing is half done
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+			log.error("Failed to verify assessor/accreditor/qms auditor application {}", request.getApplicationNo(), e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+					"Failed to submit proposal", "error", String.valueOf(e.getMessage()), "timestamp",
+					LocalDateTime.now()));
 		}
+	}
+
+	/**
+	 * Login that already exists for this applicant: the new registration no, the applicant's CID
+	 * (e.g. an NDI login), or the registration no of an earlier approved registration of the same
+	 * person (Assessor / Accreditor / QMS Auditor). Null when the person has no login yet.
+	 */
+	private User findExistingUser(String licenseNo, AssessorAccreditorQMSAuditor applicant) {
+		String citizenId = trimToNull(applicant.getCitizenId());
+		String referenceNo = trimToNull(applicant.getReferenceNo());
+
+		List<String> candidates = new ArrayList<>();
+		candidates.add(licenseNo);
+		if (citizenId != null)
+			candidates.add(citizenId);
+		if (citizenId != null || referenceNo != null)
+			candidates.addAll(
+					assessorAccreditorQMSAuditorRepository.findApprovedRegistrationNos(citizenId, referenceNo));
+
+		return candidates.stream().distinct().map(userRepository::findByUserId).flatMap(Optional::stream)
+				.findFirst().orElse(null);
+	}
+
+	/** Adds the role to tbl_user_role only when the user does not have it yet. */
+	private void addRoleIfMissing(User user, Role role) {
+		if (userRoleRepository.existsByUserIdAndRoleId(user.getId(), role.getId())) {
+			log.info("User {} already has role {}; nothing added", user.getUserId(), role.getId());
+			return;
+		}
+		UserRole userRole = new UserRole();
+		userRole.setUser(user);
+		userRole.setRole(role);
+		userRoleRepository.save(userRole);
+		log.info("Role {} added to existing user {}", role.getId(), user.getUserId());
+	}
+
+	/** New login for the approved applicant, with this registration's role. */
+	private void createUser(AssessorAccreditorQMSAuditordto request, String licenseNo, String plainPassword,
+			Role role) {
+		User user = new User();
+		user.setUserId(licenseNo);
+		user.setPassword(passwordEncoder.encode(plainPassword));
+		user.setFirstName(request.getFullName());
+		user.setMiddleName("");
+		user.setLastName("");
+		user.setLocationId(request.getDzongkhagId());
+		user.setGenderId(request.getGenderId());
+		user.setDoB(request.getDateOfBirth());
+		user.setMobileNo(request.getMobileNo());
+		user.setEmailId(request.getEmail());
+		user.setCurrentRole(role.getId());
+		user.setStatusId("1");
+		user.setCreatedAt(new Date());
+		user.setCreatedBy(null);
+		user = userRepository.save(user);
+
+		UserRole userRole = new UserRole();
+		userRole.setUser(user);
+		userRole.setRole(role);
+		List<UserRole> userRoles = new ArrayList<>(List.of(userRole));
+		userRoleRepository.saveAll(userRoles);
+		user.setUserRoles(userRoles);
+		userRepository.save(user);
+	}
+
+	/** Approved, but the person already had a login: tell them the role was added (no new password). */
+	private void notifyRoleAdded(AssessorAccreditorQMSAuditor applicant, AssessorAccreditorQMSAuditordto request,
+			Integer serviceId, String existingUserId) {
+		String mobile = applicant.getMobileNo() != null ? applicant.getMobileNo() : request.getMobileNo();
+		String email = applicant.getEmail() != null ? applicant.getEmail() : request.getEmail();
+		String name = applicant.getFullName() != null ? applicant.getFullName() : request.getFullName();
+		notificationService.sendStatus(new Recipient(mobile, email, name),
+				registrationTypeName(serviceId) + " registration", applicant.getApplicationNo(), "Approved", null,
+				"The " + registrationTypeName(serviceId) + " role has been added to your existing TVET-MIS account (User ID: "
+						+ existingUserId + "). Please log in with your existing password.",
+				"REGISTRATION_APPROVED");
+	}
+
+	/** The person's other approved registrations for the same service, newest first (by CID, or reference no). */
+	private List<AssessorAccreditorQMSAuditor> previousApprovedRegistrations(AssessorAccreditorQMSAuditor current) {
+		String citizenId = trimToNull(current.getCitizenId());
+		String referenceNo = trimToNull(current.getReferenceNo());
+		List<AssessorAccreditorQMSAuditor> previous;
+		if (citizenId != null) {
+			previous = assessorAccreditorQMSAuditorRepository.findByServiceIdAndCitizenIdAndStatusIdAndApplicationNoNot(
+					current.getServiceId(), citizenId, STATUS_APPROVED, current.getApplicationNo());
+		} else if (referenceNo != null) {
+			previous = assessorAccreditorQMSAuditorRepository.findByServiceIdAndReferenceNoAndStatusIdAndApplicationNoNot(
+					current.getServiceId(), referenceNo, STATUS_APPROVED, current.getApplicationNo());
+		} else {
+			return List.of();
+		}
+		return previous.stream()
+				.sorted(Comparator.comparing(AssessorAccreditorQMSAuditor::getUpdatedAt,
+						Comparator.nullsLast(Comparator.reverseOrder())))
+				.toList();
+	}
+
+	/**
+	 * Copies each old registration (and its work experiences) into the audit tables, linked to the
+	 * renewed registration, then deletes the old row (its work experiences are removed with it).
+	 * Flushed straight away so the renewed row can take over the unique registration no.
+	 */
+	private void archivePreviousRegistrations(List<AssessorAccreditorQMSAuditor> previous,
+			AssessorAccreditorQMSAuditor renewed) {
+		if (previous.isEmpty())
+			return;
+		for (AssessorAccreditorQMSAuditor old : previous) {
+			AssessorAccreditorQMSAuditorAudit audit = AssessorAccreditorQMSAuditorAudit.builder()
+					.applicationNo(old.getApplicationNo()).serviceId(old.getServiceId())
+					.referenceNo(old.getReferenceNo()).citizenId(old.getCitizenId()).dateOfBirth(old.getDateOfBirth())
+					.fullName(old.getFullName()).genderId(old.getGenderId()).mobileNo(old.getMobileNo())
+					.email(old.getEmail()).dzongkhagId(old.getDzongkhagId()).organizationName(old.getOrganizationName())
+					.sectorId(old.getSectorId()).sectorName(old.getSectorName()).occupationId(old.getOccupationId())
+					.occupationName(old.getOccupationName()).certificationLevelId(old.getCertificationLevelId())
+					.certificationLevelName(old.getCertificationLevelName()).designation(old.getDesignation())
+					.yearsOfExperience(old.getYearsOfExperience()).responsibility(old.getResponsibility())
+					.qmsTraining(old.getQmsTraining()).academicBackground(old.getAcademicBackground())
+					.statusId(old.getStatusId()).createdAt(old.getCreatedAt()).createdBy(old.getCreatedBy())
+					.updatedAt(old.getUpdatedAt()).updatedBy(old.getUpdatedBy()).remarks(old.getRemarks())
+					.assessorAccreditorQMSAuditor(renewed).build();
+			audit.setRegistrationNo(old.getRegistrationNo());
+			assessorAccreditorQMSAuditorAuditRepository.save(audit);
+
+			if (old.getWorkExperiences() != null && !old.getWorkExperiences().isEmpty()) {
+				auditorWorkExperienceAuditRepository.saveAll(old.getWorkExperiences().stream()
+						.map(we -> AuditorWorkExperienceAudit.builder().applicationNo(old.getApplicationNo())
+								.organizationName(we.getOrganizationName()).designation(we.getDesignation())
+								.year(we.getYear()).responsibility(we.getResponsibility())
+								.createdAt(we.getCreatedAt()).updatedAt(we.getUpdatedAt()).build())
+						.toList());
+			}
+			log.info("Registration {} ({}) archived on renewal {}", old.getApplicationNo(), old.getRegistrationNo(),
+					renewed.getApplicationNo());
+		}
+		assessorAccreditorQMSAuditorRepository.deleteAll(previous);
+		assessorAccreditorQMSAuditorRepository.flush();
 	}
 
 	/** Initial login password: full name without spaces + current year + "#" (same rule as institutes). */

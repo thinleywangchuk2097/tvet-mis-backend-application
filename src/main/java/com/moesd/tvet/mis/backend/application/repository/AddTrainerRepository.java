@@ -24,6 +24,7 @@ public interface AddTrainerRepository extends JpaRepository<AddTrainer, Long> {
 			+ "  t.institute_id, "
 			+ "  t.joining_date, "
 			+ "  t.status_id, "
+			+ "  COALESCE(t.is_active, 'Y') AS is_active, "
 			+ "  t.description, "
 			+ "  t.created_by, "
 			+ "  t.created_at, "
@@ -54,6 +55,11 @@ public interface AddTrainerRepository extends JpaRepository<AddTrainer, Long> {
 	List<Tuple> getAllActiveTrainers(Integer instituteId);
 
 	Optional<AddTrainer> findByCitizenId(String citizenId);
+
+	// every trainer record (any institute, any status) with this CID / work permit no
+	List<AddTrainer> findAllByCitizenId(String citizenId);
+
+	List<AddTrainer> findAllByWorkPermitNo(String workPermitNo);
 
 	Optional<AddTrainer> findByWorkPermitNo(String workPermitNo);
 }

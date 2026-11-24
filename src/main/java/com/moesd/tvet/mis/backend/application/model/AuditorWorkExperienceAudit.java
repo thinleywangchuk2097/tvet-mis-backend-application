@@ -2,9 +2,6 @@ package com.moesd.tvet.mis.backend.application.model;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,6 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+/** Work experiences of a registration snapshot (application_no = the old registration's application no). */
 @Table(name = "tbl_auditor_work_experience_audit")
 public class AuditorWorkExperienceAudit {
 	@Id
@@ -43,14 +41,13 @@ public class AuditorWorkExperienceAudit {
     @Column(name = "responsibility", columnDefinition = "TEXT")
     private String responsibility;
 
-    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
+    // left empty for renewal snapshots: the original work experience row is removed with its registration
     @ManyToOne
 	@JoinColumn(name = "parent_id")
 	private AuditorWorkExperience auditorWorkExperience;

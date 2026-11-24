@@ -34,6 +34,7 @@ import com.moesd.tvet.mis.backend.application.service.BhutanNDIService;
 import io.nats.client.AuthHandler;
 import io.nats.client.Connection;
 import io.nats.client.Dispatcher;
+import io.nats.client.ErrorListener;
 import io.nats.client.Message;
 import io.nats.client.NKey;
 import io.nats.client.Nats;
@@ -54,6 +55,7 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 	private static final String ERROR = "error";
 	private static final String DENIED = "denied";
 	private static final String PROOF_REJECTED_TYPE = "present-proof/rejected";
+	private static final String PROOF_VALIDATED = "ProofValidated";
 	private static final String USER_DECLINED = "The user has declined the request to share proof.";
 	private static final String USER_REJECTED = "User rejected proof request";
 	private static final String MISSING_ID_NUMBER = "NDI response missing ID Number";
@@ -98,6 +100,9 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 	private final Map<String, Connection> activeNatsConnections = new ConcurrentHashMap<>();
 	private final Map<String, Dispatcher> activeNatsDispatchers = new ConcurrentHashMap<>();
 	private final Map<String, Object> natsAuthResults = new ConcurrentHashMap<>();
+	// Threads whose agent sent an empty NATS notice: value = last time the agent API was asked
+	private final Map<String, Long> proofFetchTimes = new ConcurrentHashMap<>();
+	private static final long PROOF_FETCH_INTERVAL_MS = 3000;
 
 	// ==================== Token ====================
 
@@ -266,13 +271,14 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 		if (checkMessageField && payload.has(MESSAGE) && isDenied(payload.path(MESSAGE).asString(""))) {
 			return error(HttpStatus.UNAUTHORIZED, rejectedMessage);
 		}
-		JsonNode dataNode = payload.path("data");
-		if (isAbsent(dataNode)) {
-			log.warn("NATS payload missing 'data' field: {}", payload);
-			return error(HttpStatus.BAD_REQUEST, "Malformed NDI response");
-		}
-		if (PROOF_REJECTED_TYPE.equals(dataNode.path("type").asString(""))) {
+		JsonNode proof = proofBody(payload);
+		if (PROOF_REJECTED_TYPE.equals(proof.path("type").asString(""))) {
 			return error(HttpStatus.UNAUTHORIZED, rejectedMessage);
+		}
+		String verification = proof.path("verification_result").asString("");
+		if (!verification.isEmpty() && !PROOF_VALIDATED.equalsIgnoreCase(verification)) {
+			log.warn("NDI proof not validated ({}): {}", verification, payload);
+			return error(HttpStatus.UNAUTHORIZED, "Bhutan NDI could not validate the shared proof");
 		}
 		if (isAbsent(revealedAttributes(payload))) {
 			log.warn("Missing revealed_attrs in NATS payload: {}", payload);
@@ -282,7 +288,17 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 	}
 
 	private static JsonNode revealedAttributes(JsonNode payload) {
-		return payload.path("data").path("requested_presentation").path("revealed_attrs");
+		return proofBody(payload).path("requested_presentation").path("revealed_attrs");
+	}
+
+	/**
+	 * The proof itself. Documented NATS format has it at the top level
+	 * ({"type":"present-proof/presentation-result", "requested_presentation":{...}, "thid":...});
+	 * older payloads wrap it in "data".
+	 */
+	private static JsonNode proofBody(JsonNode payload) {
+		JsonNode data = payload.path("data");
+		return data.isObject() && !payload.has("requested_presentation") ? data : payload;
 	}
 
 	private static boolean isDenied(String text) {
@@ -367,34 +383,75 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 			String jsonPayload = new String(msg.getData(), StandardCharsets.UTF_8);
 			log.info("Received NATS message on subject [{}] replyTo [{}] thread [{}]: [{}]", msg.getSubject(),
 					msg.getReplyTo(), threadId, jsonPayload);
-
 			String trimmed = jsonPayload.trim();
 			if (trimmed.isEmpty()) {
-				log.debug("Ignoring empty NATS payload on thread {}", threadId);
+				// This agent only sends an empty notice: fetch the proof from its API
+				log.info("Empty NATS notice on thread {}: fetching the proof from the agent", threadId);
+				proofFetchTimes.putIfAbsent(threadId, 0L);
+				fetchProofFromAgent(threadId);
 				return;
 			}
-
-			var response = processAuthNatsResponse(toJsonNode(trimmed));
-			log.info("Auth processing status: {}", response.getStatusCode());
-
-			if (response.getStatusCode().is2xxSuccessful()) {
-				log.info("Authentication succeeded for threadId: {}", threadId);
-				natsAuthResults.put(threadId, response.getBody());
-			} else {
-				HttpStatusCode code = response.getStatusCode();
-				String errCode = (code.value() == 401) ? "AUTH_DENIED" : "AUTH_FAILED";
-				String message = failureMessage(response.getBody());
-				log.warn("Authentication not completed for threadId: {} — status {} — {}", threadId, code, message);
-				natsAuthResults.put(threadId, Map.of(ERROR, errCode, MESSAGE, message));
-			}
-
-			cleanupNats(threadId);
-
+			storeAuthResult(threadId, toJsonNode(trimmed));
 		} catch (Exception e) {
 			log.error("Error processing NATS message for threadId: {}", threadId, e);
 			natsAuthResults.put(threadId, Map.of(ERROR, "PROCESSING_ERROR", MESSAGE,
 					e.getMessage() != null ? e.getMessage() : "Processing error"));
 			cleanupNats(threadId);
+		}
+	}
+
+	/** Logs in / registers from an NDI proof payload, stores the result for polling and closes NATS. */
+	private void storeAuthResult(String threadId, JsonNode payload) {
+		var response = processAuthNatsResponse(payload);
+		log.info("Auth processing status: {}", response.getStatusCode());
+		if (response.getStatusCode().is2xxSuccessful()) {
+			log.info("Authentication succeeded for threadId: {}", threadId);
+			natsAuthResults.put(threadId, response.getBody());
+		} else {
+			HttpStatusCode code = response.getStatusCode();
+			String errCode = (code.value() == 401) ? "AUTH_DENIED" : "AUTH_FAILED";
+			String message = failureMessage(response.getBody());
+			log.warn("Authentication not completed for threadId: {} — status {} — {}", threadId, code, message);
+			natsAuthResults.put(threadId, Map.of(ERROR, errCode, MESSAGE, message));
+		}
+		proofFetchTimes.remove(threadId);
+		cleanupNats(threadId);
+	}
+
+	/**
+	 * Asks the agent for the proof by thread id (its NATS notice is empty). The raw reply is logged;
+	 * when it carries revealed attributes the user is logged in. Throttled per thread.
+	 */
+	private void fetchProofFromAgent(String threadId) {
+		long now = System.currentTimeMillis();
+		Long last = proofFetchTimes.get(threadId);
+		if (last == null || now - last < PROOF_FETCH_INTERVAL_MS || natsAuthResults.containsKey(threadId)) {
+			return;
+		}
+		proofFetchTimes.put(threadId, now);
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "Bearer " + getValidToken().getAccessToken());
+			String url = createProofRequestUrl + "?threadId=" + threadId;
+			ResponseEntity<String> reply = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers),
+					String.class);
+			String body = reply.getBody();
+			log.info("Agent proof lookup [{}] -> {}: {}", url, reply.getStatusCode(), body);
+			if (body != null && !body.isBlank()) {
+				JsonNode payload = objectMapper.readTree(body);
+				if (!isAbsent(revealedAttributes(payload))) {
+					storeAuthResult(threadId, payload);
+				} else if ("done".equalsIgnoreCase(payload.path("data").path("status").asString(""))) {
+					// Proof finished on the agent but it gave us no attributes: stop the page waiting
+					log.warn("NDI agent finished thread {} without returning the proof attributes", threadId);
+					natsAuthResults.put(threadId, Map.of(ERROR, "AUTH_FAILED", MESSAGE,
+							"Bhutan NDI did not return your details. Please try again later or use another login method."));
+					proofFetchTimes.remove(threadId);
+					cleanupNats(threadId);
+				}
+			}
+		} catch (Exception e) {
+			log.warn("Agent proof lookup failed for thread {}: {}", threadId, e.getMessage());
 		}
 	}
 
@@ -443,7 +500,14 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 			}
 		};
 
-		Options options = new Options.Builder().server(natsUrl).authHandler(authHandler).build();
+		// errorListener: log why a connect attempt failed (the client otherwise only says "Unable to connect")
+		Options options = new Options.Builder().server(natsUrl).authHandler(authHandler)
+				.errorListener(new ErrorListener() {
+					@Override
+					public void exceptionOccurred(Connection conn, Exception exp) {
+						log.warn("NATS connection problem ({}): {}", natsUrl, exp.toString(), exp);
+					}
+				}).build();
 		return Nats.connect(options);
 	}
 
@@ -473,11 +537,17 @@ public class BhutanNDIServiceImpl implements BhutanNDIService {
 			}
 		}
 
-		CompletableFuture.delayedExecutor(5, TimeUnit.MINUTES).execute(() -> natsAuthResults.remove(threadId));
+		CompletableFuture.delayedExecutor(5, TimeUnit.MINUTES).execute(() -> {
+			natsAuthResults.remove(threadId);
+			proofFetchTimes.remove(threadId);
+		});
 	}
 
 	@Override
 	public Object getNatsAuthResult(String threadId) {
+		if (!natsAuthResults.containsKey(threadId) && proofFetchTimes.containsKey(threadId)) {
+			fetchProofFromAgent(threadId); // retried while the login page keeps polling
+		}
 		return natsAuthResults.get(threadId);
 	}
 

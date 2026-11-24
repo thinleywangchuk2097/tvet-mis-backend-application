@@ -108,6 +108,7 @@ public class RoleDashboardRepository {
 				scopeArgs(roleId, from, to));
 	}
 
+	/** Dashboard "Applications" table: only applications with an action in the last 3 days. */
 	public List<Map<String, Object>> recentApplications(int roleId, LocalDate from, LocalDate to) {
 		return jdbc.queryForList("""
 				SELECT w.application_no, w.application_name, w.action_date, w.wf_remarks,
@@ -116,6 +117,7 @@ public class RoleDashboardRepository {
 				LEFT JOIN tbl_service_master s ON s.id = w.service_id
 				LEFT JOIN tbl_dropdown_child_master st ON st.id = w.status_id
 				WHERE """ + scope(roleId) + """
+				  AND w.action_date >= NOW() - INTERVAL 3 DAY
 				ORDER BY w.action_date DESC
 				LIMIT 300
 				""", scopeArgs(roleId, from, to));
