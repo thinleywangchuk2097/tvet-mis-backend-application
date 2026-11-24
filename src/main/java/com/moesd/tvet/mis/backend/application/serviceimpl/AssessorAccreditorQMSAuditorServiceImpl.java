@@ -154,6 +154,9 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 						serviceId, userId, null);
 			}
 
+			// Acknowledge the submission to the applicant by SMS and email
+			notifySubmitted(savedRegistration, Boolean.TRUE.equals(request.getRenewal()));
+
 			// Return response
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.body(Map.of("applicationNo", applicationNo, "id", savedRegistration.getId(), "status",
@@ -498,6 +501,21 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 		case 3 -> "QMS Auditor";
 		default -> "registration";
 		};
+	}
+
+	/** Submission acknowledgement by SMS and email; a failure here never fails the submission. */
+	private void notifySubmitted(AssessorAccreditorQMSAuditor registration, boolean renewal) {
+		try {
+			String title = registrationTypeName(registration.getServiceId()) + (renewal ? " renewal" : " registration");
+			notificationService.sendStatus(
+					new Recipient(registration.getMobileNo(), registration.getEmail(), registration.getFullName()),
+					title, registration.getApplicationNo(), "Submitted", null,
+					"It will now be reviewed by TVET Quality Assurance. You will be informed of the result by SMS and email.",
+					renewal ? "RENEWAL_SUBMITTED" : "REGISTRATION_SUBMITTED");
+		} catch (Exception e) {
+			log.warn("Registration {} saved but the submission SMS/email failed: {}", registration.getApplicationNo(),
+					e.getMessage());
+		}
 	}
 
 	/** Result by SMS and email. Approved: User ID and password. Rejected: the reason. */
