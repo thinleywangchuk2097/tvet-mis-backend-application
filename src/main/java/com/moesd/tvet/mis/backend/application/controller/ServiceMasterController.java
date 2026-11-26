@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/service-master")
+@RequestMapping("/api/v1/service-master")
 public class ServiceMasterController {
 
 	private final ServiceMasterService serviceMasterService;

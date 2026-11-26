@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/tracer")
+@RequestMapping("/api/v1/tracer")
 public class TracerQuestionGeneratorController {
 
 	private final TracerQuestionGeneratorService tracerQuestionGeneratorService;

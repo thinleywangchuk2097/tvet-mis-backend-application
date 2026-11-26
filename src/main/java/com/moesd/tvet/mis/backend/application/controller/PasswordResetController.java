@@ -33,11 +33,13 @@ public class PasswordResetController {
     
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        if (!tokenService.validateToken(request.getToken())) {
+        String email;
+        try {
+            // signature, expiry and single use (the link dies once the password has changed)
+            email = tokenService.verifyAndGetEmail(request.getToken());
+        } catch (PasswordResetTokenService.InvalidTokenException e) {
             return ResponseEntity.badRequest().body("Invalid or Expired token");
         }
-        
-        String email = tokenService.getEmailFromToken(request.getToken());
         userServiceImpl.updatePassword(email, request.getNewPassword());
         return ResponseEntity.ok("Password updated successfully");
     }

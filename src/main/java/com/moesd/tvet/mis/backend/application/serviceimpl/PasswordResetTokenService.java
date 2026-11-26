@@ -1,6 +1,9 @@
 package com.moesd.tvet.mis.backend.application.serviceimpl;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
@@ -10,6 +13,7 @@ import com.moesd.tvet.mis.backend.application.model.User;
 import com.moesd.tvet.mis.backend.application.repository.UserRepository;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService;
 import com.moesd.tvet.mis.backend.application.utility.NotificationService.Recipient;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -34,6 +38,8 @@ public class PasswordResetTokenService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
     
+    private static final String PASSWORD_FINGERPRINT = "pwf";
+
     private SecretKey jwtSecretKey;
     
     //FIXED: Initialize after @Value injection
@@ -64,39 +70,48 @@ public class PasswordResetTokenService {
     private String generateToken(User user) {
         return Jwts.builder()
             .subject(user.getEmailId())
+            .claim(PASSWORD_FINGERPRINT, passwordFingerprint(user))
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + expiration))
             .signWith(jwtSecretKey, Jwts.SIG.HS256)
             .compact();
     }
     
-    public boolean validateToken(String token) {
+    /**
+     * Email of a valid, unused reset token. The token carries a fingerprint of the password hash it was
+     * issued for, so it stops working as soon as the password changes (single use).
+     */
+    public String verifyAndGetEmail(String token) {
+        Claims claims;
         try {
-            Jwts.parser()
-                .verifyWith(jwtSecretKey)
-                .build()
-                .parseSignedClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-    
-    public String getEmailFromToken(String token) throws InvalidTokenException {
-        try {
-            return Jwts.parser()
-                .verifyWith(jwtSecretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+            claims = Jwts.parser().verifyWith(jwtSecretKey).build().parseSignedClaims(token).getPayload();
         } catch (ExpiredJwtException ex) {
             throw new InvalidTokenException("Password reset token expired", ex);
         } catch (JwtException | IllegalArgumentException ex) {
             throw new InvalidTokenException("Invalid password reset token", ex);
         }
+        User user = userRepository.findByEmailId(claims.getSubject())
+            .orElseThrow(() -> new InvalidTokenException("Invalid password reset token", null));
+        String expected = passwordFingerprint(user);
+        String actual = claims.get(PASSWORD_FINGERPRINT, String.class);
+        if (actual == null || !MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8),
+                actual.getBytes(StandardCharsets.UTF_8))) {
+            throw new InvalidTokenException("Password reset token already used", null);
+        }
+        return user.getEmailId();
     }
-    
+
+    /** Short SHA-256 fingerprint of the user's current password hash. */
+    private static String passwordFingerprint(User user) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                .digest(String.valueOf(user.getPassword()).getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(digest).substring(0, 22);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
+    }
+
     public static class InvalidTokenException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 

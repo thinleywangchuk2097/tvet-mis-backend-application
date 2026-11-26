@@ -204,7 +204,6 @@ public interface InstituteRegistrationDetailsRepository extends JpaRepository<In
 			+ "  p.mobile_no, "
 			+ "  p.email_id, "
 			+ "  p.sector_id, "
-			+ "  p.course_id, "
 			+ "  p.activity_level_id, "
 			+ "  p.other_ownership_type_id, "
 			+ "  p.other_name, "

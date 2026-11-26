@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/dropdown-management")
+@RequestMapping("/api/v1/dropdown-management")
 public class DropdownManagementController {
 	
 	private final DropdownManagementService dropdownManagementService;

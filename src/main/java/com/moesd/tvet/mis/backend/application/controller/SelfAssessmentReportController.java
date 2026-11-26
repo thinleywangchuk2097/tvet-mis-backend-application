@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/self-assessment-report")
+@RequestMapping("/api/v1/self-assessment-report")
 public class SelfAssessmentReportController {
 
 	private final SelfAssessmentReportService selfAssessmentReportService;

@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/tutor")
+@RequestMapping("/api/v1/tutor")
 public class TutorController {
 
 	private final TutorService tutorService;

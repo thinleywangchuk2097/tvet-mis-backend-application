@@ -16,7 +16,7 @@ import tools.jackson.databind.node.ObjectNode;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/cmfg-monitoring")
+@RequestMapping("/api/v1/cmfg-monitoring")
 public class CMFGMonitoringController {
 
 	private final CMFGMonitoringService cmfgMonitoringService;

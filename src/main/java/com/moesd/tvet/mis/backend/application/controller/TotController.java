@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/tot")
+@RequestMapping("/api/v1/tot")
 public class TotController {
 	
 	private final TotService totService;

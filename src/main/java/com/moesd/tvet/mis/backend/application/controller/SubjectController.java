@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/subject")
+@RequestMapping("/api/v1/subject")
 public class SubjectController {
 
 	private final SubjectService subjectService;

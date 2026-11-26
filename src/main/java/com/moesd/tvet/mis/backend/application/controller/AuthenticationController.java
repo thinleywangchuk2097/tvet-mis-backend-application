@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.moesd.tvet.mis.backend.application.dto.AuthenticationRequest;
-import com.moesd.tvet.mis.backend.application.dto.UserRegisterRequest;
 import com.moesd.tvet.mis.backend.application.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,12 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthenticationController {
 
 	private final AuthenticationService authenticationservice;
-
-	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody UserRegisterRequest request) {
-		return (authenticationservice.register(request));
-	}
-
+	
 	@PostMapping("/authenticate")
 	public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request, HttpServletRequest httpRequest) {
 		return authenticationservice.authenticate(request, httpRequest);

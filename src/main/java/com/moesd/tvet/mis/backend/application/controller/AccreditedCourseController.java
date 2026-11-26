@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/accredited-course")
+@RequestMapping("/api/v1/accredited-course")
 public class AccreditedCourseController {
 
 	private final AccreditedCourseService instituteAccreditedCourseService;

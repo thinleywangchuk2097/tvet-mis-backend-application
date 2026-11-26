@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/resource-management")
+@RequestMapping("/api/v1/resource-management")
 public class ResourceManagementController {
 
 	private final ResourceManagementService resourceManagementService;

@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/quality_standard_check_list")
+@RequestMapping("/api/v1/quality-standard-check-list")
 public class QualityStandardCheckListController {
 
 	private final QualityStandardCheckListService qualityStandardCheckListService;

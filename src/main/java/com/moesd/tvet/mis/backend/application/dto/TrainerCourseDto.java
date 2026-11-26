@@ -13,6 +13,5 @@ public class TrainerCourseDto {
 	private Long id;
 	private Integer courseId;
 	private Integer trainerId;
-	private Integer courseTypeId;
 	
 }

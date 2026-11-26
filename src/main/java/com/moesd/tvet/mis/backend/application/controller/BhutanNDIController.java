@@ -6,14 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.moesd.tvet.mis.backend.application.model.BhutanNDIToken;
 import com.moesd.tvet.mis.backend.application.service.BhutanNDIService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import tools.jackson.databind.JsonNode;
 
 @Slf4j
 @RestController
@@ -74,16 +72,6 @@ public class BhutanNDIController {
 		}
 
 		return ResponseEntity.ok(result);
-	}
-
-	@PostMapping("/return-nats-response")
-	public ResponseEntity<?> returnNDINatsResponse(@RequestBody JsonNode payload) {
-		return bhutanNDIService.processNatsResponse(payload);
-	}
-
-	@PostMapping("/nats-response-auth")
-	public ResponseEntity<?> bhutanNDIAuthNatsResponse(@RequestBody JsonNode payload) {
-		return bhutanNDIService.processAuthNatsResponse(payload);
 	}
 
 	private String extractThreadId(Map<String, Object> response) {

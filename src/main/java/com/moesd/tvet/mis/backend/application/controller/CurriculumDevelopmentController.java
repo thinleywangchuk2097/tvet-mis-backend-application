@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/curriculum")
+@RequestMapping("/api/v1/curriculum")
 public class CurriculumDevelopmentController {
 
 	private final CurriculumDevelopmentService curriculumDevelopmentService;

@@ -15,4 +15,6 @@ public interface TrainerCourseRepository extends JpaRepository<TrainerCourse, Lo
 	@Transactional
 	@Query("DELETE FROM TrainerCourse tc WHERE tc.trainer.id = :trainerId")
 	void deleteByTrainerId(@Param("trainerId") Long trainerId);
+
+	boolean existsByTrainerIdAndCourseId(Long trainerId, Integer courseId);
 }

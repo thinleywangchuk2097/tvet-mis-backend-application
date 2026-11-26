@@ -23,7 +23,6 @@ public class TrainerCourse {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private Integer courseId;
-	private Integer courseTypeId;
 	@ManyToOne
 	@JoinColumn(
 	    name = "trainerId",           // FK name column in Student Subject table

@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/ncs")
+@RequestMapping("/api/v1/ncs")
 public class NcsController {
 
 	private final NcsService ncsService;

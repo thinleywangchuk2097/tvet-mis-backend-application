@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/monitoring")
+@RequestMapping("/api/v1/monitoring")
 public class MonitoringAssessmentController {
 
 	private final MonitoringAssessmentService monitoringAssessmentService;

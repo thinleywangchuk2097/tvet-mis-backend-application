@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/ojt")
+@RequestMapping("/api/v1/ojt")
 public class OJTTraineeController {
 
 	private final OJTTraineeService oJTTraineeService;

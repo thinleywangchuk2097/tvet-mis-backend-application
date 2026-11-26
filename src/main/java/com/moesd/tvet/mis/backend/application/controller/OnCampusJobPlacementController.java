@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/campus-placement")
+@RequestMapping("/api/v1/campus-placement")
 public class OnCampusJobPlacementController {
 
 	private final OnCampusJobPlacementService onCampusJobPlacementService;

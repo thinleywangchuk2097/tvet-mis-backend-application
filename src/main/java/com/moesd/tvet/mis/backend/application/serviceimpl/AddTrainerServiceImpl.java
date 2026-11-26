@@ -209,7 +209,6 @@ public class AddTrainerServiceImpl implements AddTrainerService {
         return request.getCourses().stream()
             .map(courseDto -> TrainerCourse.builder()
                 .courseId(courseDto.getCourseId())
-                .courseTypeId(courseDto.getCourseTypeId())
                 .trainer(trainer)
                 .build())
             .toList();

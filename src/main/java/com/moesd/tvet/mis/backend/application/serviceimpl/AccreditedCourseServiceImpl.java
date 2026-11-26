@@ -23,6 +23,7 @@ import com.moesd.tvet.mis.backend.application.model.AccreditorTaskAssignment;
 import com.moesd.tvet.mis.backend.application.model.RecMemberTaskAssignment;
 import com.moesd.tvet.mis.backend.application.model.RoleService;
 import com.moesd.tvet.mis.backend.application.model.TaskFlowList;
+import com.moesd.tvet.mis.backend.application.model.TrainerCourse;
 import com.moesd.tvet.mis.backend.application.repository.DropdownManagementRepository;
 import com.moesd.tvet.mis.backend.application.repository.RecMemberTaskAssignmentRepository;
 import com.moesd.tvet.mis.backend.application.repository.AccreditedCourseRepository;
@@ -32,6 +33,8 @@ import com.moesd.tvet.mis.backend.application.repository.RoleServiceRepository;
 import com.moesd.tvet.mis.backend.application.repository.SelfAssessmentReportRepository;
 import com.moesd.tvet.mis.backend.application.repository.ServiceMasterRepository;
 import com.moesd.tvet.mis.backend.application.repository.TaskFlowListRepository;
+import com.moesd.tvet.mis.backend.application.repository.AddTrainerRepository;
+import com.moesd.tvet.mis.backend.application.repository.TrainerCourseRepository;
 import com.moesd.tvet.mis.backend.application.service.AccreditedCourseService;
 import com.moesd.tvet.mis.backend.application.service.AddTrainerService;
 import com.moesd.tvet.mis.backend.application.service.WorkTaskFlowService;
@@ -62,6 +65,8 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	private final SelfAssessmentReportRepository selfAssessmentReportRepository;
 	private final AccreditedCourseAuditRepository accreditedCourseAuditRepository;
 	private final AddTrainerService addTrainerService;
+	private final AddTrainerRepository addTrainerRepository;
+	private final TrainerCourseRepository trainerCourseRepository;
 
 	private static final int ROLE_REC = 23;
 
@@ -272,6 +277,11 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 			// Save the updated registration
 			AccreditedCourse savedRegistration = accreditedCourseRepository.save(existingAccreditedCourse);
 
+			// On approval: the lead trainer teaches this course (tbl_trainer_course_dtls)
+			if (statusId == 57) {
+				linkLeadTrainerToCourse(savedRegistration);
+			}
+
 			// Save accreditor
 			if (request.getAssignedAccreditors() != null && !request.getAssignedAccreditors().isEmpty()) {
 				List<AccreditorTaskAssignment> assignments = request.getAssignedAccreditors().stream()
@@ -440,6 +450,30 @@ public class AccreditedCourseServiceImpl implements AccreditedCourseService {
 	private static final int RENEWAL_SERVICE_ID = 54;
 
 	/** Course validity: 5 years when the institute is accredited (has a Self Assessment Report), else 3 years. */
+	/**
+	 * Adds the approved course to the lead trainer's courses: the institute's registered trainer with the
+	 * lead trainer CID. Skipped when no such trainer exists or the course is already linked (e.g. renewal).
+	 */
+	private void linkLeadTrainerToCourse(AccreditedCourse course) {
+		String cid = course.getLeadTrainerCidNo() == null ? "" : course.getLeadTrainerCidNo().trim();
+		if (cid.isEmpty() || course.getId() == null) {
+			return;
+		}
+		Integer courseId = course.getId().intValue();
+		addTrainerRepository.findAllByCitizenId(cid).stream()
+				.filter(t -> Integer.valueOf(1).equals(t.getStatusId()))
+				.filter(t -> Objects.equals(t.getInstituteId(), course.getInstituteId()))
+				.findFirst()
+				.ifPresentOrElse(trainer -> {
+					if (trainerCourseRepository.existsByTrainerIdAndCourseId(trainer.getId(), courseId)) {
+						return;
+					}
+					trainerCourseRepository.save(TrainerCourse.builder().courseId(courseId).trainer(trainer).build());
+					log.info("Course {} added to lead trainer {} (CID {})", courseId, trainer.getId(), cid);
+				}, () -> log.warn("Course {} approved but lead trainer CID {} is not a trainer of institute {}",
+						courseId, cid, course.getInstituteId()));
+	}
+
 	private int validityYears(Integer instituteId) {
 		if (instituteId == null)
 			return 3;

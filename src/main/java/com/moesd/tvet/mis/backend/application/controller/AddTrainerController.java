@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/trainer")
+@RequestMapping("/api/v1/trainer")
 public class AddTrainerController {
 
 	private final AddTrainerService addTrainerService;

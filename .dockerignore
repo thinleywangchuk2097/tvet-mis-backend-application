@@ -1,2 +1,4 @@
 sonar-project.properties
 .scannerwork
+# local developer settings (with their own credentials) must not go into the image
+src/main/resources/application-dev.properties

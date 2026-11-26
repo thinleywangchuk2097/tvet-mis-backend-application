@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/user/management/student-enrollment")
+@RequestMapping("/api/v1/student-enrollment")
 public class StudentEnrollmentController {
 
 	private final StudentEnrollmentService studentEnrollmentService;
