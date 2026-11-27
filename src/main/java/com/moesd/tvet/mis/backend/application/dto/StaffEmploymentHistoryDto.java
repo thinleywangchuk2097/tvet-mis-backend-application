@@ -17,5 +17,4 @@ public class StaffEmploymentHistoryDto {
 	private Integer employmentTypeId;
 	private Integer qualificationId;
 	private String designation;
-	private LocalDate resignationDate;
 }

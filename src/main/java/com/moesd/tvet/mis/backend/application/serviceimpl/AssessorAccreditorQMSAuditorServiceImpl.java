@@ -71,6 +71,10 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 	private static final int STATUS_REJECTED = 58;
 	/** workflow status "Approved" */
 	private static final int STATUS_APPROVED = 57;
+	/** response body keys */
+	private static final String KEY_MESSAGE = "message";
+	private static final String KEY_TIMESTAMP = "timestamp";
+	private static final String REGISTRATION_SUFFIX = " registration";
 
 	@Override
 	@Transactional
@@ -91,7 +95,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 					request.getReferenceNo(), Boolean.TRUE.equals(request.getRenewal()));
 			if (duplicate != null)
 				return ResponseEntity.status(HttpStatus.CONFLICT)
-						.body(Map.of("message", duplicate, "timestamp", LocalDateTime.now()));
+						.body(Map.of(KEY_MESSAGE, duplicate, KEY_TIMESTAMP, LocalDateTime.now()));
 
 			String userId = request.getUserId();
 			Integer serviceId = request.getServiceId();
@@ -160,16 +164,16 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			// Return response
 			return ResponseEntity.status(HttpStatus.CREATED)
 					.body(Map.of("applicationNo", applicationNo, "id", savedRegistration.getId(), "status",
-							HttpStatus.CREATED.value(), "message",
+							HttpStatus.CREATED.value(), KEY_MESSAGE,
 							"Assessor/Accreditor/QMS Auditor registration submitted successfully"));
 
 		} catch (RecordNotFoundException e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(Map.of("message", e.getMessage(), "timestamp", LocalDateTime.now()));
+					.body(Map.of(KEY_MESSAGE, e.getMessage(), KEY_TIMESTAMP, LocalDateTime.now()));
 		} catch (Exception e) {
 			log.error("Failed to submit assessor/accreditor/qms auditor registration", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to submit assessor/accreditor/qms auditor registration", "timestamp", LocalDateTime.now()));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(KEY_MESSAGE,
+					"Failed to submit assessor/accreditor/qms auditor registration", KEY_TIMESTAMP, LocalDateTime.now()));
 		}
 	}
 
@@ -269,48 +273,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 			if (statusId == 57) {
 				taskStatusId = dropdownManagementRepository.findChildById(20)// task completed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
-				// Renewal: the person's earlier approved registration for this service is copied to the
-				// audit tables and removed; the renewed registration keeps its registration no (= login id)
-				List<AssessorAccreditorQMSAuditor> previous = previousApprovedRegistrations(
-						existingAssessorAccreditorQMSAuditor);
-				String licenseNo = previous.stream().map(AssessorAccreditorQMSAuditor::getRegistrationNo)
-						.filter(no -> no != null && !no.isBlank()).findFirst()
-						.orElseGet(() -> generateLicenseNumber.generateLicenseNumber(serviceId));
-				archivePreviousRegistrations(previous, existingAssessorAccreditorQMSAuditor);
-				// Find existing registration by applicationNo
-				AssessorAccreditorQMSAuditor editAssessorAccreditorQMSAuditor = assessorAccreditorQMSAuditorRepository
-						.findByApplicationNo(request.getApplicationNo()) // Returns Optional
-						.orElseThrow(() -> new RecordNotFoundException(
-								"Institute registration not found with applicationNo: " + request.getApplicationNo()));
-				// Update InstituteRegistration entity
-				editAssessorAccreditorQMSAuditor.setRegistrationNo(licenseNo);
-				// update
-				assessorAccreditorQMSAuditorRepository.save(editAssessorAccreditorQMSAuditor);
-
-				// Role for this registration type (32 Assessor, 5 Accreditor, 3 QMS Auditor)
-				final Integer roleId = getRoleIdByServiceId(serviceId);
-				if (roleId == null) {
-					throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
-				}
-				Role role = roleRepository.findById(roleId)
-						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-								"Role with ID " + roleId + " does not exist"));
-
-				User existingUser = findExistingUser(licenseNo, existingAssessorAccreditorQMSAuditor);
-				if (existingUser != null) {
-					// already has a login: no new user, only add this role if it is not there yet
-					addRoleIfMissing(existingUser, role);
-					notifyRoleAdded(existingAssessorAccreditorQMSAuditor, request, serviceId,
-							existingUser.getUserId());
-				} else {
-					String plainPassword = initialPassword(
-							request.getFullName() != null ? request.getFullName()
-									: existingAssessorAccreditorQMSAuditor.getFullName());
-					createUser(request, licenseNo, plainPassword, role);
-					// approved: login credentials by SMS and email
-					notifyDecision(existingAssessorAccreditorQMSAuditor, request, serviceId, true, licenseNo,
-							plainPassword, null);
-				}
+				approveRegistration(request, existingAssessorAccreditorQMSAuditor, serviceId);
 			} else {
 				taskStatusId = dropdownManagementRepository.findChildById(18) // task unclaimed Id
 						.orElseThrow(() -> new RecordNotFoundException("Task Status Id not found"));
@@ -337,15 +300,66 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 
 			// For update operations - return 200 OK with updated data
 			return ResponseEntity.ok().body(Map.of("applicationNo", request.getApplicationNo(), "status",
-					HttpStatus.OK.value(), "message", "Application verified successfully"));
+					HttpStatus.OK.value(), KEY_MESSAGE, "Application verified successfully"));
 
 		} catch (Exception e) {
 			// undo everything (status, renewal archive, user / role) so nothing is half done
 			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			log.error("Failed to verify assessor/accreditor/qms auditor application {}", request.getApplicationNo(), e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to submit proposal", "error", String.valueOf(e.getMessage()), "timestamp",
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(KEY_MESSAGE,
+					"Failed to submit proposal", "error", String.valueOf(e.getMessage()), KEY_TIMESTAMP,
 					LocalDateTime.now()));
+		}
+	}
+
+	/**
+	 * Approval: renewal archives the earlier approved registration (keeping its registration no),
+	 * the registration no is set, then the login is created (or the role added to an existing one)
+	 * and the applicant is notified.
+	 */
+	private void approveRegistration(AssessorAccreditorQMSAuditordto request,
+			AssessorAccreditorQMSAuditor existingAssessorAccreditorQMSAuditor, Integer serviceId) {
+		// Renewal: the person's earlier approved registration for this service is copied to the
+		// audit tables and removed; the renewed registration keeps its registration no (= login id)
+		List<AssessorAccreditorQMSAuditor> previous = previousApprovedRegistrations(
+				existingAssessorAccreditorQMSAuditor);
+		String licenseNo = previous.stream().map(AssessorAccreditorQMSAuditor::getRegistrationNo)
+				.filter(no -> no != null && !no.isBlank()).findFirst()
+				.orElseGet(() -> generateLicenseNumber.generateLicenseNumber(serviceId));
+		archivePreviousRegistrations(previous, existingAssessorAccreditorQMSAuditor);
+		// Find existing registration by applicationNo
+		AssessorAccreditorQMSAuditor editAssessorAccreditorQMSAuditor = assessorAccreditorQMSAuditorRepository
+				.findByApplicationNo(request.getApplicationNo()) // Returns Optional
+				.orElseThrow(() -> new RecordNotFoundException(
+						"Institute registration not found with applicationNo: " + request.getApplicationNo()));
+		// Update InstituteRegistration entity
+		editAssessorAccreditorQMSAuditor.setRegistrationNo(licenseNo);
+		// update
+		assessorAccreditorQMSAuditorRepository.save(editAssessorAccreditorQMSAuditor);
+
+		// Role for this registration type (32 Assessor, 5 Accreditor, 3 QMS Auditor)
+		final Integer roleId = getRoleIdByServiceId(serviceId);
+		if (roleId == null) {
+			throw new RecordNotFoundException("Invalid serviceId: " + serviceId + " for role mapping");
+		}
+		Role role = roleRepository.findById(roleId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+						"Role with ID " + roleId + " does not exist"));
+
+		User existingUser = findExistingUser(licenseNo, existingAssessorAccreditorQMSAuditor);
+		if (existingUser != null) {
+			// already has a login: no new user, only add this role if it is not there yet
+			addRoleIfMissing(existingUser, role);
+			notifyRoleAdded(existingAssessorAccreditorQMSAuditor, request, serviceId,
+					existingUser.getUserId());
+		} else {
+			String plainPassword = initialPassword(
+					request.getFullName() != null ? request.getFullName()
+							: existingAssessorAccreditorQMSAuditor.getFullName());
+			createUser(request, licenseNo, plainPassword, role);
+			// approved: login credentials by SMS and email
+			notifyDecision(existingAssessorAccreditorQMSAuditor, request, serviceId, true, licenseNo,
+					plainPassword, null);
 		}
 	}
 
@@ -419,7 +433,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 		String email = applicant.getEmail() != null ? applicant.getEmail() : request.getEmail();
 		String name = applicant.getFullName() != null ? applicant.getFullName() : request.getFullName();
 		notificationService.sendStatus(new Recipient(mobile, email, name),
-				registrationTypeName(serviceId) + " registration", applicant.getApplicationNo(), "Approved", null,
+				registrationTypeName(serviceId) + REGISTRATION_SUFFIX, applicant.getApplicationNo(), "Approved", null,
 				"The " + registrationTypeName(serviceId) + " role has been added to your existing TVET-MIS account (User ID: "
 						+ existingUserId + "). Please log in with your existing password.",
 				"REGISTRATION_APPROVED");
@@ -506,7 +520,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 	/** Submission acknowledgement by SMS and email; a failure here never fails the submission. */
 	private void notifySubmitted(AssessorAccreditorQMSAuditor registration, boolean renewal) {
 		try {
-			String title = registrationTypeName(registration.getServiceId()) + (renewal ? " renewal" : " registration");
+			String title = registrationTypeName(registration.getServiceId()) + (renewal ? " renewal" : REGISTRATION_SUFFIX);
 			notificationService.sendStatus(
 					new Recipient(registration.getMobileNo(), registration.getEmail(), registration.getFullName()),
 					title, registration.getApplicationNo(), "Submitted", null,
@@ -524,7 +538,7 @@ public class AssessorAccreditorQMSAuditorServiceImpl implements AssessorAccredit
 		String mobile = applicant.getMobileNo() != null ? applicant.getMobileNo() : request.getMobileNo();
 		String email = applicant.getEmail() != null ? applicant.getEmail() : request.getEmail();
 		String name = applicant.getFullName() != null ? applicant.getFullName() : request.getFullName();
-		String title = registrationTypeName(serviceId) + " registration";
+		String title = registrationTypeName(serviceId) + REGISTRATION_SUFFIX;
 
 		if (approved) {
 			notificationService.sendCredentials(mobile, email, name, title, applicant.getApplicationNo(), loginId,

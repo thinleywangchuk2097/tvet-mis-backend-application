@@ -23,6 +23,12 @@ public class StaffManagementDto {
 	private Integer instituteId;
 	private Integer createdBy;
 	private Integer updatedBy;
+
+	// civil servant details (RCSC ZESt): agencyName, fieldOfStudy, positionLevel, employeeID
+	private String agencyName;
+	private String fieldOfStudy;
+	private String positionLevel;
+	private String employeeId;
 	
 	private List<StaffEmploymentHistoryDto> staffemploymenthistory;
 	private List<StaffTrainingHistoryDto> stafftraininghistory;

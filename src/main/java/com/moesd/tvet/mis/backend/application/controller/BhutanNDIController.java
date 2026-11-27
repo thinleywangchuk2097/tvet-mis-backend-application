@@ -54,10 +54,10 @@ public class BhutanNDIController {
 
 	@GetMapping("/nats-auth-result/{threadId}")
 	public ResponseEntity<?> getNatsAuthResult(@PathVariable String threadId) {
-        System.out.println("threadId : " + threadId);
+		log.debug("NDI auth result requested for threadId: {}", threadId);
         
 		Object result = bhutanNDIService.getNatsAuthResult(threadId);
-		System.out.println("result : " + result);
+		log.debug("NDI auth result for threadId {}: {}", threadId, result);
 		
 		if (result == null) {
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of("status", "PENDING"));

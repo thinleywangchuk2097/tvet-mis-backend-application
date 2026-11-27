@@ -44,6 +44,10 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 	private final ObjectToJson objectTojson;
 	private final NotificationService notificationService;
 
+	/** response body keys */
+	private static final String KEY_MESSAGE = "message";
+	private static final String KEY_TIMESTAMP = "timestamp";
+
 	@Override
 	public ResponseEntity<?> submitInstituteProposal(InstituteProposaldto dto) {
 		try {
@@ -62,7 +66,7 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 			String duplicate = checkDuplicateName(dto.getProposedInstituteName());
 			if (duplicate != null)
 				return ResponseEntity.status(HttpStatus.CONFLICT)
-						.body(Map.of("message", duplicate, "timestamp", LocalDateTime.now()));
+						.body(Map.of(KEY_MESSAGE, duplicate, KEY_TIMESTAMP, LocalDateTime.now()));
 
 			Integer serviceId = dto.getServiceId();
 			Integer assignedRoleId = dto.getAssignedRoleId();
@@ -136,8 +140,8 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 					.body(Map.of("applicationNo", applicationNo, "status", HttpStatus.CREATED.value()));
 
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(KEY_MESSAGE,
+					"Failed to submit proposal", "error", e.getMessage(), KEY_TIMESTAMP, LocalDateTime.now()));
 		}
 	}
 
@@ -227,11 +231,11 @@ public class InstituteProposalServiceImpl implements InstituteProposalService {
 
 			// For update operations - return 200 OK with updated data
 			return ResponseEntity.ok().body(Map.of("applicationNo", dto.getApplicationNo(), "status",
-					HttpStatus.OK.value(), "message", "Application Approved successfully"));
+					HttpStatus.OK.value(), KEY_MESSAGE, "Application Approved successfully"));
 
 		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message",
-					"Failed to submit proposal", "error", e.getMessage(), "timestamp", LocalDateTime.now()));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(KEY_MESSAGE,
+					"Failed to submit proposal", "error", e.getMessage(), KEY_TIMESTAMP, LocalDateTime.now()));
 		}
 	}
 

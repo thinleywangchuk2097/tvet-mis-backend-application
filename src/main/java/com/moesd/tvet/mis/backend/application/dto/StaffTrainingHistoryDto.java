@@ -17,7 +17,6 @@ public class StaffTrainingHistoryDto {
 	private LocalDate trainingStart;
 	private LocalDate trainingEnd;
 	private String providerName;
-	private LocalDate resignationDate;
 	private Integer fundingSourceId;
 	private String trainingCost;
 }

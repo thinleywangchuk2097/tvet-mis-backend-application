@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.node.ObjectNode;
 import com.moesd.tvet.mis.backend.application.dto.StaffManagementDto;
+import com.moesd.tvet.mis.backend.application.dto.StaffTrainingHistoryDto;
+import com.moesd.tvet.mis.backend.application.dto.StaffEmploymentHistoryDto;
 import com.moesd.tvet.mis.backend.application.model.StaffEmploymentHistory;
 import com.moesd.tvet.mis.backend.application.model.StaffManagement;
 import com.moesd.tvet.mis.backend.application.model.StaffTrainingHistory;
@@ -28,28 +30,32 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
     private final StaffManagementRepository staffManagementRepository;
     private final ObjectToJson objectTojson;
 
+    /** response body keys */
+    private static final String KEY_MESSAGE = "message";
+    private static final String KEY_STATUS = "status";
+
     @Override
     @Transactional
     public ResponseEntity<?> submitStaff(StaffManagementDto request) {
         try {
             if (request == null) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Request cannot be null", 
-                                     "status", HttpStatus.BAD_REQUEST.value()));
+                        .body(Map.of(KEY_MESSAGE, "Request cannot be null", 
+                                     KEY_STATUS, HttpStatus.BAD_REQUEST.value()));
             }
 
             if (request.getName() == null || request.getName().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Name is required", 
-                                     "status", HttpStatus.BAD_REQUEST.value()));
+                        .body(Map.of(KEY_MESSAGE, "Name is required", 
+                                     KEY_STATUS, HttpStatus.BAD_REQUEST.value()));
             }
 
-            if (request.getCitizenId() != null && !request.getCitizenId().trim().isEmpty()) {
-                if (staffManagementRepository.existsByCitizenIdAndStatusIdNot(request.getCitizenId(), 0)) {
-                    return ResponseEntity.badRequest()
-                            .body(Map.of("message", "Staff with Citizen ID '" + request.getCitizenId() + "' already exists", 
-                                         "status", HttpStatus.BAD_REQUEST.value()));
-                }
+            // same person may not be added twice to the same institute
+            String duplicate = checkStaffDuplicate(request.getInstituteId(), request.getCitizenId(),
+                    request.getReferenceNo(), null);
+            if (duplicate != null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of(KEY_MESSAGE, duplicate, KEY_STATUS, HttpStatus.CONFLICT.value()));
             }
 
             StaffManagement staff = StaffManagement.builder()
@@ -57,13 +63,17 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                     .citizenId(request.getCitizenId())
                     .name(request.getName().trim())
                     .instituteId(request.getInstituteId())
-                    .email(request.getEmail() != null ? request.getEmail().trim() : null)
-                    .mobileNo(request.getMobileNo() != null ? request.getMobileNo().trim() : null)
-                    .referenceNo(request.getReferenceNo() != null ? request.getReferenceNo().trim() : null)
+                    .email(trimOrNull(request.getEmail()))
+                    .mobileNo(trimOrNull(request.getMobileNo()))
+                    .referenceNo(trimOrNull(request.getReferenceNo()))
+                    .agencyName(blankToNull(request.getAgencyName()))
+                    .fieldOfStudy(blankToNull(request.getFieldOfStudy()))
+                    .positionLevel(blankToNull(request.getPositionLevel()))
+                    .employeeId(blankToNull(request.getEmployeeId()))
                     .genderId(request.getGenderId())
                     .dob(request.getDob())
-                    .createdBy(request.getCreatedBy() != null ? request.getCreatedBy() : 0)
-                    .updatedBy(request.getUpdatedBy() != null ? request.getUpdatedBy() : 0)
+                    .createdBy(orZero(request.getCreatedBy()))
+                    .updatedBy(orZero(request.getUpdatedBy()))
                     .statusId(1) // Active by default
                     .createdAt(new Date())
                     .updatedAt(new Date())
@@ -77,7 +87,6 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                                 .employmentTypeId(empDto.getEmploymentTypeId())
                                 .qualificationId(empDto.getQualificationId())
                                 .designation(empDto.getDesignation())
-                                .resignationDate(empDto.getResignationDate())
                                 .Staff(staff)
                                 .build())
                         .collect(Collectors.toCollection(ArrayList::new));
@@ -92,7 +101,6 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                                 .trainingStart(trainDto.getTrainingStart())
                                 .trainingEnd(trainDto.getTrainingEnd())
                                 .providerName(trainDto.getProviderName())
-                                .resignationDate(trainDto.getResignationDate())
                                 .fundingSourceId(trainDto.getFundingSourceId())
                                 .trainingCost(trainDto.getTrainingCost())
                                 .Staff(staff)
@@ -108,18 +116,143 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(Map.of(
-                            "message", "Staff submitted successfully",
-                            "status", HttpStatus.CREATED.value()
+                            KEY_MESSAGE, "Staff submitted successfully",
+                            KEY_STATUS, HttpStatus.CREATED.value()
                     ));
 
         } catch (Exception e) {
             log.error("Error submitting staff: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(
-                            "message", "Failed to submit staff: " + e.getMessage(),
-                            "status", HttpStatus.INTERNAL_SERVER_ERROR.value()
+                            KEY_MESSAGE, "Failed to submit staff: " + e.getMessage(),
+                            KEY_STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value()
                     ));
         }
+    }
+
+    private static String trimOrNull(String value) {
+        return value != null ? value.trim() : null;
+    }
+
+    private static Integer orZero(Integer value) {
+        return value != null ? value : 0;
+    }
+
+    /** Copies the editable staff fields from the request onto the stored staff. */
+    private static void applyBasicFields(StaffManagement staff, StaffManagementDto request) {
+        staff.setHasCitizenId(request.getHasCitizenId());
+        staff.setCitizenId(request.getCitizenId());
+        staff.setName(request.getName().trim());
+        staff.setInstituteId(request.getInstituteId());
+        staff.setEmail(trimOrNull(request.getEmail()));
+        staff.setMobileNo(trimOrNull(request.getMobileNo()));
+        staff.setReferenceNo(trimOrNull(request.getReferenceNo()));
+        // civil servant details: only overwritten when the request carries them
+        staff.setAgencyName(keepOrUpdate(staff.getAgencyName(), request.getAgencyName()));
+        staff.setFieldOfStudy(keepOrUpdate(staff.getFieldOfStudy(), request.getFieldOfStudy()));
+        staff.setPositionLevel(keepOrUpdate(staff.getPositionLevel(), request.getPositionLevel()));
+        staff.setEmployeeId(keepOrUpdate(staff.getEmployeeId(), request.getEmployeeId()));
+        staff.setGenderId(request.getGenderId());
+        staff.setDob(request.getDob());
+        staff.setUpdatedBy(orZero(request.getUpdatedBy()));
+        staff.setUpdatedAt(new Date());
+    }
+
+    /** Replaces the employment history with the request's rows: known ids are updated, the rest added. */
+    private static void mergeEmploymentHistory(StaffManagement staff, List<StaffEmploymentHistoryDto> rows) {
+        List<StaffEmploymentHistory> current = staff.getStaffemploymenthistory();
+        Map<Long, StaffEmploymentHistory> byId = current.stream()
+                .filter(emp -> emp.getId() != null)
+                .collect(Collectors.toMap(StaffEmploymentHistory::getId, emp -> emp));
+        current.clear();
+        for (StaffEmploymentHistoryDto row : rows) {
+            current.add(toEmployment(staff, row, byId));
+        }
+    }
+
+    private static StaffEmploymentHistory toEmployment(StaffManagement staff, StaffEmploymentHistoryDto empDto,
+            Map<Long, StaffEmploymentHistory> byId) {
+        StaffEmploymentHistory employment = empDto.getId() != null ? byId.get(empDto.getId()) : null;
+        if (employment == null) {
+            return StaffEmploymentHistory.builder()
+                    .appointmentDate(empDto.getAppointmentDate())
+                    .employmentTypeId(empDto.getEmploymentTypeId())
+                    .qualificationId(empDto.getQualificationId())
+                    .designation(empDto.getDesignation())
+                    .Staff(staff)
+                    .build();
+        }
+        employment.setAppointmentDate(empDto.getAppointmentDate());
+        employment.setEmploymentTypeId(empDto.getEmploymentTypeId());
+        employment.setQualificationId(empDto.getQualificationId());
+        employment.setDesignation(empDto.getDesignation());
+        employment.setStaff(staff);
+        return employment;
+    }
+
+    /** Replaces the training history with the request's rows: known ids are updated, the rest added. */
+    private static void mergeTrainingHistory(StaffManagement staff, List<StaffTrainingHistoryDto> rows) {
+        List<StaffTrainingHistory> current = staff.getStafftraininghistory();
+        Map<Long, StaffTrainingHistory> byId = current.stream()
+                .filter(train -> train.getId() != null)
+                .collect(Collectors.toMap(StaffTrainingHistory::getId, train -> train));
+        current.clear();
+        for (StaffTrainingHistoryDto row : rows) {
+            current.add(toTraining(staff, row, byId));
+        }
+    }
+
+    private static StaffTrainingHistory toTraining(StaffManagement staff, StaffTrainingHistoryDto trainDto,
+            Map<Long, StaffTrainingHistory> byId) {
+        StaffTrainingHistory training = trainDto.getId() != null ? byId.get(trainDto.getId()) : null;
+        if (training == null) {
+            return StaffTrainingHistory.builder()
+                    .trainingName(trainDto.getTrainingName())
+                    .trainingStart(trainDto.getTrainingStart())
+                    .trainingEnd(trainDto.getTrainingEnd())
+                    .providerName(trainDto.getProviderName())
+                    .fundingSourceId(trainDto.getFundingSourceId())
+                    .trainingCost(trainDto.getTrainingCost())
+                    .Staff(staff)
+                    .build();
+        }
+        training.setTrainingName(trainDto.getTrainingName());
+        training.setTrainingStart(trainDto.getTrainingStart());
+        training.setTrainingEnd(trainDto.getTrainingEnd());
+        training.setProviderName(trainDto.getProviderName());
+        training.setFundingSourceId(trainDto.getFundingSourceId());
+        training.setTrainingCost(trainDto.getTrainingCost());
+        training.setStaff(staff);
+        return training;
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    /** The new value when one is sent, otherwise the stored one. */
+    private static String keepOrUpdate(String current, String incoming) {
+        String value = blankToNull(incoming);
+        return value != null ? value : current;
+    }
+
+    @Override
+    public String checkStaffDuplicate(Integer instituteId, String citizenId, String referenceNo, Long excludeId) {
+        if (instituteId == null) {
+            return null;
+        }
+        long exclude = excludeId != null ? excludeId : -1L;
+        String cid = citizenId == null ? "" : citizenId.trim();
+        if (!cid.isEmpty()) {
+            return staffManagementRepository.existsCitizenInInstitute(instituteId, cid, exclude)
+                    ? "Staff with Citizen ID " + cid + " is already registered in this institute."
+                    : null;
+        }
+        String ref = referenceNo == null ? "" : referenceNo.trim();
+        if (!ref.isEmpty() && staffManagementRepository.existsReferenceInInstitute(instituteId, ref, exclude)) {
+            return "Staff with Reference No " + ref + " is already registered in this institute.";
+        }
+        return null;
     }
 
     @Override
@@ -131,20 +264,20 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
             // ===== VALIDATION =====
             if (request == null) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Request cannot be null", 
-                                     "status", HttpStatus.BAD_REQUEST.value()));
+                        .body(Map.of(KEY_MESSAGE, "Request cannot be null", 
+                                     KEY_STATUS, HttpStatus.BAD_REQUEST.value()));
             }
 
             if (request.getId() == null) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Staff ID is required for update", 
-                                     "status", HttpStatus.BAD_REQUEST.value()));
+                        .body(Map.of(KEY_MESSAGE, "Staff ID is required for update", 
+                                     KEY_STATUS, HttpStatus.BAD_REQUEST.value()));
             }
 
             if (request.getName() == null || request.getName().trim().isEmpty()) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Name is required", 
-                                     "status", HttpStatus.BAD_REQUEST.value()));
+                        .body(Map.of(KEY_MESSAGE, "Name is required", 
+                                     KEY_STATUS, HttpStatus.BAD_REQUEST.value()));
             }
 
             // ===== FIND EXISTING STAFF (only active ones) =====
@@ -152,114 +285,23 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                     .findByIdAndStatusIdNot(request.getId(), 0)
                     .orElseThrow(() -> new RuntimeException("Staff not found with ID: " + request.getId()));
 
-            // ===== CHECK FOR DUPLICATE CITIZEN ID =====
-            if (request.getCitizenId() != null && !request.getCitizenId().trim().isEmpty()) {
-                StaffManagement staffWithSameCitizenId = staffManagementRepository
-                        .findByCitizenIdAndStatusIdNot(request.getCitizenId(), 0)
-                        .orElse(null);
-                
-                if (staffWithSameCitizenId != null && !staffWithSameCitizenId.getId().equals(request.getId())) {
-                    return ResponseEntity.status(HttpStatus.CONFLICT)
-                            .body(Map.of("message", "Staff with Citizen ID '" + request.getCitizenId() + "' already exists", 
-                                         "status", HttpStatus.CONFLICT.value()));
-                }
+            // ===== CHECK FOR DUPLICATE IN THE SAME INSTITUTE (this staff excluded) =====
+            Integer instituteId = request.getInstituteId() != null ? request.getInstituteId()
+                    : existingStaff.getInstituteId();
+            String duplicate = checkStaffDuplicate(instituteId, request.getCitizenId(), request.getReferenceNo(),
+                    request.getId());
+            if (duplicate != null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of(KEY_MESSAGE, duplicate, KEY_STATUS, HttpStatus.CONFLICT.value()));
             }
 
-            // ===== UPDATE BASIC FIELDS =====
-            existingStaff.setHasCitizenId(request.getHasCitizenId());
-            existingStaff.setCitizenId(request.getCitizenId());
-            existingStaff.setName(request.getName().trim());
-            existingStaff.setInstituteId(request.getInstituteId());
-            existingStaff.setEmail(request.getEmail() != null ? request.getEmail().trim() : null);
-            existingStaff.setMobileNo(request.getMobileNo() != null ? request.getMobileNo().trim() : null);
-            existingStaff.setReferenceNo(request.getReferenceNo() != null ? request.getReferenceNo().trim() : null);
-            existingStaff.setGenderId(request.getGenderId());
-            existingStaff.setDob(request.getDob());
-            existingStaff.setUpdatedBy(request.getUpdatedBy() != null ? request.getUpdatedBy() : 0);
-            existingStaff.setUpdatedAt(new Date());
-
-            // ===== UPDATE EMPLOYMENT HISTORY =====
-            List<StaffEmploymentHistory> currentEmployment = existingStaff.getStaffemploymenthistory();
-            
+            // ===== UPDATE FIELDS AND HISTORIES =====
+            applyBasicFields(existingStaff, request);
             if (request.getStaffemploymenthistory() != null) {
-                // Create a map of current employment by ID
-                Map<Long, StaffEmploymentHistory> currentEmploymentMap = currentEmployment.stream()
-                        .filter(emp -> emp.getId() != null)
-                        .collect(Collectors.toMap(StaffEmploymentHistory::getId, emp -> emp));
-
-                // Clear the current list
-                currentEmployment.clear();
-                
-                // Process each employment from request
-                for (var empDto : request.getStaffemploymenthistory()) {
-                    StaffEmploymentHistory employment;
-                    
-                    if (empDto.getId() != null && currentEmploymentMap.containsKey(empDto.getId())) {
-                        // Update existing
-                        employment = currentEmploymentMap.get(empDto.getId());
-                        employment.setAppointmentDate(empDto.getAppointmentDate());
-                        employment.setEmploymentTypeId(empDto.getEmploymentTypeId());
-                        employment.setQualificationId(empDto.getQualificationId());
-                        employment.setDesignation(empDto.getDesignation());
-                        employment.setResignationDate(empDto.getResignationDate());
-                        employment.setStaff(existingStaff);
-                    } else {
-                        // Create new
-                        employment = StaffEmploymentHistory.builder()
-                                .appointmentDate(empDto.getAppointmentDate())
-                                .employmentTypeId(empDto.getEmploymentTypeId())
-                                .qualificationId(empDto.getQualificationId())
-                                .designation(empDto.getDesignation())
-                                .resignationDate(empDto.getResignationDate())
-                                .Staff(existingStaff)
-                                .build();
-                    }
-                    currentEmployment.add(employment);
-                }
+                mergeEmploymentHistory(existingStaff, request.getStaffemploymenthistory());
             }
-
-            // ===== UPDATE TRAINING HISTORY =====
-            List<StaffTrainingHistory> currentTraining = existingStaff.getStafftraininghistory();
-            
             if (request.getStafftraininghistory() != null) {
-                // Create a map of current training by ID
-                Map<Long, StaffTrainingHistory> currentTrainingMap = currentTraining.stream()
-                        .filter(train -> train.getId() != null)
-                        .collect(Collectors.toMap(StaffTrainingHistory::getId, train -> train));
-
-                // Clear the current list
-                currentTraining.clear();
-                
-                // Process each training from request
-                for (var trainDto : request.getStafftraininghistory()) {
-                    StaffTrainingHistory training;
-                    
-                    if (trainDto.getId() != null && currentTrainingMap.containsKey(trainDto.getId())) {
-                        // Update existing
-                        training = currentTrainingMap.get(trainDto.getId());
-                        training.setTrainingName(trainDto.getTrainingName());
-                        training.setTrainingStart(trainDto.getTrainingStart());
-                        training.setTrainingEnd(trainDto.getTrainingEnd());
-                        training.setProviderName(trainDto.getProviderName());
-                        training.setResignationDate(trainDto.getResignationDate());
-                        training.setFundingSourceId(trainDto.getFundingSourceId());
-                        training.setTrainingCost(trainDto.getTrainingCost());
-                        training.setStaff(existingStaff);
-                    } else {
-                        // Create new
-                        training = StaffTrainingHistory.builder()
-                                .trainingName(trainDto.getTrainingName())
-                                .trainingStart(trainDto.getTrainingStart())
-                                .trainingEnd(trainDto.getTrainingEnd())
-                                .providerName(trainDto.getProviderName())
-                                .resignationDate(trainDto.getResignationDate())
-                                .fundingSourceId(trainDto.getFundingSourceId())
-                                .trainingCost(trainDto.getTrainingCost())
-                                .Staff(existingStaff)
-                                .build();
-                    }
-                    currentTraining.add(training);
-                }
+                mergeTrainingHistory(existingStaff, request.getStafftraininghistory());
             }
 
             // ===== SAVE =====
@@ -269,16 +311,16 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                      updatedStaff.getId(), updatedStaff.getName(), updatedStaff.getCitizenId());
 
             return ResponseEntity.ok(Map.of(
-                    "message", "Staff updated successfully",
-                    "status", HttpStatus.OK.value()
+                    KEY_MESSAGE, "Staff updated successfully",
+                    KEY_STATUS, HttpStatus.OK.value()
             ));
 
         } catch (Exception e) {
             log.error("Error updating staff: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(
-                            "message", "Failed to update staff: " + e.getMessage(),
-                            "status", HttpStatus.INTERNAL_SERVER_ERROR.value()
+                            KEY_MESSAGE, "Failed to update staff: " + e.getMessage(),
+                            KEY_STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value()
                     ));
         }
     }
@@ -289,8 +331,8 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
         try {
             if (id == null) {
                 return ResponseEntity.badRequest()
-                        .body(Map.of("message", "Staff ID is required", 
-                                     "status", HttpStatus.BAD_REQUEST.value()));
+                        .body(Map.of(KEY_MESSAGE, "Staff ID is required", 
+                                     KEY_STATUS, HttpStatus.BAD_REQUEST.value()));
             }
 
             // ===== FIND EXISTING STAFF (including soft deleted) =====
@@ -302,8 +344,8 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
             if (staff.getStatusId() != null && staff.getStatusId() == 0) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of(
-                                "message", "Staff is already deleted",
-                                "status", HttpStatus.BAD_REQUEST.value()
+                                KEY_MESSAGE, "Staff is already deleted",
+                                KEY_STATUS, HttpStatus.BAD_REQUEST.value()
                         ));
             }
 
@@ -318,16 +360,16 @@ public class ResourceManagementServiceImpl implements ResourceManagementService 
                      deletedStaff.getId(), deletedStaff.getName());
             
             return ResponseEntity.ok(Map.of(
-                    "message", "Staff deleted successfully",
-                    "status", HttpStatus.OK.value()
+                    KEY_MESSAGE, "Staff deleted successfully",
+                    KEY_STATUS, HttpStatus.OK.value()
             ));
 
         } catch (Exception e) {
             log.error("Error deleting staff: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(
-                            "message", "Failed to delete staff: " + e.getMessage(),
-                            "status", HttpStatus.INTERNAL_SERVER_ERROR.value()
+                            KEY_MESSAGE, "Failed to delete staff: " + e.getMessage(),
+                            KEY_STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value()
                     ));
         }
     }

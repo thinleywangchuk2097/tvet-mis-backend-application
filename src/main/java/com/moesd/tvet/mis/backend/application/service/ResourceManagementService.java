@@ -10,6 +10,9 @@ import com.moesd.tvet.mis.backend.application.dto.StaffManagementDto;
 public interface ResourceManagementService {
 	
 	ResponseEntity<?> submitStaff(StaffManagementDto request);
+
+	/** Message when this CID / reference no is already staff of the institute, otherwise null. */
+	String checkStaffDuplicate(Integer instituteId, String citizenId, String referenceNo, Long excludeId);
 	
 	List<ObjectNode> getInstituteStaff(String instituteId);
 	

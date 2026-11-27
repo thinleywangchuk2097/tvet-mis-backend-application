@@ -40,6 +40,12 @@ public class StaffManagement {
 	private Integer updatedBy;
 	private Date updatedAt;
 	private Integer statusId;
+
+	// from the RCSC ZESt civil servant record (only filled when the staff is a civil servant)
+	private String agencyName;
+	private String fieldOfStudy;
+	private String positionLevel;
+	private String employeeId;
 	
 	@OneToMany(mappedBy = "Staff", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StaffTrainingHistory> stafftraininghistory;

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import com.moesd.tvet.mis.backend.application.service.DatahubTokenService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -25,27 +25,21 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/public/gyalsung")
 public class GyalsungApiController {
 
-	@Value("${gyalsung-token-api}")
-	private String gyalsungTokenUrl;
-
-	@Value("${gyalsung-consumer-key}")
-	private String consumerKey;
-
-	@Value("${gyalsung-consumer-secret}")
-	private String consumerSecret;
-
 	@Value("${gyalsung-data-api}")
 	private String gyalsungDataUrl;
 
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Autowired
+	private DatahubTokenService datahubTokenService;
+
 	@GetMapping("/gyalsungDetails/{citizenshipNo}")
     public ResponseEntity<?> getGyalsungDetails(@PathVariable String citizenshipNo) {
 
         try {
-            // 1. Generate token
-            String accessToken = generateNewToken();
+            // 1. Generate token (same DataHub token as the other DataHub APIs)
+            String accessToken = datahubTokenService.generateNewToken();
 
             // 2. Prepare headers for GET request
             HttpHeaders headers = new HttpHeaders();
@@ -82,27 +76,6 @@ public class GyalsungApiController {
                     .body(Map.of("message", "Failed to retrieve Gyalsung details"));
         }
     }
-
-	private String generateNewToken() {
-
-		// Request body as per curl
-		Map<String, String> requestBody = Map.of("client_id", consumerKey, "client_secret", consumerSecret);
-
-		// Headers
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-		HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-
-		// Call token API
-		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(gyalsungTokenUrl.trim(), HttpMethod.POST, request,
-				new ParameterizedTypeReference<Map<String, Object>>() {
-				});
-
-		// Extract token
-		return (String) response.getBody().get("access_token");
-	}
 
 	// removes trailing "/" characters with a simple loop (no regex, so no backtracking)
 	private static String stripTrailingSlashes(String url) {

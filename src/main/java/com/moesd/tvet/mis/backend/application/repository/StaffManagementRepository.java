@@ -22,6 +22,10 @@ public interface StaffManagementRepository extends JpaRepository<StaffManagement
 					+ "  sm.email, "
 					+ "  sm.mobile_no, "
 					+ "  sm.reference_no, "
+					+ "  sm.agency_name, "
+					+ "  sm.field_of_study, "
+					+ "  sm.position_level, "
+					+ "  sm.employee_id, "
 					+ "  sm.gender_id, "
 					+ "  sm.dob, "
 					+ "  sm.institute_id, "
@@ -43,9 +47,7 @@ public interface StaffManagementRepository extends JpaRepository<StaffManagement
 					+ "        'qualificationId', "
 					+ "        seh.qualification_id, "
 					+ "        'designation', "
-					+ "        seh.designation, "
-					+ "        'resignationDate', "
-					+ "        seh.resignation_date "
+					+ "        seh.designation "
 					+ "      ) "
 					+ "    ) "
 					+ "  FROM "
@@ -64,8 +66,6 @@ public interface StaffManagementRepository extends JpaRepository<StaffManagement
 					+ "        sth.training_end, "
 					+ "        'providerName', "
 					+ "        sth.provider_name, "
-					+ "        'resignationDate', "
-					+ "        sth.resignation_date, "
 					+ "        'fundingSourceId', "
 					+ "        sth.funding_source_id, "
 					+ "        'trainingCost', "
@@ -85,9 +85,15 @@ public interface StaffManagementRepository extends JpaRepository<StaffManagement
 	@Query("SELECT s FROM StaffManagement s WHERE s.id = :id AND s.statusId != 0")
 	Optional<StaffManagement> findByIdAndStatusIdNot(@Param("id") Long id, @Param("statusId") Integer statusId);
 	
-	@Query("SELECT s FROM StaffManagement s WHERE s.citizenId = :citizenId AND s.statusId != 0")
-	Optional<StaffManagement> findByCitizenIdAndStatusIdNot(@Param("citizenId") String citizenId, @Param("statusId") Integer statusId);
-	
-	@Query("SELECT COUNT(s) > 0 FROM StaffManagement s WHERE s.citizenId = :citizenId AND s.statusId != 0")
-	boolean existsByCitizenIdAndStatusIdNot(@Param("citizenId") String citizenId, @Param("statusId") Integer statusId);    
+	// same CID already registered (not deleted) in this institute; excludeId = the staff being edited (-1 = none)
+	@Query("SELECT COUNT(s) > 0 FROM StaffManagement s WHERE s.instituteId = :instituteId "
+			+ "AND TRIM(s.citizenId) = :citizenId AND s.statusId != 0 AND s.id <> :excludeId")
+	boolean existsCitizenInInstitute(@Param("instituteId") Integer instituteId, @Param("citizenId") String citizenId,
+			@Param("excludeId") Long excludeId);
+
+	// same reference no (staff without CID) already registered (not deleted) in this institute
+	@Query("SELECT COUNT(s) > 0 FROM StaffManagement s WHERE s.instituteId = :instituteId "
+			+ "AND TRIM(s.referenceNo) = :referenceNo AND s.statusId != 0 AND s.id <> :excludeId")
+	boolean existsReferenceInInstitute(@Param("instituteId") Integer instituteId,
+			@Param("referenceNo") String referenceNo, @Param("excludeId") Long excludeId);
 }
